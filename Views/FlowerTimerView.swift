@@ -4,8 +4,8 @@
 //
 //  Autor: Mathias Hubrich & Claude (Anthropic)
 //  Erstellt: 24. Januar 2026
-//  Geaendert: 11. Februar 2026, 19:30 Uhr
-//  Version: 7.0.0
+//  Geaendert: 12. Februar 2026, 22:00 Uhr
+//  Version: 8.0.0
 //
 //  Beschreibung: Blumen-Timer mit vorgerenderten Icon-Composer-Bildern
 //  14 Zustände (0-12h/12d) als 1024x1024 PNGs mit transparentem Hintergrund
@@ -21,6 +21,13 @@ struct FlowerTimerView: View {
     let nextDate: Date
     var colorScheme: FlowerColorScheme = .hellblau
 
+    // Cached DateFormatter (expensive to create)
+    private static let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "dd.MM.yyyy"
+        return f
+    }()
+
     // Berechne gefuellte Bluetenblaetter basierend auf verbleibendem Fortschritt
     var filledPetals: Int {
         if remainingDays <= 0 { return 12 } // Ueberfaellig = voll
@@ -33,18 +40,17 @@ struct FlowerTimerView: View {
         remainingDays <= 0
     }
 
-    // Formatierte Tage-Anzeige (z.B. "5 Tage" oder "-3 Tage")
+    // Formatierte Tage-Anzeige (localized)
     var formattedDays: String {
-        if remainingDays == 1 { return "1 Tag" }
-        if remainingDays == -1 { return "-1 Tag" }
-        return "\(remainingDays) Tage"
+        if remainingDays == 1 || remainingDays == -1 {
+            return "\(remainingDays) " + String(localized: "Tag")
+        }
+        return "\(remainingDays) " + String(localized: "Tage")
     }
 
     // Numerisches Datumsformat (DD.MM.YYYY)
     var formattedDate: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy"
-        return formatter.string(from: nextDate)
+        Self.dateFormatter.string(from: nextDate)
     }
 
     // Bildname basierend auf Füllstand und Farbschema
@@ -112,8 +118,8 @@ struct FlowerTimerView: View {
                 .padding(.vertical, 2)
                 .background(Badge3D())
 
-            // Titel
-            Text(eventType.rawValue)
+            // Titel (localized)
+            Text(eventType.localizedName)
                 .font(.caption2)
                 .foregroundColor(.secondary)
 
@@ -272,61 +278,6 @@ struct LED3D: View {
             }
         }
     }
-}
-
-// MARK: - Kompatibilität (Legacy-Typen fuer andere Views)
-
-struct PetalImage: View {
-    let isFilled: Bool
-    var body: some View { EmptyView() }
-}
-
-struct StempelImage: View {
-    let isFilled: Bool
-    var body: some View { EmptyView() }
-}
-
-struct Petal3D: View {
-    let isFilled: Bool
-    let colorScheme: FlowerColorScheme
-    let rotationAngle: Double
-    var body: some View { EmptyView() }
-}
-
-struct Stempel3D: View {
-    let isFilled: Bool
-    let colorScheme: FlowerColorScheme
-    var body: some View { EmptyView() }
-}
-
-struct ColoredGlassPetal: View {
-    let isFilled: Bool
-    let colorScheme: FlowerColorScheme
-    var body: some View { EmptyView() }
-}
-
-struct ColoredGlassStempel: View {
-    let isFilled: Bool
-    let colorScheme: FlowerColorScheme
-    var body: some View { EmptyView() }
-}
-
-struct GlassPetal: View {
-    let isFilled: Bool
-    var body: some View { EmptyView() }
-}
-
-struct GlassStempel: View {
-    let isFilled: Bool
-    var body: some View { EmptyView() }
-}
-
-struct GlassBlinkingLED: View {
-    var body: some View { LED3D() }
-}
-
-struct BlinkingLED: View {
-    var body: some View { LED3D() }
 }
 
 // MARK: - Preview

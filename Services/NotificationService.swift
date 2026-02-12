@@ -4,10 +4,10 @@
 //
 //  Autor: Mathias Hubrich & Claude (Anthropic)
 //  Erstellt: 24. Januar 2026
-//  Geaendert: 25. Januar 2026, 12:00 Uhr
-//  Version: 1.1.0
+//  Geaendert: 12. Februar 2026, 22:00 Uhr
+//  Version: 2.0.0
 //
-//  Beschreibung: Benachrichtigungen fuer Termine
+//  Beschreibung: Lokale Benachrichtigungen fuer Termine
 //
 
 import Foundation
@@ -18,6 +18,7 @@ class NotificationService {
 
     private init() {}
 
+    /// Schedule a notification for a specific event type
     func scheduleNotification(
         for horse: Horse,
         eventType: Horse.EventType,
@@ -25,35 +26,35 @@ class NotificationService {
     ) {
         let center = UNUserNotificationCenter.current()
 
-        // Bestehende Benachrichtigung entfernen
+        // Remove existing notification for this horse+event
         let identifier = "\(horse.id.uuidString)-\(eventType.rawValue)"
         center.removePendingNotificationRequests(withIdentifiers: [identifier])
 
-        // Naechsten Termin berechnen
+        // Calculate next appointment date
         let nextDate = horse.naechsterTermin(fuer: eventType)
 
-        // Benachrichtigungsdatum berechnen
+        // Calculate notification date (X days before)
         guard let notificationDate = Calendar.current.date(byAdding: .day, value: -daysBeforeEvent, to: nextDate) else {
             return
         }
 
-        // Nur wenn das Datum in der Zukunft liegt
+        // Only schedule if notification date is in the future
         guard notificationDate > Date() else { return }
 
-        // Benachrichtigung erstellen
+        // Create notification content (localized)
         let content = UNMutableNotificationContent()
         content.title = "Hippominder"
-        content.body = "\(horse.name): \(eventType.rawValue) in \(daysBeforeEvent) Tagen faellig!"
+        content.body = "\(horse.name): \(eventType.localizedName) " + String(localized: "in") + " \(daysBeforeEvent) " + String(localized: "Tagen fällig!")
         content.sound = .default
 
-        // Trigger erstellen
-        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: notificationDate)
+        // Create trigger at 9:00 AM on notification day
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: notificationDate)
+        components.hour = 9
+        components.minute = 0
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
 
-        // Request erstellen
+        // Schedule
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
-
-        // Hinzufuegen
         center.add(request) { error in
             if let error = error {
                 print("Error scheduling notification: \(error)")
@@ -61,6 +62,7 @@ class NotificationService {
         }
     }
 
+    /// Schedule notifications for all event types of a horse
     func scheduleAllNotifications(for horse: Horse) {
         for eventType in Horse.EventType.allCases {
             scheduleNotification(
@@ -71,6 +73,7 @@ class NotificationService {
         }
     }
 
+    /// Remove all notifications for a horse
     func removeAllNotifications(for horse: Horse) {
         let center = UNUserNotificationCenter.current()
         let identifiers = Horse.EventType.allCases.map { "\(horse.id.uuidString)-\($0.rawValue)" }

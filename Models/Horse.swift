@@ -4,8 +4,8 @@
 //
 //  Autor: Mathias Hubrich & Claude (Anthropic)
 //  Erstellt: 24. Januar 2026
-//  Geaendert: 5. Februar 2026, 17:00 Uhr
-//  Version: 1.4.0
+//  Geaendert: 12. Februar 2026, 22:00 Uhr
+//  Version: 2.0.0
 //
 //  Beschreibung: Datenmodell fuer Pferde mit Timer-Funktionen
 //
@@ -33,17 +33,12 @@ class Horse {
     // Benachrichtigung Tage vorher
     var benachrichtigungTageVorher: Int
 
-    // Kontakte fuer Benachrichtigungen
+    // Benachrichtigungs-Flags (pro Pferd, Kontaktdaten global in ContactSettings)
     var notifyApotheker: Bool = false
-    var kontaktApotheker: String = ""
     var notifyBesitzer: Bool = false
-    var kontaktBesitzer: String = ""
     var notifyHufschmied: Bool = false
-    var kontaktHufschmied: String = ""
     var notifyStallbesitzer: Bool = false
-    var kontaktStallbesitzer: String = ""
     var notifyTierarzt: Bool = false
-    var kontaktTierarzt: String = ""
 
     init(
         name: String,
