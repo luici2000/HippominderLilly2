@@ -41,3 +41,6 @@ iOSInjectionProject/
 # Misc
 *.swp
 *.orig
+
+# Design references (not needed in repo)
+assets/
