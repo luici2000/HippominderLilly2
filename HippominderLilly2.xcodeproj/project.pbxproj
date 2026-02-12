@@ -1,0 +1,588 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C78557432D734C0300840FAF /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C78557422D734C0300840FAF /* EventKit.framework */; };
+		C7LOCA00200000000840FAF0 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C7LOCA00100000000840FAF0 /* Localizable.xcstrings */; };
+		C7LOCA00400000000840FAF0 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C7LOCA00300000000840FAF0 /* InfoPlist.xcstrings */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C78557132D71AB7700840FAF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C78556F62D71AB7500840FAF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C78556FD2D71AB7500840FAF;
+			remoteInfo = HippominderLilly2;
+		};
+		C785571D2D71AB7700840FAF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C78556F62D71AB7500840FAF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C78556FD2D71AB7500840FAF;
+			remoteInfo = HippominderLilly2;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		C78556FE2D71AB7500840FAF /* HippominderLilly2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HippominderLilly2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C78557122D71AB7700840FAF /* HippominderLilly2Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HippominderLilly2Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C785571C2D71AB7700840FAF /* HippominderLilly2UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HippominderLilly2UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C78557422D734C0300840FAF /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
+		C7LOCA00100000000840FAF0 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		C7LOCA00300000000840FAF0 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		C78557002D71AB7500840FAF /* . */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = .;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C78556FB2D71AB7500840FAF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C78557432D734C0300840FAF /* EventKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C785570F2D71AB7700840FAF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C78557192D71AB7700840FAF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C78556F52D71AB7400840FAF = {
+			isa = PBXGroup;
+			children = (
+				C7LOCA00100000000840FAF0 /* Localizable.xcstrings */,
+				C7LOCA00300000000840FAF0 /* InfoPlist.xcstrings */,
+				C78557002D71AB7500840FAF /* . */,
+				C78557412D734C0300840FAF /* Frameworks */,
+				C78556FF2D71AB7500840FAF /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C78556FF2D71AB7500840FAF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C78556FE2D71AB7500840FAF /* HippominderLilly2.app */,
+				C78557122D71AB7700840FAF /* HippominderLilly2Tests.xctest */,
+				C785571C2D71AB7700840FAF /* HippominderLilly2UITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C78557412D734C0300840FAF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C78557422D734C0300840FAF /* EventKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C78556FD2D71AB7500840FAF /* HippominderLilly2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C78557252D71AB7700840FAF /* Build configuration list for PBXNativeTarget "HippominderLilly2" */;
+			buildPhases = (
+				C78556FA2D71AB7500840FAF /* Sources */,
+				C78556FB2D71AB7500840FAF /* Frameworks */,
+				C78556FC2D71AB7500840FAF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C78557002D71AB7500840FAF /* . */,
+			);
+			name = HippominderLilly2;
+			packageProductDependencies = (
+			);
+			productName = HippominderLilly2;
+			productReference = C78556FE2D71AB7500840FAF /* HippominderLilly2.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C78557112D71AB7700840FAF /* HippominderLilly2Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C785572A2D71AB7700840FAF /* Build configuration list for PBXNativeTarget "HippominderLilly2Tests" */;
+			buildPhases = (
+				C785570E2D71AB7700840FAF /* Sources */,
+				C785570F2D71AB7700840FAF /* Frameworks */,
+				C78557102D71AB7700840FAF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C78557142D71AB7700840FAF /* PBXTargetDependency */,
+			);
+			name = HippominderLilly2Tests;
+			packageProductDependencies = (
+			);
+			productName = HippominderLilly2Tests;
+			productReference = C78557122D71AB7700840FAF /* HippominderLilly2Tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		C785571B2D71AB7700840FAF /* HippominderLilly2UITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C785572D2D71AB7700840FAF /* Build configuration list for PBXNativeTarget "HippominderLilly2UITests" */;
+			buildPhases = (
+				C78557182D71AB7700840FAF /* Sources */,
+				C78557192D71AB7700840FAF /* Frameworks */,
+				C785571A2D71AB7700840FAF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C785571E2D71AB7700840FAF /* PBXTargetDependency */,
+			);
+			name = HippominderLilly2UITests;
+			packageProductDependencies = (
+			);
+			productName = HippominderLilly2UITests;
+			productReference = C785571C2D71AB7700840FAF /* HippominderLilly2UITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C78556F62D71AB7500840FAF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					C78556FD2D71AB7500840FAF = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					C78557112D71AB7700840FAF = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = C78556FD2D71AB7500840FAF;
+					};
+					C785571B2D71AB7700840FAF = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = C78556FD2D71AB7500840FAF;
+					};
+				};
+			};
+			buildConfigurationList = C78556F92D71AB7500840FAF /* Build configuration list for PBXProject "HippominderLilly2" */;
+			developmentRegion = de;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				de,
+				es,
+				fr,
+				"pt-BR",
+				Base,
+			);
+			mainGroup = C78556F52D71AB7400840FAF;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C78556FF2D71AB7500840FAF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C78556FD2D71AB7500840FAF /* HippominderLilly2 */,
+				C78557112D71AB7700840FAF /* HippominderLilly2Tests */,
+				C785571B2D71AB7700840FAF /* HippominderLilly2UITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C78556FC2D71AB7500840FAF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7LOCA00200000000840FAF0 /* Localizable.xcstrings in Resources */,
+				C7LOCA00400000000840FAF0 /* InfoPlist.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C78557102D71AB7700840FAF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C785571A2D71AB7700840FAF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C78556FA2D71AB7500840FAF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C785570E2D71AB7700840FAF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C78557182D71AB7700840FAF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C78557142D71AB7700840FAF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C78556FD2D71AB7500840FAF /* HippominderLilly2 */;
+			targetProxy = C78557132D71AB7700840FAF /* PBXContainerItemProxy */;
+		};
+		C785571E2D71AB7700840FAF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C78556FD2D71AB7500840FAF /* HippominderLilly2 */;
+			targetProxy = C785571D2D71AB7700840FAF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		C78557262D71AB7700840FAF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = HippominderLilly2.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
+				DEVELOPMENT_TEAM = H5FBB5BQB6;
+				ENABLE_PREVIEWS = YES;
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					"archiv/*",
+					"neu/*",
+					"aktuell/*",
+					"4Lilly/*",
+					Info.plist,
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roboterwerk.HippominderLilly2;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C78557272D71AB7700840FAF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = HippominderLilly2.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
+				DEVELOPMENT_TEAM = H5FBB5BQB6;
+				ENABLE_PREVIEWS = YES;
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					"archiv/*",
+					"neu/*",
+					"aktuell/*",
+					"4Lilly/*",
+					Info.plist,
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roboterwerk.HippominderLilly2;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		C78557282D71AB7700840FAF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		C78557292D71AB7700840FAF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C785572B2D71AB7700840FAF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roboterwerk.HippominderLilly2Tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HippominderLilly2.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/HippominderLilly2";
+			};
+			name = Debug;
+		};
+		C785572C2D71AB7700840FAF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roboterwerk.HippominderLilly2Tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HippominderLilly2.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/HippominderLilly2";
+			};
+			name = Release;
+		};
+		C785572E2D71AB7700840FAF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roboterwerk.HippominderLilly2UITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = HippominderLilly2;
+			};
+			name = Debug;
+		};
+		C785572F2D71AB7700840FAF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roboterwerk.HippominderLilly2UITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = HippominderLilly2;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C78556F92D71AB7500840FAF /* Build configuration list for PBXProject "HippominderLilly2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C78557282D71AB7700840FAF /* Debug */,
+				C78557292D71AB7700840FAF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C78557252D71AB7700840FAF /* Build configuration list for PBXNativeTarget "HippominderLilly2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C78557262D71AB7700840FAF /* Debug */,
+				C78557272D71AB7700840FAF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C785572A2D71AB7700840FAF /* Build configuration list for PBXNativeTarget "HippominderLilly2Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C785572B2D71AB7700840FAF /* Debug */,
+				C785572C2D71AB7700840FAF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C785572D2D71AB7700840FAF /* Build configuration list for PBXNativeTarget "HippominderLilly2UITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C785572E2D71AB7700840FAF /* Debug */,
+				C785572F2D71AB7700840FAF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C78556F62D71AB7500840FAF /* Project object */;
+}

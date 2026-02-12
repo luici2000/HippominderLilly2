@@ -1,0 +1,46 @@
+{
+  "identifier" : "A1B2C3D4",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "2.99",
+      "familyShareable" : true,
+      "internalID" : "PRO001",
+      "localizations" : [
+        {
+          "description" : "Unbegrenzt viele Pferde verwalten",
+          "displayName" : "Hippominder Pro",
+          "locale" : "de"
+        },
+        {
+          "description" : "Manage unlimited horses",
+          "displayName" : "Hippominder Pro",
+          "locale" : "en"
+        }
+      ],
+      "productID" : "com.roboterwerk.HippominderLilly2.pro",
+      "referenceName" : "Hippominder Pro",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "APP001",
+    "_developerTeamID" : "H5FBB5BQB6",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "de",
+    "_storefront" : "DEU",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

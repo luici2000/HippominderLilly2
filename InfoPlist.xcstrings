@@ -1,0 +1,118 @@
+{
+  "sourceLanguage": "de",
+  "strings": {
+    "NSCalendarsUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder would like to add appointments to your calendar."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder desea añadir citas a tu calendario."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder souhaite ajouter des rendez-vous à votre calendrier."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder gostaria de adicionar compromissos ao seu calendário."
+          }
+        }
+      }
+    },
+    "NSContactsUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder would like to access your contacts to select notification recipients."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder desea acceder a tus contactos para seleccionar destinatarios de notificaciones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder souhaite accéder à vos contacts pour sélectionner les destinataires des notifications."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder gostaria de acessar seus contatos para selecionar destinatários de notificações."
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder would like to access your photos to select a horse picture."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder desea acceder a tus fotos para seleccionar una imagen del caballo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder souhaite accéder à vos photos pour sélectionner une photo de cheval."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder gostaria de acessar suas fotos para selecionar uma foto do cavalo."
+          }
+        }
+      }
+    },
+    "NSUserNotificationsUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder would like to remind you about appointments."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder desea recordarte las citas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder souhaite vous rappeler vos rendez-vous."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder gostaria de lembrá-lo sobre compromissos."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

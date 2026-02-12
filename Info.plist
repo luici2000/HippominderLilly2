@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSCalendarsUsageDescription</key>
+    <string>Hippominder möchte Termine in deinen Kalender eintragen.</string>
+    <key>NSContactsUsageDescription</key>
+    <string>Hippominder möchte auf deine Kontakte zugreifen, um Benachrichtigungsempfänger auszuwählen.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Hippominder möchte auf deine Fotos zugreifen, um ein Pferdebild auszuwählen.</string>
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>Hippominder möchte dich an Termine erinnern.</string>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
+</dict>
+</plist>

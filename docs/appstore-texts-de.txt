@@ -1,0 +1,79 @@
+============================================================
+HIPPOMINDER – APP STORE TEXTE (DEUTSCH)
+Fuer App Store Connect / Apple App Store
+============================================================
+
+--- APP NAME (max. 30 Zeichen) ---
+Hippominder
+
+--- UNTERTITEL (max. 30 Zeichen) ---
+Pferde-Termine im Blick
+
+--- KATEGORIE ---
+Primaer: Lifestyle
+Sekundaer: Gesundheit & Fitness
+
+--- BESCHREIBUNG (max. 4000 Zeichen) ---
+
+Hippominder erinnert dich zuverlaessig an alle wichtigen Termine fuer dein Pferd – Hufschmied, Impfung und Wurmkur.
+
+Nie wieder einen Termin vergessen! Mit der einzigartigen Blumen-Anzeige siehst du auf einen Blick, wann welcher Termin ansteht. Je naeher ein Termin rueckt, desto deutlicher zeigt es die Blume an – von frischem Gruen bis hin zu warnendem Rot.
+
+FUNKTIONEN:
+
+- Terminverwaltung fuer Hufschmied, Impfung und Wurmkur
+- Individuelle Intervalle fuer jedes Pferd
+- Visuelle Blumen-Anzeige mit Farbverlauf
+- Farbige Ampel-Indikatoren (gruen/orange/rot)
+- E-Mail-Benachrichtigungen an Stallbetreiber, Hufschmied & Co.
+- Kontaktverwaltung mit Apple-Kontakte-Integration
+- Pferdefotos aus der Fotomediathek
+- Kalender-Integration
+- Lokale Erinnerungen
+- 3 waehlbare Farbschemata
+- Komplett offline – keine Cloud, kein Tracking
+
+KOSTENLOS STARTEN:
+
+Verwalte 1 Pferd voellig kostenlos. Mit dem einmaligen Kauf von "Hippominder Pro" schaltest du unbegrenzt viele Pferde frei – kein Abo, einmal kaufen, fuer immer nutzen.
+
+DATENSCHUTZ:
+
+Alle Daten bleiben auf deinem Geraet. Hippominder nutzt keine Analyse-Tools, kein Tracking und keine Werbung.
+
+Entwickelt mit Liebe fuer alle Pferdemenschen.
+
+--- KEYWORDS (max. 100 Zeichen, kommagetrennt) ---
+Pferd,Hufschmied,Impfung,Wurmkur,Termin,Erinnerung,Stall,Reiten,Pferdepflege,Timer
+
+--- PROMOTIONAL TEXT (max. 170 Zeichen) ---
+Nie wieder einen Pferde-Termin vergessen! Hufschmied, Impfung, Wurmkur – alles im Blick mit der einzigartigen Blumen-Anzeige.
+
+--- WHATS NEW (fuer Version 1.7.0) ---
+- Neu: In-App-Kauf "Hippominder Pro" fuer unbegrenzte Pferde
+- Neu: Benachrichtigungs-Einstellungen auf eigener Seite
+- Verbessert: Toolbar mit beschrifteten Symbolen
+- Verbessert: Optimierungen fuer den App Store
+
+--- SUPPORT URL ---
+https://luici2000.github.io/HippominderLilly2/support.html
+
+--- PRIVACY POLICY URL ---
+https://luici2000.github.io/HippominderLilly2/privacy-policy.html
+
+--- PREIS ---
+Kostenlos (mit In-App-Kauf "Hippominder Pro" fuer 2,99 EUR)
+
+--- ALTERSFREIGABE ---
+4+ (keine angestoessenen Inhalte)
+
+--- APP PRIVACY (Datenschutz-Label) ---
+Kategorie: Daten nicht erfasst
+(Die App erhebt keine Daten, die mit der Identitaet des Nutzers verknuepft werden.)
+
+============================================================
+HINWEIS: Die Support- und Privacy-URLs setzen voraus, dass
+GitHub Pages fuer das Repository aktiviert ist.
+Repo: https://github.com/luici2000/HippominderLilly2
+Ordner: /docs (als GitHub Pages Source konfigurieren)
+============================================================
