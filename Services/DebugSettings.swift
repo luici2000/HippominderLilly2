@@ -130,7 +130,9 @@ struct DebugTimeView: View {
             }
             .padding()
             .navigationTitle("Debug: Zeit")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Fertig") { dismiss() }

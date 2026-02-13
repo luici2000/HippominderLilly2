@@ -44,7 +44,9 @@ struct ContactsView: View {
                 }
             }
             .navigationTitle("Kontakte")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Fertig") { dismiss() }

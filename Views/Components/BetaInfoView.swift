@@ -161,7 +161,9 @@ struct BetaInfoView: View {
                 .padding(.horizontal)
             }
             .navigationTitle("Beta-Info")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Fertig") { dismiss() }

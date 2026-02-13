@@ -123,7 +123,9 @@ struct PaywallView: View {
                     Spacer()
                 }
             }
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Später") {
