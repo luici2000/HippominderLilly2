@@ -4,8 +4,8 @@
 //
 //  Autor: Mathias Hubrich & Claude (Anthropic)
 //  Erstellt: 24. Januar 2026
-//  Geaendert: 12. Februar 2026, 10:10 Uhr
-//  Version: 1.8.0
+//  Geaendert: 13. Februar 2026
+//  Version: 1.9.0
 //
 //  Beschreibung: Hauptansicht mit Pferdeuebersicht
 //
@@ -24,6 +24,8 @@ struct ContentView: View {
     @State private var showingAddHorse = false
     @State private var showingContacts = false
     @State private var showingPaywall = false
+    @State private var showingBetaInfo = false
+    @State private var logoTapCount = 0
 
     var body: some View {
         NavigationStack {
@@ -47,11 +49,21 @@ struct ContentView: View {
 
                         Spacer()
 
-                        // Logo zentriert
+                        // Logo zentriert (5x tippen = Beta-Info / Debug)
                         Image("hippominder_logo")
                             .resizable()
                             .scaledToFit()
                             .frame(height: 50)
+                            .onTapGesture {
+                                logoTapCount += 1
+                                if logoTapCount >= 5 {
+                                    showingBetaInfo = true
+                                    logoTapCount = 0
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                    logoTapCount = 0
+                                }
+                            }
 
                         Spacer()
 
@@ -157,6 +169,9 @@ struct ContentView: View {
             }
             .sheet(isPresented: $showingPaywall) {
                 PaywallView()
+            }
+            .sheet(isPresented: $showingBetaInfo) {
+                BetaInfoView()
             }
         }
     }

@@ -1,0 +1,75 @@
+============================================================
+HIPPOMINDER – APP STORE TEXTS (ENGLISH)
+For App Store Connect / Apple App Store
+============================================================
+
+--- APP NAME (max. 30 characters) ---
+Hippominder
+
+--- SUBTITLE (max. 30 characters) ---
+Horse Care Reminders
+
+--- CATEGORY ---
+Primary: Lifestyle
+Secondary: Health & Fitness
+
+--- DESCRIPTION (max. 4000 characters) ---
+
+Hippominder reliably reminds you of all important appointments for your horse – farrier, vaccinations, and deworming.
+
+Never forget an appointment again! With the unique flower display, you can see at a glance when each appointment is due. The closer a deadline gets, the more clearly the flower shows it – from fresh green to warning red.
+
+FEATURES:
+
+- Appointment management for farrier, vaccinations, and deworming
+- Individual intervals for each horse
+- Visual flower display with color gradient
+- Color-coded traffic light indicators (green/orange/red)
+- Email notifications to stable owner, farrier & more
+- Contact management with Apple Contacts integration
+- Horse photos from your photo library
+- Calendar integration
+- Local reminders
+- 3 selectable color schemes
+- Completely offline – no cloud, no tracking
+
+GET STARTED FOR FREE:
+
+Manage 1 horse completely free. With the one-time purchase of "Hippominder Pro", you unlock unlimited horses – no subscription, buy once, use forever.
+
+PRIVACY:
+
+All data stays on your device. Hippominder uses no analytics, no tracking, and no advertising.
+
+Developed with love for all horse people.
+
+--- KEYWORDS (max. 100 characters, comma-separated) ---
+horse,farrier,vaccination,deworming,appointment,reminder,stable,riding,horse care,timer
+
+--- PROMOTIONAL TEXT (max. 170 characters) ---
+Never forget a horse appointment again! Farrier, vaccination, deworming – everything at a glance with the unique flower display.
+
+--- WHATS NEW (for Version 2.0.0) ---
+- New: Completely optimized code architecture
+- New: Hidden beta/debug access via logo
+- New: Improved notification system
+- New: Refactored components for better performance
+- Improved: Localization in 5 languages
+
+--- SUPPORT URL ---
+https://luici2000.github.io/HippominderLilly2/support.html
+
+--- PRIVACY POLICY URL ---
+https://luici2000.github.io/HippominderLilly2/privacy-policy.html
+
+--- PRICE ---
+Free (with In-App Purchase "Hippominder Pro" for $2.99)
+
+--- AGE RATING ---
+4+ (no objectionable content)
+
+--- APP PRIVACY (Privacy Label) ---
+Category: Data Not Collected
+(The app does not collect any data linked to the user's identity.)
+
+============================================================

@@ -1,0 +1,75 @@
+============================================================
+HIPPOMINDER – TEXTOS APP STORE (ESPANOL)
+Para App Store Connect / Apple App Store
+============================================================
+
+--- NOMBRE DE LA APP (max. 30 caracteres) ---
+Hippominder
+
+--- SUBTITULO (max. 30 caracteres) ---
+Recordatorios para caballos
+
+--- CATEGORIA ---
+Primaria: Estilo de vida
+Secundaria: Salud y forma fisica
+
+--- DESCRIPCION (max. 4000 caracteres) ---
+
+Hippominder te recuerda de forma fiable todas las citas importantes para tu caballo – herrador, vacunas y desparasitacion.
+
+Nunca mas olvides una cita! Con la visualizacion unica de flores, puedes ver de un vistazo cuando vence cada cita. Cuanto mas se acerca una fecha, mas claramente lo muestra la flor – de verde fresco a rojo de advertencia.
+
+FUNCIONES:
+
+- Gestion de citas para herrador, vacunas y desparasitacion
+- Intervalos individuales para cada caballo
+- Visualizacion floral con degradado de colores
+- Indicadores tipo semaforo (verde/naranja/rojo)
+- Notificaciones por email al propietario del establo, herrador y mas
+- Gestion de contactos con integracion de Contactos de Apple
+- Fotos de caballos desde tu biblioteca de fotos
+- Integracion con calendario
+- Recordatorios locales
+- 3 esquemas de colores seleccionables
+- Completamente offline – sin nube, sin rastreo
+
+EMPIEZA GRATIS:
+
+Gestiona 1 caballo completamente gratis. Con la compra unica de "Hippominder Pro", desbloqueas caballos ilimitados – sin suscripcion, compra una vez, usa para siempre.
+
+PRIVACIDAD:
+
+Todos los datos permanecen en tu dispositivo. Hippominder no usa herramientas de analisis, ni rastreo, ni publicidad.
+
+Desarrollado con amor para todos los amantes de los caballos.
+
+--- PALABRAS CLAVE (max. 100 caracteres, separadas por comas) ---
+caballo,herrador,vacuna,desparasitacion,cita,recordatorio,establo,equitacion,cuidado,temporizador
+
+--- TEXTO PROMOCIONAL (max. 170 caracteres) ---
+Nunca olvides una cita para tu caballo! Herrador, vacuna, desparasitacion – todo a la vista con la visualizacion de flores.
+
+--- NOVEDADES (para Version 2.0.0) ---
+- Nuevo: Arquitectura de codigo completamente optimizada
+- Nuevo: Acceso beta/debug oculto via logo
+- Nuevo: Sistema de notificaciones mejorado
+- Nuevo: Componentes refactorizados para mejor rendimiento
+- Mejorado: Localizacion en 5 idiomas
+
+--- URL DE SOPORTE ---
+https://luici2000.github.io/HippominderLilly2/support.html
+
+--- URL POLITICA DE PRIVACIDAD ---
+https://luici2000.github.io/HippominderLilly2/privacy-policy.html
+
+--- PRECIO ---
+Gratis (con compra in-app "Hippominder Pro" por 2,99 EUR)
+
+--- CLASIFICACION POR EDAD ---
+4+ (sin contenido objetable)
+
+--- PRIVACIDAD DE LA APP ---
+Categoria: Datos no recopilados
+(La app no recopila datos vinculados a la identidad del usuario.)
+
+============================================================

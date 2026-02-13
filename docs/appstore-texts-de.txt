@@ -49,11 +49,12 @@ Pferd,Hufschmied,Impfung,Wurmkur,Termin,Erinnerung,Stall,Reiten,Pferdepflege,Tim
 --- PROMOTIONAL TEXT (max. 170 Zeichen) ---
 Nie wieder einen Pferde-Termin vergessen! Hufschmied, Impfung, Wurmkur – alles im Blick mit der einzigartigen Blumen-Anzeige.
 
---- WHATS NEW (fuer Version 1.7.0) ---
-- Neu: In-App-Kauf "Hippominder Pro" fuer unbegrenzte Pferde
-- Neu: Benachrichtigungs-Einstellungen auf eigener Seite
-- Verbessert: Toolbar mit beschrifteten Symbolen
-- Verbessert: Optimierungen fuer den App Store
+--- WHATS NEW (fuer Version 2.0.0) ---
+- Neu: Komplett optimierte Code-Architektur
+- Neu: Versteckter Beta/Debug-Zugang ueber Logo
+- Neu: Verbessertes Benachrichtigungssystem
+- Neu: Refaktorierte Komponenten fuer bessere Performance
+- Verbessert: Lokalisierung in 5 Sprachen
 
 --- SUPPORT URL ---
 https://luici2000.github.io/HippominderLilly2/support.html

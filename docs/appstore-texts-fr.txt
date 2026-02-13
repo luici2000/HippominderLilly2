@@ -1,0 +1,75 @@
+============================================================
+HIPPOMINDER – TEXTES APP STORE (FRANCAIS)
+Pour App Store Connect / Apple App Store
+============================================================
+
+--- NOM DE L'APP (max. 30 caracteres) ---
+Hippominder
+
+--- SOUS-TITRE (max. 30 caracteres) ---
+Rappels soins equins
+
+--- CATEGORIE ---
+Primaire : Style de vie
+Secondaire : Sante et forme
+
+--- DESCRIPTION (max. 4000 caracteres) ---
+
+Hippominder vous rappelle de maniere fiable tous les rendez-vous importants pour votre cheval – marechal-ferrant, vaccinations et vermifuge.
+
+N'oubliez plus jamais un rendez-vous ! Avec l'affichage floral unique, vous voyez d'un coup d'oeil quand chaque rendez-vous est du. Plus la date approche, plus la fleur le montre clairement – du vert frais au rouge d'alerte.
+
+FONCTIONNALITES :
+
+- Gestion des rendez-vous pour marechal-ferrant, vaccinations et vermifuge
+- Intervalles individuels pour chaque cheval
+- Affichage floral visuel avec degrade de couleurs
+- Indicateurs type feu tricolore (vert/orange/rouge)
+- Notifications par email au proprietaire d'ecurie, marechal-ferrant et plus
+- Gestion des contacts avec integration Contacts Apple
+- Photos de chevaux depuis votre phototheque
+- Integration calendrier
+- Rappels locaux
+- 3 schemas de couleurs au choix
+- Completement hors ligne – pas de cloud, pas de suivi
+
+COMMENCEZ GRATUITEMENT :
+
+Gerez 1 cheval gratuitement. Avec l'achat unique de "Hippominder Pro", debloquez des chevaux illimites – sans abonnement, achetez une fois, utilisez pour toujours.
+
+CONFIDENTIALITE :
+
+Toutes les donnees restent sur votre appareil. Hippominder n'utilise ni outils d'analyse, ni suivi, ni publicite.
+
+Developpe avec amour pour tous les passionnes de chevaux.
+
+--- MOTS-CLES (max. 100 caracteres, separes par des virgules) ---
+cheval,marechal-ferrant,vaccination,vermifuge,rendez-vous,rappel,ecurie,equitation,soin,minuterie
+
+--- TEXTE PROMOTIONNEL (max. 170 caracteres) ---
+N'oubliez plus un rendez-vous equin ! Marechal-ferrant, vaccination, vermifuge – tout visible avec l'affichage floral unique.
+
+--- NOUVEAUTES (pour Version 2.0.0) ---
+- Nouveau : Architecture de code completement optimisee
+- Nouveau : Acces beta/debug cache via le logo
+- Nouveau : Systeme de notifications ameliore
+- Nouveau : Composants refactorises pour de meilleures performances
+- Ameliore : Localisation en 5 langues
+
+--- URL DE SUPPORT ---
+https://luici2000.github.io/HippominderLilly2/support.html
+
+--- URL POLITIQUE DE CONFIDENTIALITE ---
+https://luici2000.github.io/HippominderLilly2/privacy-policy.html
+
+--- PRIX ---
+Gratuit (avec achat in-app "Hippominder Pro" pour 2,99 EUR)
+
+--- CLASSIFICATION PAR AGE ---
+4+ (aucun contenu reprehensible)
+
+--- CONFIDENTIALITE DE L'APP ---
+Categorie : Donnees non collectees
+(L'app ne collecte aucune donnee liee a l'identite de l'utilisateur.)
+
+============================================================

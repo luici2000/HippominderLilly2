@@ -1,0 +1,75 @@
+============================================================
+HIPPOMINDER – TEXTOS APP STORE (PORTUGUES BRASILEIRO)
+Para App Store Connect / Apple App Store
+============================================================
+
+--- NOME DO APP (max. 30 caracteres) ---
+Hippominder
+
+--- SUBTITULO (max. 30 caracteres) ---
+Lembretes para cavalos
+
+--- CATEGORIA ---
+Primaria: Estilo de Vida
+Secundaria: Saude e Fitness
+
+--- DESCRICAO (max. 4000 caracteres) ---
+
+Hippominder lembra voce de forma confiavel de todos os compromissos importantes para seu cavalo – ferrador, vacinacoes e vermifugacao.
+
+Nunca mais esqueca um compromisso! Com a visualizacao unica de flores, voce ve de relance quando cada compromisso vence. Quanto mais perto a data fica, mais claramente a flor mostra – de verde fresco a vermelho de alerta.
+
+FUNCIONALIDADES:
+
+- Gerenciamento de compromissos para ferrador, vacinacoes e vermifugacao
+- Intervalos individuais para cada cavalo
+- Visualizacao floral com gradiente de cores
+- Indicadores tipo semaforo (verde/laranja/vermelho)
+- Notificacoes por email para proprietario do estabulo, ferrador e mais
+- Gerenciamento de contatos com integracao de Contatos da Apple
+- Fotos de cavalos da sua biblioteca de fotos
+- Integracao com calendario
+- Lembretes locais
+- 3 esquemas de cores selecionaveis
+- Completamente offline – sem nuvem, sem rastreamento
+
+COMECE GRATIS:
+
+Gerencie 1 cavalo completamente gratis. Com a compra unica do "Hippominder Pro", desbloqueie cavalos ilimitados – sem assinatura, compre uma vez, use para sempre.
+
+PRIVACIDADE:
+
+Todos os dados ficam no seu dispositivo. Hippominder nao usa ferramentas de analise, rastreamento ou publicidade.
+
+Desenvolvido com amor para todos os amantes de cavalos.
+
+--- PALAVRAS-CHAVE (max. 100 caracteres, separadas por virgulas) ---
+cavalo,ferrador,vacina,vermifugo,compromisso,lembrete,estabulo,equitacao,cuidado,temporizador
+
+--- TEXTO PROMOCIONAL (max. 170 caracteres) ---
+Nunca esqueca um compromisso equino! Ferrador, vacina, vermifugo – tudo visivel com a visualizacao floral unica.
+
+--- NOVIDADES (para Versao 2.0.0) ---
+- Novo: Arquitetura de codigo completamente otimizada
+- Novo: Acesso beta/debug oculto via logo
+- Novo: Sistema de notificacoes melhorado
+- Novo: Componentes refatorados para melhor desempenho
+- Melhorado: Localizacao em 5 idiomas
+
+--- URL DE SUPORTE ---
+https://luici2000.github.io/HippominderLilly2/support.html
+
+--- URL POLITICA DE PRIVACIDADE ---
+https://luici2000.github.io/HippominderLilly2/privacy-policy.html
+
+--- PRECO ---
+Gratis (com compra no app "Hippominder Pro" por R$ 14,90)
+
+--- CLASSIFICACAO ETARIA ---
+Livre (sem conteudo objetavel)
+
+--- PRIVACIDADE DO APP ---
+Categoria: Dados nao coletados
+(O app nao coleta dados vinculados a identidade do usuario.)
+
+============================================================
