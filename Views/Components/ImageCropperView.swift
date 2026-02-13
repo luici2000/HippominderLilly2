@@ -4,12 +4,15 @@
 //
 //  Autor: Mathias Hubrich & Claude (Anthropic)
 //  Erstellt: 12. Februar 2026
-//  Version: 1.0.0
+//  Version: 1.1.0
 //
-//  Beschreibung: Bild-Zuschnitt mit Pinch-to-Zoom und Drag
+//  Beschreibung: Bild-Zuschnitt mit Pinch-to-Zoom und Drag (nur iOS)
 //
 
 import SwiftUI
+
+#if os(iOS)
+import UIKit
 
 struct ImageCropperView: View {
     let image: UIImage
@@ -130,3 +133,4 @@ struct ImageCropperView: View {
         onCrop(circularImage)
     }
 }
+#endif

@@ -7,12 +7,13 @@
 //  Geaendert: 13. Februar 2026
 //  Version: 1.9.0
 //
-//  Beschreibung: Hauptansicht mit Pferdeuebersicht
+//  Beschreibung: Hauptansicht mit Pferdeuebersicht (iOS)
 //
 
 import SwiftUI
 import SwiftData
 
+#if os(iOS)
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var horses: [Horse]
@@ -383,3 +384,4 @@ struct ColorSphere3D: View {
     ContentView()
         .modelContainer(for: Horse.self, inMemory: true)
 }
+#endif

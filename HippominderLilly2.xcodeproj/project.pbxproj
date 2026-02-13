@@ -294,6 +294,7 @@
 					"neu/*",
 					"aktuell/*",
 					"4Lilly/*",
+					"WatchApp/*",
 					Info.plist,
 				);
 				GENERATE_INFOPLIST_FILE = YES;
@@ -332,6 +333,7 @@
 					"neu/*",
 					"aktuell/*",
 					"4Lilly/*",
+					"WatchApp/*",
 					Info.plist,
 				);
 				GENERATE_INFOPLIST_FILE = YES;

@@ -11,6 +11,8 @@
 //
 
 import SwiftUI
+
+#if os(iOS)
 import PhotosUI
 import EventKit
 import MessageUI
@@ -530,3 +532,5 @@ struct DatePickerSheet: View {
     .modelContainer(for: Horse.self, inMemory: true)
 }
 #endif
+
+#endif // os(iOS)

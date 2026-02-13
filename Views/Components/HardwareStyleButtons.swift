@@ -52,7 +52,9 @@ struct HardwareStyleButtons: View {
         }
         .alert("Wert eingeben", isPresented: $showingInput) {
             TextField("Tage", text: $inputText)
+                #if os(iOS)
                 .keyboardType(.numberPad)
+                #endif
             Button("OK") {
                 if let newValue = Int(inputText), newValue > 0 {
                     value = newValue

@@ -4,13 +4,15 @@
 //
 //  Autor: Mathias Hubrich & Claude (Anthropic)
 //  Erstellt: 24. Januar 2026
-//  Geaendert: 25. Januar 2026, 12:00 Uhr
-//  Version: 1.1.0
+//  Geaendert: 13. Februar 2026
+//  Version: 1.2.0
 //
-//  Beschreibung: Neues Pferd hinzufuegen
+//  Beschreibung: Neues Pferd hinzufuegen (iOS)
 //
 
 import SwiftUI
+
+#if os(iOS)
 import PhotosUI
 
 struct AddHorseView: View {
@@ -114,3 +116,4 @@ struct AddHorseView: View {
     AddHorseView()
         .modelContainer(for: Horse.self, inMemory: true)
 }
+#endif

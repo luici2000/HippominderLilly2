@@ -4,10 +4,11 @@
 //
 //  Autor: Mathias Hubrich & Claude (Anthropic)
 //  Erstellt: 24. Januar 2026
-//  Geaendert: 12. Februar 2026, 22:00 Uhr
-//  Version: 2.0.0
+//  Geaendert: 13. Februar 2026
+//  Version: 3.0.0
 //
 //  Beschreibung: Haupt-App-Einstiegspunkt mit SwiftData Container
+//  Unterstuetzt iOS, macOS (feste Fenstergroesse)
 //
 
 import SwiftUI
@@ -34,12 +35,25 @@ struct HippominderApp: App {
 
     var body: some Scene {
         WindowGroup {
+            #if os(macOS)
+            MacContentView()
+                .onAppear {
+                    scheduleAllNotifications()
+                }
+                .frame(minWidth: 700, idealWidth: 900, maxWidth: 1100,
+                       minHeight: 500, idealHeight: 650, maxHeight: 800)
+            #else
             ContentView()
                 .onAppear {
                     scheduleAllNotifications()
                 }
+            #endif
         }
         .modelContainer(sharedModelContainer)
+        #if os(macOS)
+        .defaultSize(width: 900, height: 650)
+        .windowResizability(.contentSize)
+        #endif
     }
 
     private func requestNotificationPermission() {

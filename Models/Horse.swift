@@ -14,6 +14,12 @@ import Foundation
 import SwiftData
 import SwiftUI
 
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
+
 @Model
 class Horse {
     var id: UUID
@@ -65,9 +71,16 @@ class Horse {
 
     // MARK: - Berechnete Eigenschaften
 
+    /// Plattformuebergreifende Bild-Property
     var image: Image? {
-        guard let data = imageData, let uiImage = UIImage(data: data) else { return nil }
+        guard let data = imageData else { return nil }
+        #if canImport(UIKit)
+        guard let uiImage = UIImage(data: data) else { return nil }
         return Image(uiImage: uiImage)
+        #elseif canImport(AppKit)
+        guard let nsImage = NSImage(data: data) else { return nil }
+        return Image(nsImage: nsImage)
+        #endif
     }
 
     // Aktuelles Datum (nutzt Debug-Offset wenn aktiv)

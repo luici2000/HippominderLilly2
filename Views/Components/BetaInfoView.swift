@@ -63,8 +63,13 @@ struct BetaInfoView: View {
 
                         InfoRow(label: "Pro-Status", value: storeManager.isPro ? "Aktiv" : "Kostenlos")
                         InfoRow(label: "Bundle ID", value: Bundle.main.bundleIdentifier ?? "–")
+                        #if os(iOS)
                         InfoRow(label: "iOS", value: UIDevice.current.systemVersion)
                         InfoRow(label: "Geraet", value: UIDevice.current.model)
+                        #elseif os(macOS)
+                        InfoRow(label: "macOS", value: ProcessInfo.processInfo.operatingSystemVersionString)
+                        InfoRow(label: "Geraet", value: "Mac")
+                        #endif
                     }
                     .padding()
                     .background(Color.gray.opacity(0.08))

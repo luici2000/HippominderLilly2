@@ -10,7 +10,9 @@
 //
 
 import SwiftUI
+#if os(iOS)
 import ContactsUI
+#endif
 
 struct ContactsView: View {
     @ObservedObject var contactSettings = ContactSettings.shared
@@ -102,9 +104,11 @@ struct ContactEditRow: View {
                     .frame(width: 16)
                 TextField("E-Mail", text: $email)
                     .font(.callout)
+                    #if os(iOS)
                     .keyboardType(.emailAddress)
                     .textContentType(.emailAddress)
                     .autocapitalization(.none)
+                    #endif
                     .onChange(of: email) { _, _ in onUpdate(name, email, phone) }
             }
 
@@ -116,12 +120,15 @@ struct ContactEditRow: View {
                     .frame(width: 16)
                 TextField("Telefon", text: $phone)
                     .font(.callout)
+                    #if os(iOS)
                     .keyboardType(.phonePad)
                     .textContentType(.telephoneNumber)
+                    #endif
                     .onChange(of: phone) { _, _ in onUpdate(name, email, phone) }
             }
         }
         .padding(.vertical, 4)
+        #if os(iOS)
         .sheet(isPresented: $showingContactPicker) {
             GlobalContactPickerView(
                 selectedName: $name,
@@ -130,11 +137,13 @@ struct ContactEditRow: View {
                 onDone: { onUpdate(name, email, phone) }
             )
         }
+        #endif
     }
 }
 
-// MARK: - Contact Picker fuer globale Kontakte
+// MARK: - Contact Picker fuer globale Kontakte (nur iOS)
 
+#if os(iOS)
 struct GlobalContactPickerView: UIViewControllerRepresentable {
     @Binding var selectedName: String
     @Binding var selectedEmail: String
@@ -189,6 +198,8 @@ struct GlobalContactPickerView: UIViewControllerRepresentable {
         }
     }
 }
+
+#endif // os(iOS) for GlobalContactPickerView
 
 #Preview {
     ContactsView()

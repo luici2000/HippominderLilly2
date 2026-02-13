@@ -4,12 +4,14 @@
 //
 //  Autor: Mathias Hubrich & Claude (Anthropic)
 //  Erstellt: 12. Februar 2026
-//  Version: 1.0.0
+//  Version: 1.1.0
 //
-//  Beschreibung: E-Mail-Vorlagen und Mail-Composer
+//  Beschreibung: E-Mail-Vorlagen und Mail-Composer (nur iOS)
 //
 
 import SwiftUI
+
+#if os(iOS)
 import MessageUI
 
 // MARK: - E-Mail Vorlagen
@@ -326,3 +328,4 @@ struct MailComposeView: UIViewControllerRepresentable {
         }
     }
 }
+#endif
