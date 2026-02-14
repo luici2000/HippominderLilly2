@@ -10,6 +10,8 @@
 		C78557432D734C0300840FAF /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C78557422D734C0300840FAF /* EventKit.framework */; };
 		C7LOCA00200000000840FAF0 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C7LOCA00100000000840FAF0 /* Localizable.xcstrings */; };
 		C7LOCA00400000000840FAF0 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C7LOCA00300000000840FAF0 /* InfoPlist.xcstrings */; };
+		C7WATCH0010000000840FAF00 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C7LOCA00100000000840FAF0 /* Localizable.xcstrings */; };
+		C7WATCH0020000000840FAF00 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C7LOCA00300000000840FAF0 /* InfoPlist.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +38,7 @@
 		C78557422D734C0300840FAF /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
 		C7LOCA00100000000840FAF0 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		C7LOCA00300000000840FAF0 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		C7WATCH0030000000840FAF00 /* HippominderWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HippominderWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -44,7 +47,20 @@
 			path = .;
 			sourceTree = "<group>";
 		};
+		C7WATCH00C0000000840FAF00 /* WatchApp */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = WatchApp;
+			sourceTree = "<group>";
+		};
+		C7WATCH00D0000000840FAF00 /* Models */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Models;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		C78556FB2D71AB7500840FAF /* Frameworks */ = {
@@ -69,6 +85,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C7WATCH0060000000840FAF00 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -78,6 +101,8 @@
 				C7LOCA00100000000840FAF0 /* Localizable.xcstrings */,
 				C7LOCA00300000000840FAF0 /* InfoPlist.xcstrings */,
 				C78557002D71AB7500840FAF /* . */,
+				C7WATCH00C0000000840FAF00 /* WatchApp */,
+				C7WATCH00D0000000840FAF00 /* Models */,
 				C78557412D734C0300840FAF /* Frameworks */,
 				C78556FF2D71AB7500840FAF /* Products */,
 			);
@@ -89,6 +114,7 @@
 				C78556FE2D71AB7500840FAF /* HippominderLilly2.app */,
 				C78557122D71AB7700840FAF /* HippominderLilly2Tests.xctest */,
 				C785571C2D71AB7700840FAF /* HippominderLilly2UITests.xctest */,
+				C7WATCH0030000000840FAF00 /* HippominderWatch.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -166,6 +192,27 @@
 			productReference = C785571C2D71AB7700840FAF /* HippominderLilly2UITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		C7WATCH0050000000840FAF00 /* HippominderWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C7WATCH00B0000000840FAF00 /* Build configuration list for PBXNativeTarget "HippominderWatch" */;
+			buildPhases = (
+				C7WATCH0080000000840FAF00 /* Sources */,
+				C7WATCH0060000000840FAF00 /* Frameworks */,
+				C7WATCH0070000000840FAF00 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C7WATCH00C0000000840FAF00 /* WatchApp */,
+				C7WATCH00D0000000840FAF00 /* Models */,
+			);
+			name = HippominderWatch;
+			productName = HippominderWatch;
+			productReference = C7WATCH0030000000840FAF00 /* HippominderWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -186,6 +233,9 @@
 					C785571B2D71AB7700840FAF = {
 						CreatedOnToolsVersion = 16.2;
 						TestTargetID = C78556FD2D71AB7500840FAF;
+					};
+					C7WATCH0050000000840FAF00 = {
+						CreatedOnToolsVersion = 16.2;
 					};
 				};
 			};
@@ -210,6 +260,7 @@
 				C78556FD2D71AB7500840FAF /* HippominderLilly2 */,
 				C78557112D71AB7700840FAF /* HippominderLilly2Tests */,
 				C785571B2D71AB7700840FAF /* HippominderLilly2UITests */,
+				C7WATCH0050000000840FAF00 /* HippominderWatch */,
 			);
 		};
 /* End PBXProject section */
@@ -238,6 +289,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C7WATCH0070000000840FAF00 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7WATCH0010000000840FAF00 /* Localizable.xcstrings in Resources */,
+				C7WATCH0020000000840FAF00 /* InfoPlist.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -256,6 +316,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C78557182D71AB7700840FAF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7WATCH0080000000840FAF00 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -553,6 +620,66 @@
 			};
 			name = Release;
 		};
+		C7WATCH0090000000840FAF00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H5FBB5BQB6;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Hippominder;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.roboterwerk.HippominderLilly2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roboterwerk.HippominderLilly2.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Debug;
+		};
+		C7WATCH00A0000000840FAF00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H5FBB5BQB6;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Hippominder;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.roboterwerk.HippominderLilly2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.roboterwerk.HippominderLilly2.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -588,6 +715,15 @@
 			buildConfigurations = (
 				C785572E2D71AB7700840FAF /* Debug */,
 				C785572F2D71AB7700840FAF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C7WATCH00B0000000840FAF00 /* Build configuration list for PBXNativeTarget "HippominderWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C7WATCH0090000000840FAF00 /* Debug */,
+				C7WATCH00A0000000840FAF00 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

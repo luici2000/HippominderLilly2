@@ -85,7 +85,11 @@ class Horse {
 
     // Aktuelles Datum (nutzt Debug-Offset wenn aktiv)
     private var currentDate: Date {
+        #if os(watchOS)
+        Date()
+        #else
         DebugSettings.shared.simulatedDate
+        #endif
     }
 
     // Tage bis zum naechsten Termin (negativ = ueberfaellig)

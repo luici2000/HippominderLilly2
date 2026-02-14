@@ -130,7 +130,6 @@ struct WatchHorseDetailView: View {
             .padding(.horizontal, 4)
         }
         .navigationTitle(horse.name)
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
