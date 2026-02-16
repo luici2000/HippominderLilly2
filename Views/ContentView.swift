@@ -162,7 +162,9 @@ struct ContentView: View {
                 }
             }
             .navigationBarHidden(true)
-            .sheet(isPresented: $showingAddHorse) {
+            .sheet(isPresented: $showingAddHorse, onDismiss: {
+                WatchSyncService.shared.syncToWatch()
+            }) {
                 AddHorseView()
             }
             .sheet(isPresented: $showingContacts) {
@@ -183,6 +185,7 @@ struct ContentView: View {
                 modelContext.delete(horses[index])
             }
         }
+        WatchSyncService.shared.syncToWatch()
     }
 }
 

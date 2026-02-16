@@ -63,9 +63,11 @@ struct MacContentView: View {
                 if horses.isEmpty {
                     VStack(spacing: 12) {
                         Spacer()
-                        Image(systemName: "hare")
-                            .font(.system(size: 40))
-                            .foregroundColor(.gray.opacity(0.3))
+                        Image("horse_silhouette")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 50, height: 50)
+                            .opacity(0.3)
                         Text("Noch keine Pferde")
                             .font(.headline)
                             .foregroundColor(.gray)
@@ -156,9 +158,11 @@ struct MacHorseRow: View {
                     .fill(Color.gray.opacity(0.15))
                     .frame(width: 36, height: 36)
                     .overlay(
-                        Image(systemName: "hare")
-                            .font(.system(size: 16))
-                            .foregroundColor(.gray.opacity(0.4))
+                        Image("horse_silhouette")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
+                            .opacity(0.4)
                     )
             }
 
@@ -219,9 +223,11 @@ struct MacHorseDetailView: View {
                             .fill(Color.gray.opacity(0.1))
                             .frame(width: 80, height: 80)
                             .overlay(
-                                Image(systemName: "hare")
-                                    .font(.title)
-                                    .foregroundColor(.gray.opacity(0.3))
+                                Image("horse_silhouette")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 40, height: 40)
+                                    .opacity(0.3)
                             )
                     }
 

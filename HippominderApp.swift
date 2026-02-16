@@ -17,6 +17,7 @@ import UserNotifications
 
 @main
 struct HippominderApp: App {
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         requestNotificationPermission()
@@ -46,6 +47,12 @@ struct HippominderApp: App {
             ContentView()
                 .onAppear {
                     scheduleAllNotifications()
+                    WatchSyncService.shared.configure(with: sharedModelContainer)
+                }
+                .onChange(of: scenePhase) { _, newPhase in
+                    if newPhase == .active {
+                        WatchSyncService.shared.syncToWatch()
+                    }
                 }
             #endif
         }

@@ -27,6 +27,9 @@ struct HippominderWatchApp: App {
     var body: some Scene {
         WindowGroup {
             WatchContentView()
+                .onAppear {
+                    WatchSyncReceiver.shared.configure(with: sharedModelContainer)
+                }
         }
         .modelContainer(sharedModelContainer)
     }

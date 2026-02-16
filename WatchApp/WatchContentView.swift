@@ -14,26 +14,45 @@ import SwiftData
 
 struct WatchContentView: View {
     @Query private var horses: [Horse]
+    @ObservedObject var syncReceiver = WatchSyncReceiver.shared
 
     var body: some View {
         NavigationStack {
             if horses.isEmpty {
                 VStack(spacing: 8) {
-                    Image(systemName: "hare")
-                        .font(.largeTitle)
-                        .foregroundColor(.gray)
-                    Text("Keine Pferde")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                    Text("Fuege Pferde in der\niPhone-App hinzu")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
+                    if syncReceiver.isSyncing {
+                        ProgressView()
+                            .padding(.bottom, 4)
+                        Text("Synchronisiere...")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Image(systemName: "figure.equestrian.sports")
+                            .font(.largeTitle)
+                            .foregroundColor(.gray)
+                        Text("Keine Pferde")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                        Text("Fuege Pferde in der\niPhone-App hinzu")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
                 }
             } else {
-                List(horses) { horse in
-                    NavigationLink(destination: WatchHorseDetailView(horse: horse)) {
-                        WatchHorseRow(horse: horse)
+                List {
+                    ForEach(horses) { horse in
+                        NavigationLink(destination: WatchHorseDetailView(horse: horse)) {
+                            WatchHorseRow(horse: horse)
+                        }
+                    }
+
+                    if let lastSync = syncReceiver.lastSyncDate {
+                        Section {
+                            Text("Sync: \(lastSync, style: .relative) her")
+                                .font(.system(size: 9))
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
                 .navigationTitle("Hippominder")
