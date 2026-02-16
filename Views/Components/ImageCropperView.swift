@@ -4,9 +4,9 @@
 //
 //  Autor: Mathias Hubrich & Claude (Anthropic)
 //  Erstellt: 12. Februar 2026
-//  Version: 1.1.0
+//  Version: 1.2.0
 //
-//  Beschreibung: Bild-Zuschnitt mit Pinch-to-Zoom und Drag (nur iOS)
+//  Beschreibung: Bild-Zuschnitt mit Pinch-to-Zoom, Drag und Zoom-Slider (nur iOS)
 //
 
 import SwiftUI
@@ -86,6 +86,19 @@ struct ImageCropperView: View {
                 }
                 .frame(width: cropSize, height: cropSize)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                // Zoom-Slider
+                HStack {
+                    Image(systemName: "minus.magnifyingglass")
+                        .foregroundColor(.secondary)
+                    Slider(value: $scale, in: 0.5...5.0)
+                        .onChange(of: scale) { _, _ in
+                            lastScale = scale
+                        }
+                    Image(systemName: "plus.magnifyingglass")
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 40)
 
                 Spacer()
             }
