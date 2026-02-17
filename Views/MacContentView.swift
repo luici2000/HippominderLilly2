@@ -18,6 +18,7 @@ import SwiftData
 import PhotosUI
 import EventKit
 import AppKit
+import UniformTypeIdentifiers
 
 struct MacContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -263,9 +264,11 @@ struct MacHorseDetailView: View {
 
     @State private var selectedEventType: Horse.EventType?
     @State private var showingDatePicker = false
-    @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var showingImageCropper = false
     @State private var rawNSImage: NSImage?
+    @State private var isLoadingPhoto = false
+    @State private var showingPhotoPicker = false
+    @State private var isDropTargeted = false
     @State private var showingCalendarAlert = false
     @State private var calendarAlertMessage = ""
     @State private var showingNotificationSettings = false
@@ -295,7 +298,47 @@ struct MacHorseDetailView: View {
                                 )
                         }
 
-                        PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                        // Drop highlight
+                        if isDropTargeted {
+                            Circle()
+                                .stroke(Color.accentColor, lineWidth: 3)
+                                .frame(width: 80, height: 80)
+                        }
+
+                        if isLoadingPhoto {
+                            Circle()
+                                .fill(Color.black.opacity(0.3))
+                                .frame(width: 80, height: 80)
+                                .overlay(
+                                    ProgressView()
+                                        .scaleEffect(0.8)
+                                        .tint(.white)
+                                )
+                        }
+
+                        // Dropdown menu for photo sources
+                        Menu {
+                            Button {
+                                openImageFromFinder()
+                            } label: {
+                                Label("Bild wählen…", systemImage: "folder")
+                            }
+
+                            Button {
+                                showingPhotoPicker = true
+                            } label: {
+                                Label("Fotos-Mediathek", systemImage: "photo.on.rectangle")
+                            }
+
+                            if horse.imageData != nil {
+                                Divider()
+                                Button(role: .destructive) {
+                                    horse.imageData = nil
+                                } label: {
+                                    Label("Foto entfernen", systemImage: "trash")
+                                }
+                            }
+                        } label: {
                             ZStack {
                                 Circle()
                                     .fill(Color(nsColor: .controlBackgroundColor))
@@ -306,8 +349,16 @@ struct MacHorseDetailView: View {
                             }
                             .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
                         }
-                        .buttonStyle(.plain)
+                        .menuStyle(.borderlessButton)
+                        .menuIndicator(.hidden)
+                        .frame(width: 28, height: 28)
                         .offset(x: 2, y: 2)
+                        .disabled(isLoadingPhoto)
+                    }
+                    // Drag & Drop support
+                    .onDrop(of: [.image, .fileURL], isTargeted: $isDropTargeted) { providers in
+                        handleImageDrop(providers: providers)
+                        return true
                     }
 
                     VStack(alignment: .leading, spacing: 4) {
@@ -497,24 +548,29 @@ struct MacHorseDetailView: View {
         .sheet(isPresented: $showingImageCropper) {
             if let nsImage = rawNSImage {
                 MacImageCropperView(image: nsImage) { croppedImage in
-                    if let tiffData = croppedImage.tiffRepresentation,
-                       let bitmap = NSBitmapImageRep(data: tiffData),
-                       let jpegData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.8]) {
-                        horse.imageData = jpegData
+                    // JPEG encoding on background thread to avoid UI freeze
+                    Task.detached(priority: .userInitiated) {
+                        let tiffData = croppedImage.tiffRepresentation
+                        let jpegData: Data? = tiffData.flatMap { data in
+                            NSBitmapImageRep(data: data)?.representation(using: .jpeg, properties: [.compressionFactor: 0.8])
+                        }
+                        await MainActor.run {
+                            if let jpegData = jpegData {
+                                horse.imageData = jpegData
+                            }
+                            showingImageCropper = false
+                        }
                     }
-                    showingImageCropper = false
                 }
                 .frame(width: 400, height: 450)
             }
         }
-        .onChange(of: selectedPhotoItem) { _, newItem in
-            Task {
-                if let data = try? await newItem?.loadTransferable(type: Data.self),
-                   let nsImage = NSImage(data: data) {
-                    rawNSImage = nsImage
-                    showingImageCropper = true
-                }
+        .sheet(isPresented: $showingPhotoPicker) {
+            MacPHPickerView { nsImage in
+                rawNSImage = nsImage
+                showingImageCropper = true
             }
+            .frame(width: 600, height: 500)
         }
         .alert("Kalender", isPresented: $showingCalendarAlert) {
             Button("OK", role: .cancel) { }
@@ -537,6 +593,90 @@ struct MacHorseDetailView: View {
         return flags.filter { isOn, type in
             isOn && contactSettings.contact(for: type).hasEmail
         }.count
+    }
+
+    // MARK: - Bild aus Finder (NSOpenPanel - schnell!)
+
+    private func openImageFromFinder() {
+        let panel = NSOpenPanel()
+        panel.title = "Bild wählen"
+        panel.allowedContentTypes = [.image]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.directoryURL = FileManager.default.urls(for: .picturesDirectory, in: .userDomainMask).first
+
+        if panel.runModal() == .OK, let url = panel.url {
+            if let nsImage = NSImage(contentsOf: url) {
+                rawNSImage = nsImage
+                showingImageCropper = true
+            }
+        }
+    }
+
+    // MARK: - Drag & Drop Image Handler
+
+    private func handleImageDrop(providers: [NSItemProvider]) {
+        isLoadingPhoto = true
+        for provider in providers {
+            // 1. Try loading image data directly (works for images dragged from apps)
+            if provider.hasItemConformingToTypeIdentifier("public.image") {
+                provider.loadDataRepresentation(forTypeIdentifier: "public.image") { data, _ in
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        guard let data = data, let nsImage = NSImage(data: data) else {
+                            DispatchQueue.main.async { isLoadingPhoto = false }
+                            return
+                        }
+                        DispatchQueue.main.async {
+                            isLoadingPhoto = false
+                            rawNSImage = nsImage
+                            showingImageCropper = true
+                        }
+                    }
+                }
+                return
+            }
+            // 2. Try file URL (for files dragged from Finder)
+            if provider.hasItemConformingToTypeIdentifier("public.file-url") {
+                provider.loadItem(forTypeIdentifier: "public.file-url", options: nil) { item, _ in
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        guard let data = item as? Data,
+                              let url = URL(dataRepresentation: data, relativeTo: nil),
+                              let nsImage = NSImage(contentsOf: url) else {
+                            DispatchQueue.main.async { isLoadingPhoto = false }
+                            return
+                        }
+                        DispatchQueue.main.async {
+                            isLoadingPhoto = false
+                            rawNSImage = nsImage
+                            showingImageCropper = true
+                        }
+                    }
+                }
+                return
+            }
+            // 3. Try web URL (for images dragged from browsers)
+            if provider.hasItemConformingToTypeIdentifier("public.url") {
+                provider.loadItem(forTypeIdentifier: "public.url", options: nil) { item, _ in
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        guard let data = item as? Data,
+                              let url = URL(dataRepresentation: data, relativeTo: nil),
+                              let imageData = try? Data(contentsOf: url),
+                              let nsImage = NSImage(data: imageData) else {
+                            DispatchQueue.main.async { isLoadingPhoto = false }
+                            return
+                        }
+                        DispatchQueue.main.async {
+                            isLoadingPhoto = false
+                            rawNSImage = nsImage
+                            showingImageCropper = true
+                        }
+                    }
+                }
+                return
+            }
+        }
+        // No supported provider found
+        isLoadingPhoto = false
     }
 
     // MARK: - Kalender-Funktion
@@ -754,9 +894,9 @@ struct MacAddHorseView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var name = ""
-    @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var imageData: Data?
     @State private var previewImage: NSImage?
+    @State private var showingPhotoPicker = false
     @State private var hufschmiedIntervall = 42
     @State private var impfungIntervall = 180
     @State private var wurmkurIntervall = 90
@@ -787,10 +927,23 @@ struct MacAddHorseView: View {
                             )
                     }
 
-                    PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                    Menu {
+                        Button {
+                            openImageForNewHorse()
+                        } label: {
+                            Label("Bild wählen…", systemImage: "folder")
+                        }
+                        Button {
+                            showingPhotoPicker = true
+                        } label: {
+                            Label("Fotos-Mediathek", systemImage: "photo.on.rectangle")
+                        }
+                    } label: {
                         Text("Foto auswählen")
                             .font(.caption)
                     }
+                    .menuStyle(.borderlessButton)
+                    .menuIndicator(.hidden)
                 }
                 Spacer()
             }
@@ -825,14 +978,34 @@ struct MacAddHorseView: View {
             .padding(.bottom)
         }
         .padding(.top)
-        .onChange(of: selectedPhotoItem) { _, newItem in
-            Task {
-                if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                    imageData = data
-                    if let nsImage = NSImage(data: data) {
-                        previewImage = nsImage
-                    }
+        .sheet(isPresented: $showingPhotoPicker) {
+            MacPHPickerView { nsImage in
+                previewImage = nsImage
+                if let tiffData = nsImage.tiffRepresentation,
+                   let bitmap = NSBitmapImageRep(data: tiffData),
+                   let jpegData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.8]) {
+                    imageData = jpegData
                 }
+            }
+            .frame(width: 600, height: 500)
+        }
+    }
+
+    private func openImageForNewHorse() {
+        let panel = NSOpenPanel()
+        panel.title = "Bild wählen"
+        panel.allowedContentTypes = [.image]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.directoryURL = FileManager.default.urls(for: .picturesDirectory, in: .userDomainMask).first
+
+        if panel.runModal() == .OK, let url = panel.url,
+           let nsImage = NSImage(contentsOf: url) {
+            previewImage = nsImage
+            if let tiffData = nsImage.tiffRepresentation,
+               let bitmap = NSBitmapImageRep(data: tiffData),
+               let jpegData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.8]) {
+                imageData = jpegData
             }
         }
     }
@@ -979,6 +1152,68 @@ struct MacNotifyToggleRow: View {
     }
 }
 
+// MARK: - PHPickerViewController (schneller Foto-Picker, out-of-process)
+
+struct MacPHPickerView: NSViewControllerRepresentable {
+    let onImageSelected: (NSImage) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    func makeNSViewController(context: Context) -> PHPickerViewController {
+        var config = PHPickerConfiguration()
+        config.filter = .images
+        config.selectionLimit = 1
+        config.preferredAssetRepresentationMode = .current
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateNSViewController(_ nsViewController: PHPickerViewController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject, PHPickerViewControllerDelegate {
+        let parent: MacPHPickerView
+
+        init(_ parent: MacPHPickerView) {
+            self.parent = parent
+        }
+
+        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            guard let result = results.first else {
+                parent.dismiss()
+                return
+            }
+
+            result.itemProvider.loadDataRepresentation(forTypeIdentifier: UTType.image.identifier) { data, _ in
+                DispatchQueue.main.async {
+                    if let data = data, let image = NSImage(data: data) {
+                        // Downscale to max 1024px for fast cropping
+                        let maxDim: CGFloat = 1024
+                        let size = image.size
+                        if size.width > maxDim || size.height > maxDim {
+                            let ratio = min(maxDim / size.width, maxDim / size.height)
+                            let newSize = NSSize(width: size.width * ratio, height: size.height * ratio)
+                            let resized = NSImage(size: newSize)
+                            resized.lockFocus()
+                            image.draw(in: NSRect(origin: .zero, size: newSize),
+                                       from: NSRect(origin: .zero, size: size),
+                                       operation: .copy, fraction: 1.0)
+                            resized.unlockFocus()
+                            self.parent.onImageSelected(resized)
+                        } else {
+                            self.parent.onImageSelected(image)
+                        }
+                    }
+                    self.parent.dismiss()
+                }
+            }
+        }
+    }
+}
+
 // MARK: - Bild-Zuschnitt (Mac) - mit Zoom und Drag
 
 struct MacImageCropperView: View {
@@ -1007,7 +1242,7 @@ struct MacImageCropperView: View {
             ZStack {
                 Image(nsImage: image)
                     .resizable()
-                    .scaledToFill()
+                    .scaledToFit()
                     .frame(width: cropSize * scale, height: cropSize * scale)
                     .offset(offset)
                     .gesture(
@@ -1090,22 +1325,25 @@ struct MacImageCropperView: View {
         let clipPath = NSBezierPath(ovalIn: NSRect(origin: .zero, size: size))
         clipPath.addClip()
 
-        // Draw the image with scale and offset
+        // Draw the image with scale and offset (scaledToFit logic)
         let imageSize = image.size
         let aspectRatio = imageSize.width / imageSize.height
-        let drawWidth = cropSize * scale
+        let drawWidth: CGFloat
         let drawHeight: CGFloat
         if aspectRatio > 1 {
+            // Landscape: width fills, height is smaller
+            drawWidth = cropSize * scale
             drawHeight = drawWidth / aspectRatio
         } else {
-            drawHeight = drawWidth
+            // Portrait: height fills, width is smaller
+            drawHeight = cropSize * scale
+            drawWidth = drawHeight * aspectRatio
         }
-        let actualDrawWidth = drawHeight * aspectRatio
 
-        let drawX = (cropSize - actualDrawWidth) / 2 + offset.width
+        let drawX = (cropSize - drawWidth) / 2 + offset.width
         let drawY = (cropSize - drawHeight) / 2 - offset.height // Y is flipped on macOS
 
-        image.draw(in: NSRect(x: drawX, y: drawY, width: actualDrawWidth, height: drawHeight))
+        image.draw(in: NSRect(x: drawX, y: drawY, width: drawWidth, height: drawHeight))
 
         croppedImage.unlockFocus()
 
