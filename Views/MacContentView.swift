@@ -565,10 +565,16 @@ struct MacHorseDetailView: View {
                 .frame(width: 400, height: 450)
             }
         }
-        .sheet(isPresented: $showingPhotoPicker) {
+        .sheet(isPresented: $showingPhotoPicker, onDismiss: {
+            // Open cropper after PHPicker sheet is fully dismissed
+            if rawNSImage != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    showingImageCropper = true
+                }
+            }
+        }) {
             MacPHPickerView { nsImage in
                 rawNSImage = nsImage
-                showingImageCropper = true
             }
             .frame(width: 600, height: 500)
         }
@@ -606,11 +612,25 @@ struct MacHorseDetailView: View {
         panel.directoryURL = FileManager.default.urls(for: .picturesDirectory, in: .userDomainMask).first
 
         if panel.runModal() == .OK, let url = panel.url {
-            if let nsImage = NSImage(contentsOf: url) {
-                rawNSImage = nsImage
-                showingImageCropper = true
+            isLoadingPhoto = true
+            DispatchQueue.global(qos: .userInitiated).async {
+                guard let nsImage = NSImage(contentsOf: url) else {
+                    DispatchQueue.main.async { isLoadingPhoto = false }
+                    return
+                }
+                let downscaled = Self.downscaleImage(nsImage, maxDim: 1024)
+                DispatchQueue.main.async {
+                    isLoadingPhoto = false
+                    rawNSImage = downscaled
+                    showingImageCropper = true
+                }
             }
         }
+    }
+
+    // Calls shared helper
+    private static func downscaleImage(_ image: NSImage, maxDim: CGFloat) -> NSImage {
+        return downscaleNSImage(image, maxDim: maxDim)
     }
 
     // MARK: - Drag & Drop Image Handler
@@ -626,9 +646,10 @@ struct MacHorseDetailView: View {
                             DispatchQueue.main.async { isLoadingPhoto = false }
                             return
                         }
+                        let downscaled = Self.downscaleImage(nsImage, maxDim: 1024)
                         DispatchQueue.main.async {
                             isLoadingPhoto = false
-                            rawNSImage = nsImage
+                            rawNSImage = downscaled
                             showingImageCropper = true
                         }
                     }
@@ -645,9 +666,10 @@ struct MacHorseDetailView: View {
                             DispatchQueue.main.async { isLoadingPhoto = false }
                             return
                         }
+                        let downscaled = Self.downscaleImage(nsImage, maxDim: 1024)
                         DispatchQueue.main.async {
                             isLoadingPhoto = false
-                            rawNSImage = nsImage
+                            rawNSImage = downscaled
                             showingImageCropper = true
                         }
                     }
@@ -665,9 +687,10 @@ struct MacHorseDetailView: View {
                             DispatchQueue.main.async { isLoadingPhoto = false }
                             return
                         }
+                        let downscaled = downscaleNSImage(nsImage, maxDim: 1024)
                         DispatchQueue.main.async {
                             isLoadingPhoto = false
-                            rawNSImage = nsImage
+                            rawNSImage = downscaled
                             showingImageCropper = true
                         }
                     }
@@ -999,13 +1022,34 @@ struct MacAddHorseView: View {
         panel.canChooseDirectories = false
         panel.directoryURL = FileManager.default.urls(for: .picturesDirectory, in: .userDomainMask).first
 
-        if panel.runModal() == .OK, let url = panel.url,
-           let nsImage = NSImage(contentsOf: url) {
-            previewImage = nsImage
-            if let tiffData = nsImage.tiffRepresentation,
-               let bitmap = NSBitmapImageRep(data: tiffData),
-               let jpegData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.8]) {
-                imageData = jpegData
+        if panel.runModal() == .OK, let url = panel.url {
+            DispatchQueue.global(qos: .userInitiated).async {
+                guard let nsImage = NSImage(contentsOf: url) else { return }
+                // Downscale for preview
+                let maxDim: CGFloat = 1024
+                let size = nsImage.size
+                let finalImage: NSImage
+                if size.width > maxDim || size.height > maxDim {
+                    let ratio = min(maxDim / size.width, maxDim / size.height)
+                    let newSize = NSSize(width: size.width * ratio, height: size.height * ratio)
+                    let resized = NSImage(size: newSize)
+                    resized.lockFocus()
+                    nsImage.draw(in: NSRect(origin: .zero, size: newSize),
+                                 from: NSRect(origin: .zero, size: size),
+                                 operation: .copy, fraction: 1.0)
+                    resized.unlockFocus()
+                    finalImage = resized
+                } else {
+                    finalImage = nsImage
+                }
+                // JPEG encode
+                let jpegData: Data? = finalImage.tiffRepresentation.flatMap {
+                    NSBitmapImageRep(data: $0)?.representation(using: .jpeg, properties: [.compressionFactor: 0.8])
+                }
+                DispatchQueue.main.async {
+                    previewImage = finalImage
+                    imageData = jpegData
+                }
             }
         }
     }
@@ -1162,7 +1206,8 @@ struct MacPHPickerView: NSViewControllerRepresentable {
         var config = PHPickerConfiguration()
         config.filter = .images
         config.selectionLimit = 1
-        config.preferredAssetRepresentationMode = .current
+        // .compatible = system delivers a pre-converted smaller image (much faster!)
+        config.preferredAssetRepresentationMode = .compatible
         let picker = PHPickerViewController(configuration: config)
         picker.delegate = context.coordinator
         return picker
@@ -1187,12 +1232,20 @@ struct MacPHPickerView: NSViewControllerRepresentable {
                 return
             }
 
-            result.itemProvider.loadDataRepresentation(forTypeIdentifier: UTType.image.identifier) { data, _ in
-                DispatchQueue.main.async {
-                    if let data = data, let image = NSImage(data: data) {
-                        // Downscale to max 1024px for fast cropping
+            let provider = result.itemProvider
+
+            // loadObject delivers a ready-made NSImage (fastest method)
+            if provider.canLoadObject(ofClass: NSImage.self) {
+                provider.loadObject(ofClass: NSImage.self) { object, _ in
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        guard let image = object as? NSImage else {
+                            DispatchQueue.main.async { self.parent.dismiss() }
+                            return
+                        }
+                        // Downscale if needed
                         let maxDim: CGFloat = 1024
                         let size = image.size
+                        let finalImage: NSImage
                         if size.width > maxDim || size.height > maxDim {
                             let ratio = min(maxDim / size.width, maxDim / size.height)
                             let newSize = NSSize(width: size.width * ratio, height: size.height * ratio)
@@ -1202,13 +1255,18 @@ struct MacPHPickerView: NSViewControllerRepresentable {
                                        from: NSRect(origin: .zero, size: size),
                                        operation: .copy, fraction: 1.0)
                             resized.unlockFocus()
-                            self.parent.onImageSelected(resized)
+                            finalImage = resized
                         } else {
-                            self.parent.onImageSelected(image)
+                            finalImage = image
+                        }
+                        DispatchQueue.main.async {
+                            self.parent.onImageSelected(finalImage)
+                            self.parent.dismiss()
                         }
                     }
-                    self.parent.dismiss()
                 }
+            } else {
+                parent.dismiss()
             }
         }
     }
@@ -1349,6 +1407,22 @@ struct MacImageCropperView: View {
 
         onCrop(croppedImage)
     }
+}
+
+// MARK: - Shared Helper: Downscale NSImage
+
+private func downscaleNSImage(_ image: NSImage, maxDim: CGFloat) -> NSImage {
+    let size = image.size
+    guard size.width > maxDim || size.height > maxDim else { return image }
+    let ratio = min(maxDim / size.width, maxDim / size.height)
+    let newSize = NSSize(width: size.width * ratio, height: size.height * ratio)
+    let resized = NSImage(size: newSize)
+    resized.lockFocus()
+    image.draw(in: NSRect(origin: .zero, size: newSize),
+               from: NSRect(origin: .zero, size: size),
+               operation: .copy, fraction: 1.0)
+    resized.unlockFocus()
+    return resized
 }
 
 #Preview {
