@@ -1,0 +1,185 @@
+============================================================
+HIPPOMINDER – BEDIENUNGSANLEITUNG v3.0.0
+Stand: 19. Februar 2026
+============================================================
+
+
+ Hippominder – Bedienungsanleitung (v3.0.0)
+
+
+ Warum Hippominder?
+
+Als Pferdebesitzer kennst du das: Wann war der Hufschmied zuletzt da? Wann steht die naechste Impfung an? Ist die Wurmkur schon ueberfaellig?
+
+Das Problem: Pferde brauchen regelmaessige Pflege in festen Intervallen – Hufpflege alle 6-8 Wochen, Impfungen alle 6-12 Monate, Wurmkuren alle 3 Monate. Termine vergessen bedeutet: Gesundheitsrisiken fuer dein Pferd.
+
+Die Loesung: Hippominder zeigt dir auf einen Blick, was wann dran ist. Die einzigartige Blumen-Anzeige macht es visuell sofort klar – von gruen (alles gut) ueber orange (bald faellig) bis rot (ueberfaellig). Kein Kalender-Chaos, keine vergessenen Zettel.
+
+Deine Vorteile:
+- Nie wieder einen Termin vergessen
+- Alle Pferde auf einen Blick
+- Automatische Erinnerungen
+- E-Mail-Vorlagen fuer Hufschmied, Tierarzt & Co.
+- Komplett offline – keine Cloud, kein Tracking, deine Daten bleiben bei dir
+- Verfuegbar fuer iPhone, Mac und Apple Watch
+
+
+============================================================
+
+
+
+ Verfuegbar auf 3 Plattformen
+
+   iPhone (iOS)
+Die Haupt-App mit allen Funktionen. Optimiert fuer iOS 26 mit Liquid Glass Design.
+
+   Mac (macOS)
+Eigene macOS-App mit Sidebar-Navigation und grossem Bildschirm-Layout. Unterstuetzt Drag & Drop fuer Fotos und Finder-Integration.
+
+   Apple Watch (watchOS)
+Kompakte Pferde-Uebersicht direkt am Handgelenk. Zeigt Ampel-Farben und Timer fuer alle Termine. Synchronisiert automatisch mit der iPhone-App (auf echten Geraeten).
+
+
+============================================================
+
+
+
+ Erste Schritte
+
+   1. Pferd anlegen
+- iPhone: Tippe auf das "+"-Symbol oben rechts
+- Mac: Klicke auf "+" in der Toolbar
+
+Gib den Namen deines Pferdes ein und waehle optional ein Foto.
+
+   2. Foto hinzufuegen
+
+Auf dem iPhone:
+- Tippe auf das Kamera-Symbol am Profilbild
+- Waehle ein Foto aus deiner Mediathek
+- Verschiebe und zoome mit dem Slider (0.5x bis 5x) fuer den perfekten Ausschnitt
+- Das Foto wird automatisch rund zugeschnitten
+
+Auf dem Mac (3 Wege):
+- Bild waehlen: Klick auf Kamera-Symbol > "Bild waehlen..." – oeffnet den Finder (schnellste Methode)
+- Fotos-Mediathek: Klick auf Kamera-Symbol > "Fotos-Mediathek" – oeffnet die Fotos-App
+- Drag & Drop: Ziehe ein Bild direkt aus dem Finder, Safari oder einer anderen App auf das Profilbild
+- Foto entfernen: Klick auf Kamera-Symbol > "Foto entfernen"
+
+   3. Intervalle einstellen
+Fuer jedes Pferd kannst du individuelle Intervalle festlegen:
+- Hufschmied: Standard 42 Tage (6 Wochen)
+- Impfung: Standard 180 Tage (6 Monate)
+- Wurmkur: Standard 90 Tage (3 Monate)
+
+Nutze die +/- Buttons oder tippe auf die Zahl fuer direkte Eingabe.
+
+   4. Letzte Termine eintragen
+Trage ein, wann der letzte Termin stattgefunden hat. Hippominder berechnet automatisch, wann der naechste Termin faellig ist.
+
+
+============================================================
+
+
+
+ Die Hauptansicht
+
+   Pferde-Liste
+Jedes Pferd zeigt:
+- Foto (oder Platzhalter-Silhouette)
+- Name
+- Naechster faelliger Termin mit Tagesangabe und Farb-Ampel
+- 3 Status-Punkte (Hufschmied, Impfung, Wurmkur) – gruen/orange/rot
+
+   Farbschema
+Oben rechts findest du 3 Farbkugeln. Waehle dein Lieblings-Farbschema:
+- Hellblau – frisch und klar
+- Orange – warm und auffaellig
+- Grau – dezent und elegant
+
+Das Farbschema aendert die Blumen-Anzeige fuer alle Pferde gleichzeitig.
+
+   Kontakte
+Tippe/klicke auf das Kontakte-Symbol um deine wichtigen Ansprechpartner zu verwalten: Tierarzt, Hufschmied, Stallbesitzer, Apotheker, Besitzer.
+
+
+============================================================
+
+
+
+ Detail-Ansicht
+
+Tippe/klicke auf ein Pferd, um die Detail-Ansicht zu oeffnen.
+
+   Blumen-Timer
+Drei Blumen-Karten zeigen den Status fuer Hufschmied, Impfung und Wurmkur:
+- Gruene Blaetter = Viel Zeit
+- Orange/Gelbe Blaetter = Bald faellig
+- Rote Blaetter = Ueberfaellig oder fast ueberfaellig
+
+   Termin aktualisieren
+Unter jeder Blume findest du:
+- "War heute da" – setzt den Termin auf heute und startet den Timer neu
+- "Datum waehlen" – waehle ein bestimmtes Datum fuer den letzten Termin
+
+   Intervalle anpassen
+Im Bereich "Intervalle" kannst du die Tage fuer jeden Termintyp individuell anpassen.
+
+   Termine im Kalender speichern
+Tippe auf "Termine im Kalender speichern" – alle 3 naechsten Termine werden als Ganztags-Ereignisse in deinem Apple Kalender gespeichert. Duplikate werden automatisch erkannt.
+
+   E-Mail senden
+Tippe auf "Erinnerung per E-Mail senden" – eine vorbereitete E-Mail mit allen Termindaten wird erstellt und an die aktivierten Kontakte adressiert.
+
+   Benachrichtigungen verwalten
+Stelle ein:
+- Wie viele Tage vorher du erinnert werden moechtest
+- Welche Kontakte zusaetzlich per E-Mail benachrichtigt werden sollen
+
+
+============================================================
+
+
+
+ Apple Watch
+
+Die Watch-App zeigt eine kompakte Uebersicht deiner Pferde:
+- Pferde-Liste mit Mini-Ampeln (gruen/orange/rot)
+- Detail-Ansicht mit Timer-Karten und Fortschrittsbalken
+- Sync-Status am unteren Rand der Liste
+
+Wichtig: Die Synchronisation zwischen iPhone und Apple Watch funktioniert nur auf echten Geraeten (nicht im Simulator). Pferdedaten werden automatisch uebertragen wenn sich etwas aendert.
+
+
+============================================================
+
+
+
+ Hippominder Pro
+
+Die kostenlose Version erlaubt 1 Pferd. Mit Hippominder Pro (einmaliger Kauf, kein Abo) schaltest du unbegrenzt viele Pferde frei.
+
+
+============================================================
+
+
+
+ Datenschutz
+
+Alle deine Daten bleiben auf deinem Geraet. Hippominder verwendet:
+- Keine Cloud-Synchronisation (ausser Apple Watch Sync)
+- Kein Tracking oder Analytics
+- Keine Werbung
+- Keine Weitergabe an Dritte
+
+
+============================================================
+
+
+
+ Hilfe & Support
+
+Bei Fragen oder Problemen: support@roboterwerk.de
+Website: https://luici2000.github.io/HippominderLilly2/support.html
+
+Entwickelt mit Liebe fuer alle Pferdemenschen.

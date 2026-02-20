@@ -1,6 +1,7 @@
 ============================================================
 HIPPOMINDER – APP STORE TEXTE (DEUTSCH)
 Fuer App Store Connect / Apple App Store
+Version 3.0.0 – Stand 19. Februar 2026
 ============================================================
 
 --- APP NAME (max. 30 Zeichen) ---
@@ -15,7 +16,7 @@ Sekundaer: Gesundheit & Fitness
 
 --- BESCHREIBUNG (max. 4000 Zeichen) ---
 
-Hippominder erinnert dich zuverlaessig an alle wichtigen Termine fuer dein Pferd – Hufschmied, Impfung und Wurmkur.
+Hippominder erinnert dich zuverlaessig an alle wichtigen Termine fuer dein Pferd – Hufschmied, Impfung und Wurmkur. Jetzt fuer iPhone, Mac und Apple Watch!
 
 Nie wieder einen Termin vergessen! Mit der einzigartigen Blumen-Anzeige siehst du auf einen Blick, wann welcher Termin ansteht. Je naeher ein Termin rueckt, desto deutlicher zeigt es die Blume an – von frischem Gruen bis hin zu warnendem Rot.
 
@@ -25,13 +26,19 @@ FUNKTIONEN:
 - Individuelle Intervalle fuer jedes Pferd
 - Visuelle Blumen-Anzeige mit Farbverlauf
 - Farbige Ampel-Indikatoren (gruen/orange/rot)
+- Pferdefotos mit Zoom-Slider und kreisfoermigem Zuschnitt
 - E-Mail-Benachrichtigungen an Stallbetreiber, Hufschmied & Co.
 - Kontaktverwaltung mit Apple-Kontakte-Integration
-- Pferdefotos aus der Fotomediathek
-- Kalender-Integration
+- Kalender-Integration (Termine direkt speichern)
 - Lokale Erinnerungen
-- 3 waehlbare Farbschemata
+- 3 waehlbare Farbschemata (Hellblau, Orange, Grau)
 - Komplett offline – keine Cloud, kein Tracking
+
+MULTI-PLATTFORM:
+
+- iPhone: Optimiert fuer iOS 26 mit Liquid Glass Design
+- Mac: Eigene macOS-App mit Sidebar-Navigation, Drag & Drop Fotos
+- Apple Watch: Kompakte Pferde-Uebersicht mit Ampel-Farben
 
 KOSTENLOS STARTEN:
 
@@ -47,14 +54,16 @@ Entwickelt mit Liebe fuer alle Pferdemenschen.
 Pferd,Hufschmied,Impfung,Wurmkur,Termin,Erinnerung,Stall,Reiten,Pferdepflege,Timer
 
 --- PROMOTIONAL TEXT (max. 170 Zeichen) ---
-Nie wieder einen Pferde-Termin vergessen! Hufschmied, Impfung, Wurmkur – alles im Blick mit der einzigartigen Blumen-Anzeige.
+Neu: Jetzt auch fuer Mac und Apple Watch! Hufschmied, Impfung, Wurmkur – alles im Blick mit der einzigartigen Blumen-Anzeige. Multi-Plattform.
 
---- WHATS NEW (fuer Version 2.0.0) ---
-- Neu: Komplett optimierte Code-Architektur
-- Neu: Versteckter Beta/Debug-Zugang ueber Logo
-- Neu: Verbessertes Benachrichtigungssystem
-- Neu: Refaktorierte Komponenten fuer bessere Performance
-- Verbessert: Lokalisierung in 5 Sprachen
+--- WHATS NEW (fuer Version 3.0.0) ---
+- Neu: macOS-App mit voller Feature-Paritaet
+- Neu: Apple Watch Companion App mit Ampel-Uebersicht
+- Neu: Foto-Import per Drag & Drop, Finder oder Mediathek (Mac)
+- Neu: Zoom-Slider im Bild-Zuschnitt (iOS + Mac)
+- Neu: 3 waehlbare Farbschemata (Hellblau, Orange, Grau)
+- Verbessert: Performance bei grossen Foto-Mediatheken
+- Verbessert: Alle Bildverarbeitung im Hintergrund (kein Einfrieren)
 
 --- SUPPORT URL ---
 https://luici2000.github.io/HippominderLilly2/support.html
