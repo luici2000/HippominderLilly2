@@ -117,14 +117,13 @@ struct HorseDetailView: View {
                             selectedEventType = eventType
                             showingActionSheet = true
                         }) {
-                            FlowerTimerView(
+                            GlassFlowerTimerView(
                                 eventType: eventType,
                                 remainingDays: horse.tageBis(fuer: eventType),
                                 interval: horse.holeIntervall(fuer: eventType),
                                 nextDate: horse.naechsterTermin(fuer: eventType),
                                 colorScheme: GlobalSettings.shared.flowerColorScheme
                             )
-                            .frame(width: 100)
                         }
                         .buttonStyle(.plain)
                     }
