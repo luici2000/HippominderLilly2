@@ -121,7 +121,8 @@ struct HorseDetailView: View {
                 .padding(.horizontal)
 
                 // Die drei Timer - je nach Darstellung
-                if globalSettings.designMode == .glass {
+                switch globalSettings.designMode {
+                case .glass:
                     ZStack(alignment: .bottomTrailing) {
                         GlassFlowerStage(backgroundImage: horse.backgroundImage) {
                             HStack(alignment: .top, spacing: 4) {
@@ -165,8 +166,9 @@ struct HorseDetailView: View {
                         .padding(10)
                     }
                     .padding(.horizontal, 12)
-                } else {
-                    // Classic: das LCD des Original-Geraets
+
+                case .classic:
+                    // Das LCD des Original-Geraets
                     LCDPanel(alarmActive: hasDueEvent) {
                         HStack(alignment: .top, spacing: 8) {
                             ForEach(Horse.EventType.allCases, id: \.self) { eventType in
@@ -186,6 +188,29 @@ struct HorseDetailView: View {
                         }
                     }
                     .padding(.horizontal, 12)
+
+                case .blume:
+                    // Mathias' vorgerenderte Icon-Composer-Blumen
+                    HStack(alignment: .top, spacing: 20) {
+                        ForEach(Horse.EventType.allCases, id: \.self) { eventType in
+                            Button(action: {
+                                selectedEventType = eventType
+                                showingActionSheet = true
+                            }) {
+                                FlowerTimerView(
+                                    eventType: eventType,
+                                    remainingDays: horse.tageBis(fuer: eventType),
+                                    interval: horse.holeIntervall(fuer: eventType),
+                                    nextDate: horse.naechsterTermin(fuer: eventType),
+                                    colorScheme: globalSettings.flowerColorScheme
+                                )
+                                .frame(width: 100)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
                 }
 
                 // Einstellungen

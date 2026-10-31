@@ -106,11 +106,14 @@ extension Color {
 
 // MARK: - Darstellung
 
-/// Classic ist der urspruengliche Hardware-Look: erhabene Flaechen, 3D-Kugeln,
-/// weiche Schatten. Glass ist die iOS-26-Variante mit Foto hinter dem Glas.
+/// Drei Darstellungen derselben Blume:
+/// - glass:   iOS 26 Liquid Glass, Pferdefoto scheint durch
+/// - classic: das LCD des Original-Geraets von 2006
+/// - blume:   Mathias' vorgerenderte Icon-Composer-Blumen
 enum DesignMode: String, CaseIterable, Identifiable {
     case glass = "Glass"
     case classic = "Classic"
+    case blume = "Blume"
 
     var id: String { rawValue }
 
@@ -118,6 +121,7 @@ enum DesignMode: String, CaseIterable, Identifiable {
         switch self {
         case .glass: return String(localized: "Glas")
         case .classic: return String(localized: "Classic")
+        case .blume: return String(localized: "Blume")
         }
     }
 
@@ -125,8 +129,12 @@ enum DesignMode: String, CaseIterable, Identifiable {
         switch self {
         case .glass: return "circle.hexagongrid.fill"
         case .classic: return "dial.medium.fill"
+        case .blume: return "camera.macro"
         }
     }
+
+    /// Nur die PNG-Blumen nutzen die drei Farbschemata
+    var usesColorScheme: Bool { self == .blume }
 }
 
 // MARK: - Farbschema Enum
