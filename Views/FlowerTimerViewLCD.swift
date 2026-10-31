@@ -201,10 +201,13 @@ struct LCDPanel<Content: View>: View {
 
                 Spacer()
 
-                Text("HIPPOMINDER")
-                    .font(.system(size: 7, weight: .bold, design: .rounded))
-                    .tracking(0.8)
-                    .foregroundStyle(LCDPalette.on.opacity(0.75))
+                // Mathias' Original-Logo aus Assets.xcassets, nicht nachgebaut
+                Image("hippominder_logo")
+                    .resizable()
+                    .renderingMode(.template)
+                    .scaledToFit()
+                    .frame(height: 16)
+                    .foregroundStyle(LCDPalette.on.opacity(0.85))
             }
             .padding(.horizontal, 12)
             .padding(.top, 8)
