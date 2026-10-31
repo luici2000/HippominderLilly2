@@ -213,8 +213,32 @@ struct LCDPanel<Content: View>: View {
             .padding(.top, 8)
 
             content
-                .padding(.top, 20)
+                .padding(.top, 24)
                 .padding(.bottom, 12)
+        }
+        // Das Display liegt vertieft hinter einer Scheibe: der Rahmen wirft
+        // oben links Schatten, unten rechts faellt Licht ein (-45 Grad).
+        .overlay {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(
+                    LinearGradient(
+                        colors: [.black.opacity(0.3), .clear, .white.opacity(0.22)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 2.5
+                )
+                .blur(radius: 1.5)
+                .padding(1)
+        }
+        // Schwacher Glanz der Scheibe
+        .overlay {
+            LinearGradient(
+                colors: [.white.opacity(0.14), .clear, .clear],
+                startPoint: .topLeading,
+                endPoint: UnitPoint(x: 0.75, y: 0.7)
+            )
+            .allowsHitTesting(false)
         }
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         // Gehaeuserahmen
