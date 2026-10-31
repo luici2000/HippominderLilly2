@@ -5,104 +5,94 @@
 //  Autor: Mathias Hubrich & Claude (Anthropic)
 //  Erstellt: 30. Oktober 2026
 //  Geaendert: 31. Oktober 2026
-//  Version: 2.0.0
+//  Version: 3.0.0
 //
-//  Beschreibung: Blumen-Timer aus echtem Glas.
-//  Die 12 Bluetenblaetter sind SwiftUI-Shapes mit .ultraThinMaterial -
-//  der Hintergrund (Pferdefoto) wird durch sie hindurch gebrochen und
-//  eingefaerbt sichtbar. Kein Hof, kein Schein, keine PNGs.
+//  Beschreibung: Mathias' Blumen-Timer, aber aus echtem Glas.
+//
+//  Die Geometrie ist 1:1 aus den Icon-Composer-PNGs (flower_*.png)
+//  vermessen: 12 Kapseln radial nach aussen, deutliche Luecke zur Mitte,
+//  Stempel als eigener Kreis. Fuellung startet bei 1 Uhr im Uhrzeigersinn.
+//
+//  Neu ist nur das Material: statt vorgerenderter PNGs sind es Shapes mit
+//  .ultraThinMaterial - dadurch wird das Pferdefoto dahinter gebrochen und
+//  eingefaerbt sichtbar. Kein Hof, kein Schein.
 //  Glasfarbe frei waehlbar ueber GlobalSettings.glassTint.
-//  Lichteinfall konstant -45 Grad, auch bei gedrehten Blaettern.
 //
 //  Das Original FlowerTimerView.swift (PNG-Variante) bleibt unberuehrt.
 //
 
 import SwiftUI
 
-// MARK: - Bluetenblatt-Form
+// MARK: - Proportionen aus den Original-PNGs
 
-/// Tropfenform: Spitze unten (Blumenmitte), runde Kuppe oben.
-struct PetalShape: Shape {
-    func path(in rect: CGRect) -> Path {
-        let w = rect.width
-        let h = rect.height
-        var p = Path()
-
-        p.move(to: CGPoint(x: w * 0.5, y: h))
-        p.addCurve(
-            to: CGPoint(x: w * 0.5, y: 0),
-            control1: CGPoint(x: -w * 0.06, y: h * 0.60),
-            control2: CGPoint(x: w * 0.14, y: h * 0.03)
-        )
-        p.addCurve(
-            to: CGPoint(x: w * 0.5, y: h),
-            control1: CGPoint(x: w * 0.86, y: h * 0.03),
-            control2: CGPoint(x: w * 1.06, y: h * 0.60)
-        )
-        p.closeSubpath()
-        return p
-    }
+/// Alle Werte als Anteil der Blumenbreite, vermessen an flower_6.png (1024x1024).
+private enum FlowerGeometry {
+    static let petalWidth: CGFloat = 0.117
+    static let petalLength: CGFloat = 0.255
+    /// Abstand Blumenmitte -> Mitte eines Bluetenblatts
+    static let radialDistance: CGFloat = 0.363
+    static let stampDiameter: CGFloat = 0.298
+    static let petalCount = 12
 }
 
 // MARK: - Einzelnes Glas-Bluetenblatt
 
 struct GlassPetal: View {
-    /// Drehwinkel des Blattes - wird fuer die Gegenrotation des Glanzes gebraucht
+    /// Drehwinkel - wird fuer die Gegenrotation des Glanzes gebraucht
     let angle: Double
     let isFilled: Bool
     let tint: Color
 
     var body: some View {
-        PetalShape()
-            // Basis: echtes Material - bricht und blurrt den Hintergrund
-            .fill(.ultraThinMaterial)
-            // Einfaerbung (leere Blaetter bleiben klar)
-            .overlay {
-                PetalShape()
-                    .fill(tint.opacity(isFilled ? 0.26 : 0.04))
-            }
-            // Tiefe: innen unten rechts abgedunkelt
-            .overlay {
-                PetalShape()
-                    .fill(
+        if isFilled {
+            // Sattes, getoentes Milchglas
+            Capsule()
+                .fill(.ultraThinMaterial)
+                .overlay { Capsule().fill(tint.opacity(0.74)) }
+                .overlay { specular(strength: 0.6) }
+                .overlay {
+                    Capsule().strokeBorder(
                         LinearGradient(
-                            colors: [.clear, .black.opacity(isFilled ? 0.16 : 0.07)],
-                            startPoint: UnitPoint(x: 0.25, y: 0.1),
-                            endPoint: UnitPoint(x: 0.9, y: 0.95)
-                        )
-                    )
-            }
-            // Spekularer Glanz - gegenrotiert, damit das Licht fuer ALLE
-            // Blaetter aus derselben Richtung (-45 Grad) kommt
-            .overlay {
-                LinearGradient(
-                    colors: [
-                        .white.opacity(isFilled ? 0.62 : 0.3),
-                        .white.opacity(isFilled ? 0.12 : 0.06),
-                        .clear
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .rotationEffect(.degrees(-angle))
-                .scaleEffect(2.2)
-                .clipShape(PetalShape())
-            }
-            // Glasrand
-            .overlay {
-                PetalShape()
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                .white.opacity(isFilled ? 0.6 : 0.32),
-                                .white.opacity(isFilled ? 0.14 : 0.08)
-                            ],
+                            colors: [.white.opacity(0.5), .white.opacity(0.16)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
                         lineWidth: 1
                     )
-            }
+                }
+                .shadow(color: .black.opacity(0.28), radius: 2, x: 0, y: 1)
+        } else {
+            // Klares Fensterglas - nur Kontur, maximaler Kontrast zum gefuellten
+            Capsule()
+                .fill(.white.opacity(0.05))
+                .overlay { specular(strength: 0.26) }
+                .overlay {
+                    Capsule().strokeBorder(
+                        LinearGradient(
+                            colors: [.white.opacity(0.42), .white.opacity(0.14)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+                }
+        }
+    }
+
+    /// Glanz gegenrotiert, damit das Licht fuer ALLE Blaetter aus -45 Grad kommt
+    private func specular(strength: Double) -> some View {
+        LinearGradient(
+            colors: [
+                .white.opacity(strength),
+                .white.opacity(strength * 0.18),
+                .clear
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .rotationEffect(.degrees(-angle))
+        .scaleEffect(2.6)
+        .clipShape(Capsule())
     }
 }
 
@@ -115,21 +105,18 @@ struct GlassStamp: View {
 
     var body: some View {
         ZStack {
-            Circle()
-                .fill(.ultraThinMaterial)
+            Circle().fill(.ultraThinMaterial)
 
-            Circle()
-                .fill(tint.opacity(0.32))
+            Circle().fill(tint.opacity(0.58))
 
             // Kugeltiefe
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [.white.opacity(0.3), .clear, .black.opacity(0.2)],
-                        startPoint: UnitPoint(x: 0.2, y: 0.1),
-                        endPoint: UnitPoint(x: 0.88, y: 0.95)
-                    )
+            Circle().fill(
+                LinearGradient(
+                    colors: [.white.opacity(0.3), .clear, .black.opacity(0.22)],
+                    startPoint: UnitPoint(x: 0.2, y: 0.1),
+                    endPoint: UnitPoint(x: 0.88, y: 0.95)
                 )
+            )
 
             // Glanzpunkt oben links
             Ellipse()
@@ -141,64 +128,64 @@ struct GlassStamp: View {
                         endRadius: size * 0.28
                     )
                 )
-                .frame(width: size * 0.44, height: size * 0.22)
+                .frame(width: size * 0.44, height: size * 0.24)
                 .rotationEffect(.degrees(-45))
                 .offset(x: -size * 0.17, y: -size * 0.19)
 
-            Circle()
-                .stroke(
-                    LinearGradient(
-                        colors: [.white.opacity(0.68), .white.opacity(0.16)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
-                )
+            Circle().strokeBorder(
+                LinearGradient(
+                    colors: [.white.opacity(0.68), .white.opacity(0.18)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                lineWidth: 1
+            )
 
             Image(symbol)
                 .resizable()
                 .scaledToFit()
-                .frame(width: size * 0.46, height: size * 0.46)
+                .frame(width: size * 0.5, height: size * 0.5)
                 .shadow(color: .black.opacity(0.45), radius: 1.5, x: 0, y: 1)
         }
         .frame(width: size, height: size)
+        .shadow(color: .black.opacity(0.3), radius: 4, x: 1, y: 2)
     }
 }
 
-// MARK: - Glasblume (12 Blaetter + Stempel)
+// MARK: - Glasblume
 
 struct GlassFlower: View {
     let filledPetals: Int
     let tint: Color
     let symbol: String
-    var size: CGFloat = 124
+    var size: CGFloat = 106
 
-    private var petalWidth: CGFloat { size * 0.30 }
-    private var petalHeight: CGFloat { size * 0.44 }
-    private var stampSize: CGFloat { size * 0.33 }
+    private var petalWidth: CGFloat { size * FlowerGeometry.petalWidth }
+    private var petalLength: CGFloat { size * FlowerGeometry.petalLength }
+    private var radialDistance: CGFloat { size * FlowerGeometry.radialDistance }
+    private var stampSize: CGFloat { size * FlowerGeometry.stampDiameter }
 
     var body: some View {
         ZStack {
-            ForEach(0..<12, id: \.self) { index in
-                let angle = Double(index) * 30
+            ForEach(0..<FlowerGeometry.petalCount, id: \.self) { index in
+                // Fuellung startet bei 1 Uhr und laeuft im Uhrzeigersinn
+                let angle = Double(index + 1) * 30
 
                 GlassPetal(
                     angle: angle,
                     isFilled: index < filledPetals,
                     tint: tint
                 )
-                .frame(width: petalWidth, height: petalHeight)
-                // Basis des Blattes auf die Blumenmitte schieben.
+                .frame(width: petalWidth, height: petalLength)
                 // offset aendert das Layout-Frame nicht, deshalb dreht
-                // rotationEffect danach um genau diese Mitte.
-                .offset(y: -petalHeight / 2)
+                // rotationEffect danach um die Blumenmitte
+                .offset(y: -radialDistance)
                 .rotationEffect(.degrees(angle))
             }
 
             GlassStamp(tint: tint, symbol: symbol, size: stampSize)
         }
         .frame(width: size, height: size)
-        .shadow(color: .black.opacity(0.25), radius: 7, x: 3, y: 5)
     }
 }
 
@@ -210,7 +197,7 @@ struct GlassFlowerTimerView: View {
     let interval: Int
     let nextDate: Date
     var tint: Color = Color(red: 0.34, green: 0.62, blue: 0.94)
-    var flowerSize: CGFloat = 124
+    var flowerSize: CGFloat = 106
 
     private static let dateFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -220,9 +207,10 @@ struct GlassFlowerTimerView: View {
 
     /// Gefuellte Blaetter wachsen mit dem verstrichenen Anteil des Intervalls
     var filledPetals: Int {
-        if remainingDays <= 0 { return 12 }
+        if remainingDays <= 0 { return FlowerGeometry.petalCount }
         let remainingShare = Double(remainingDays) / Double(interval)
-        return min(12, max(0, 12 - Int(remainingShare * 12)))
+        let filled = FlowerGeometry.petalCount - Int(remainingShare * Double(FlowerGeometry.petalCount))
+        return min(FlowerGeometry.petalCount, max(0, filled))
     }
 
     var isExpired: Bool { remainingDays <= 0 }
@@ -241,7 +229,7 @@ struct GlassFlowerTimerView: View {
     @State private var duePulse = false
 
     var body: some View {
-        VStack(spacing: 7) {
+        VStack(spacing: 6) {
             GlassFlower(
                 filledPetals: filledPetals,
                 tint: tint,
@@ -253,15 +241,16 @@ struct GlassFlowerTimerView: View {
             Text(formattedDays)
                 .font(.caption.bold())
                 .foregroundStyle(.white)
-                .padding(.horizontal, 11)
+                .lineLimit(1)
+                .padding(.horizontal, 10)
                 .padding(.vertical, 3)
                 .background {
                     ZStack {
                         Capsule().fill(.ultraThinMaterial)
                         Capsule().fill(
-                            isExpired ? Color.red.opacity(0.34) : Color.white.opacity(0.1)
+                            isExpired ? Color.red.opacity(0.36) : Color.white.opacity(0.12)
                         )
-                        Capsule().strokeBorder(.white.opacity(0.45), lineWidth: 0.5)
+                        Capsule().strokeBorder(.white.opacity(0.46), lineWidth: 0.5)
                     }
                 }
                 .opacity(isExpired && duePulse ? 0.5 : 1.0)
@@ -275,12 +264,14 @@ struct GlassFlowerTimerView: View {
             Text(eventType.localizedName)
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.white)
-                .shadow(color: .black.opacity(0.55), radius: 3, x: 0, y: 1)
+                .lineLimit(1)
+                .shadow(color: .black.opacity(0.6), radius: 3, x: 0, y: 1)
 
             Text(formattedDate)
                 .font(.caption2)
                 .foregroundStyle(.white.opacity(0.75))
-                .shadow(color: .black.opacity(0.5), radius: 3, x: 0, y: 1)
+                .lineLimit(1)
+                .shadow(color: .black.opacity(0.55), radius: 3, x: 0, y: 1)
         }
     }
 }
@@ -310,7 +301,17 @@ struct GlassFlowerStage<Content: View>: View {
                     )
                 }
             }
-            .overlay(Color.black.opacity(0.18))
+            // Foto beruhigen, damit die Glasfarbe traegt
+            .overlay(
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.07, green: 0.08, blue: 0.11).opacity(0.2),
+                        Color(red: 0.07, green: 0.08, blue: 0.11).opacity(0.32)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
 
             content
         }
@@ -322,8 +323,9 @@ struct GlassFlowerStage<Content: View>: View {
 
 #if DEBUG
 #Preview("Glasblumen auf Foto") {
+    // Werte aus Horse.preview
     GlassFlowerStage(backgroundImage: nil) {
-        HStack(alignment: .top, spacing: 4) {
+        HStack(alignment: .top, spacing: 2) {
             GlassFlowerTimerView(
                 eventType: .hufschmied,
                 remainingDays: 151,
@@ -334,23 +336,23 @@ struct GlassFlowerStage<Content: View>: View {
 
             GlassFlowerTimerView(
                 eventType: .impfung,
-                remainingDays: 12,
+                remainingDays: 46,
                 interval: 49,
-                nextDate: Date().addingTimeInterval(12 * 86400),
+                nextDate: Date().addingTimeInterval(46 * 86400),
                 tint: Color(red: 0.34, green: 0.62, blue: 0.94)
             )
 
             GlassFlowerTimerView(
                 eventType: .wurmkur,
-                remainingDays: 0,
+                remainingDays: 11,
                 interval: 101,
-                nextDate: Date(),
+                nextDate: Date().addingTimeInterval(11 * 86400),
                 tint: Color(red: 0.34, green: 0.62, blue: 0.94)
             )
         }
-        .padding(.vertical, 16)
+        .padding(.vertical, 14)
     }
-    .frame(height: 250)
+    .frame(height: 230)
     .padding()
 }
 #endif
