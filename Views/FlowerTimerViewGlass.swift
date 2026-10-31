@@ -26,13 +26,20 @@ import SwiftUI
 // MARK: - Proportionen aus den Original-PNGs
 
 /// Alle Werte als Anteil der Blumenbreite, vermessen an flower_6.png (1024x1024).
-private enum FlowerGeometry {
+/// Die Original-Firmware (docs/original_geraet/fet430_1.c) bestaetigt den Aufbau:
+/// 12 Segmente, "Rosen fangen bei 1 Uhr an".
+enum FlowerGeometry {
     static let petalWidth: CGFloat = 0.117
     static let petalLength: CGFloat = 0.255
     /// Abstand Blumenmitte -> Mitte eines Bluetenblatts
     static let radialDistance: CGFloat = 0.363
     static let stampDiameter: CGFloat = 0.298
     static let petalCount = 12
+
+    /// Winkel eines Blattes. Index 0 liegt auf 1 Uhr, dann im Uhrzeigersinn.
+    static func angle(for index: Int) -> Double {
+        Double(index + 1) * 30
+    }
 }
 
 // MARK: - Einzelnes Glas-Bluetenblatt

@@ -166,27 +166,26 @@ struct HorseDetailView: View {
                     }
                     .padding(.horizontal, 12)
                 } else {
-                    // Classic: der urspruengliche Hardware-Look
-                    HStack(alignment: .top, spacing: 20) {
-                        ForEach(Horse.EventType.allCases, id: \.self) { eventType in
-                            Button(action: {
-                                selectedEventType = eventType
-                                showingActionSheet = true
-                            }) {
-                                FlowerTimerView(
-                                    eventType: eventType,
-                                    remainingDays: horse.tageBis(fuer: eventType),
-                                    interval: horse.holeIntervall(fuer: eventType),
-                                    nextDate: horse.naechsterTermin(fuer: eventType),
-                                    colorScheme: globalSettings.flowerColorScheme
-                                )
-                                .frame(width: 100)
+                    // Classic: das LCD des Original-Geraets
+                    LCDPanel(alarmActive: hasDueEvent) {
+                        HStack(alignment: .top, spacing: 8) {
+                            ForEach(Horse.EventType.allCases, id: \.self) { eventType in
+                                Button(action: {
+                                    selectedEventType = eventType
+                                    showingActionSheet = true
+                                }) {
+                                    LCDFlowerTimerView(
+                                        eventType: eventType,
+                                        remainingDays: horse.tageBis(fuer: eventType),
+                                        interval: horse.holeIntervall(fuer: eventType),
+                                        nextDate: horse.naechsterTermin(fuer: eventType)
+                                    )
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
                 }
 
                 // Einstellungen
@@ -361,6 +360,11 @@ struct HorseDetailView: View {
     }
 
     // MARK: - Aktive Benachrichtigungen zaehlen
+
+    /// Mindestens ein Termin faellig - im Original blinkt dann die Glocke
+    private var hasDueEvent: Bool {
+        Horse.EventType.allCases.contains { horse.tageBis(fuer: $0) <= 0 }
+    }
 
     private var notifySubtitle: String {
         let count = activeNotifyCount
