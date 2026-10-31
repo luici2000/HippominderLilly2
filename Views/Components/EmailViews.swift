@@ -154,6 +154,7 @@ struct EmailTypePickerView: View {
                                 Image(typ.symbol)
                                     .resizable()
                                     .scaledToFit()
+                                    .foregroundStyle(.primary)
                                     .frame(width: 20, height: 20)
                                     .opacity(0.7)
 

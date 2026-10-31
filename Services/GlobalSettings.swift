@@ -44,13 +44,36 @@ class GlobalSettings: ObservableObject {
             glassTintRed = d.double(forKey: "glassTintRed")
             glassTintGreen = d.double(forKey: "glassTintGreen")
             glassTintBlue = d.double(forKey: "glassTintBlue")
+        } else {
+            // Bestandsinstallation: Glasfarbe aus dem bisher gewaehlten Schema uebernehmen
+            let rgb = flowerColorScheme.glassRGB
+            glassTintRed = rgb.red
+            glassTintGreen = rgb.green
+            glassTintBlue = rgb.blue
         }
     }
 
-    /// Aktuelles Farbschema
+    /// Aktuelles Farbschema. Setzen uebernimmt auch die Glasfarbe des Schemas,
+    /// damit die drei Kugeln auf der Hauptseite die Glasblumen aller Pferde steuern.
     var flowerColorScheme: FlowerColorScheme {
         get { FlowerColorScheme.allCases[safe: flowerColorSchemeIndex] ?? .hellblau }
-        set { flowerColorSchemeIndex = FlowerColorScheme.allCases.firstIndex(of: newValue) ?? 0 }
+        set {
+            flowerColorSchemeIndex = FlowerColorScheme.allCases.firstIndex(of: newValue) ?? 0
+            let rgb = newValue.glassRGB
+            glassTintRed = rgb.red
+            glassTintGreen = rgb.green
+            glassTintBlue = rgb.blue
+        }
+    }
+
+    /// Das Schema, dessen Glasfarbe gerade aktiv ist - nil bei frei gewaehlter Farbe
+    var matchingColorScheme: FlowerColorScheme? {
+        FlowerColorScheme.allCases.first { scheme in
+            let rgb = scheme.glassRGB
+            return abs(rgb.red - glassTintRed) < 0.02
+                && abs(rgb.green - glassTintGreen) < 0.02
+                && abs(rgb.blue - glassTintBlue) < 0.02
+        }
     }
 
     /// Glasfarbe als SwiftUI Color - beliebige Farbe, nicht auf Schemata beschraenkt
@@ -106,6 +129,20 @@ enum FlowerColorScheme: String, CaseIterable, Identifiable {
         case .orange: return Color(red: 0.95, green: 0.55, blue: 0.2)
         case .grau: return Color(red: 0.4, green: 0.4, blue: 0.4)
         }
+    }
+
+    /// Glasfarbe des Schemas fuer die Glasblumen (RGB 0...1)
+    var glassRGB: (red: Double, green: Double, blue: Double) {
+        switch self {
+        case .hellblau: return (0.34, 0.62, 0.94)
+        case .orange: return (0.96, 0.58, 0.22)
+        case .grau: return (0.56, 0.58, 0.62)
+        }
+    }
+
+    var glassColor: Color {
+        let rgb = glassRGB
+        return Color(red: rgb.red, green: rgb.green, blue: rgb.blue)
     }
 }
 

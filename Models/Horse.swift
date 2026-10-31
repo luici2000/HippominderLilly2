@@ -92,20 +92,24 @@ class Horse {
         #endif
     }
 
+    /// Ganze Kalendertage zwischen zwei Zeitpunkten - Uhrzeiten werden ignoriert,
+    /// sonst zeigt ein Termin von heute 10:12 um 10:13 schon einen Tag weniger an.
+    private static func kalenderTage(von start: Date, bis ende: Date) -> Int {
+        let calendar = Calendar.current
+        return calendar.dateComponents([.day], from: calendar.startOfDay(for: start), to: calendar.startOfDay(for: ende)).day ?? 0
+    }
+
     // Tage bis zum naechsten Termin (negativ = ueberfaellig)
     var tageBisHufschmied: Int {
-        let naechsterTermin = Calendar.current.date(byAdding: .day, value: hufschmiedIntervall, to: letzterHufschmiedTermin)!
-        return Calendar.current.dateComponents([.day], from: currentDate, to: naechsterTermin).day ?? 0
+        Self.kalenderTage(von: currentDate, bis: naechsterHufschmiedTermin)
     }
 
     var tageBisImpfung: Int {
-        let naechsterTermin = Calendar.current.date(byAdding: .day, value: impfungIntervall, to: letzterImpfungTermin)!
-        return Calendar.current.dateComponents([.day], from: currentDate, to: naechsterTermin).day ?? 0
+        Self.kalenderTage(von: currentDate, bis: naechsterImpfungTermin)
     }
 
     var tageBisWurmkur: Int {
-        let naechsterTermin = Calendar.current.date(byAdding: .day, value: wurmkurIntervall, to: letzterWurmkurTermin)!
-        return Calendar.current.dateComponents([.day], from: currentDate, to: naechsterTermin).day ?? 0
+        Self.kalenderTage(von: currentDate, bis: naechsterWurmkurTermin)
     }
 
     // Naechste Termine
@@ -128,13 +132,13 @@ class Horse {
 
         switch typ {
         case .hufschmied:
-            tageVergangen = Calendar.current.dateComponents([.day], from: letzterHufschmiedTermin, to: currentDate).day ?? 0
+            tageVergangen = Self.kalenderTage(von: letzterHufschmiedTermin, bis: currentDate)
             intervall = hufschmiedIntervall
         case .impfung:
-            tageVergangen = Calendar.current.dateComponents([.day], from: letzterImpfungTermin, to: currentDate).day ?? 0
+            tageVergangen = Self.kalenderTage(von: letzterImpfungTermin, bis: currentDate)
             intervall = impfungIntervall
         case .wurmkur:
-            tageVergangen = Calendar.current.dateComponents([.day], from: letzterWurmkurTermin, to: currentDate).day ?? 0
+            tageVergangen = Self.kalenderTage(von: letzterWurmkurTermin, bis: currentDate)
             intervall = wurmkurIntervall
         }
 

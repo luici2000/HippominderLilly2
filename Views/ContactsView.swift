@@ -95,6 +95,7 @@ struct ContactEditRow: View {
                     .frame(width: 16)
                 TextField("Name", text: $name)
                     .font(.callout)
+                    .accessibilityIdentifier("contact_\(type.rawValue)_name")
                     .onChange(of: name) { _, _ in onUpdate(name, email, phone) }
             }
 
@@ -106,6 +107,7 @@ struct ContactEditRow: View {
                     .frame(width: 16)
                 TextField("E-Mail", text: $email)
                     .font(.callout)
+                    .accessibilityIdentifier("contact_\(type.rawValue)_email")
                     #if os(iOS)
                     .keyboardType(.emailAddress)
                     .textContentType(.emailAddress)
@@ -122,6 +124,7 @@ struct ContactEditRow: View {
                     .frame(width: 16)
                 TextField("Telefon", text: $phone)
                     .font(.callout)
+                    .accessibilityIdentifier("contact_\(type.rawValue)_phone")
                     #if os(iOS)
                     .keyboardType(.phonePad)
                     .textContentType(.telephoneNumber)

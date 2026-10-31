@@ -27,9 +27,12 @@ struct ContentView: View {
     @State private var showingPaywall = false
     @State private var showingBetaInfo = false
     @State private var logoTapCount = 0
+    @State private var navigationPath = NavigationPath()
+    @State private var demoSeeded = false
+    @State private var notificationsDumped = false
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             VStack(spacing: 0) {
                 // Header-Bereich: Icons + Logo + Farbschema
                 VStack(spacing: 0) {
@@ -97,10 +100,16 @@ struct ContentView: View {
                     // Farbschema-Auswahl rechts
                     HStack {
                         Spacer()
-                        GlobalColorPicker(selectedScheme: Binding(
-                            get: { globalSettings.flowerColorScheme },
-                            set: { globalSettings.flowerColorScheme = $0 }
-                        ))
+                        GlobalColorPicker(
+                            selectedScheme: Binding(
+                                get: { globalSettings.matchingColorScheme },
+                                set: { if let scheme = $0 { globalSettings.flowerColorScheme = scheme } }
+                            ),
+                            customTint: Binding(
+                                get: { globalSettings.glassTint },
+                                set: { globalSettings.glassTint = $0 }
+                            )
+                        )
                     }
                     .padding(.horizontal, 12)
                     .padding(.top, 2)
@@ -154,6 +163,7 @@ struct ContentView: View {
                                 NavigationLink(destination: HorseDetailView(horse: horse)) {
                                     HorseRowView(horse: horse)
                                 }
+                                .accessibilityIdentifier("horseRow_\(horse.name)")
                             }
                             .onDelete(perform: deleteHorses)
                         }
@@ -162,6 +172,10 @@ struct ContentView: View {
                 }
             }
             .navigationBarHidden(true)
+            .navigationDestination(for: Horse.self) { horse in
+                HorseDetailView(horse: horse)
+            }
+            .onAppear { seedDemoHorseIfRequested() }
             .sheet(isPresented: $showingAddHorse, onDismiss: {
                 WatchSyncService.shared.syncToWatch()
             }) {
@@ -179,12 +193,67 @@ struct ContentView: View {
         }
     }
 
+    /// Debug-Hilfe fuer den Simulator: Start mit "-demoHorse" legt ein Demo-Pferd an
+    /// (Foto optional per "-demoHorsePhoto /pfad/zum/bild.jpg") und oeffnet direkt die Detailansicht.
+    private func seedDemoHorseIfRequested() {
+        #if DEBUG
+        let args = ProcessInfo.processInfo.arguments
+        if args.contains("-dumpNotifications"), !notificationsDumped {
+            notificationsDumped = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                NotificationService.shared.debugDumpPending()
+            }
+        }
+        guard args.contains("-demoHorse"), !demoSeeded else { return }
+        demoSeeded = true
+
+        var photo: Data? = nil
+        if let path = UserDefaults.standard.string(forKey: "demoHorsePhoto") {
+            photo = try? Data(contentsOf: URL(fileURLWithPath: path))
+        }
+        // "-demoDaysAgo 30,120,10" = Tage seit Hufschmied, Impfung, Wurmkur
+        var daysAgo = [30, 120, 10]
+        if let spec = UserDefaults.standard.string(forKey: "demoDaysAgo") {
+            let parsed = spec.split(separator: ",").compactMap { Int($0.trimmingCharacters(in: .whitespaces)) }
+            if parsed.count == 3 { daysAgo = parsed }
+        }
+        let today = Date()
+        let dates = daysAgo.map { Calendar.current.date(byAdding: .day, value: -$0, to: today) ?? today }
+
+        let horse: Horse
+        if let existing = horses.first(where: { $0.name == "Demo" }) {
+            horse = existing
+            horse.imageData = photo
+            horse.letzterHufschmiedTermin = dates[0]
+            horse.letzterImpfungTermin = dates[1]
+            horse.letzterWurmkurTermin = dates[2]
+        } else {
+            horse = Horse(
+                name: "Demo",
+                imageData: photo,
+                letzterHufschmiedTermin: dates[0],
+                letzterImpfungTermin: dates[1],
+                letzterWurmkurTermin: dates[2]
+            )
+            modelContext.insert(horse)
+        }
+        try? modelContext.save()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            if navigationPath.isEmpty { navigationPath.append(horse) }
+        }
+        #endif
+    }
+
     private func deleteHorses(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
+                NotificationService.shared.removeAllNotifications(for: horses[index])
                 modelContext.delete(horses[index])
             }
         }
+        // Sofort sichern, damit das Loeschen auch bei sofortigem App-Ende erhalten bleibt
+        try? modelContext.save()
         WatchSyncService.shared.syncToWatch()
     }
 }
@@ -226,6 +295,7 @@ struct HorseRowView: View {
                     Image(nextEvent.type.symbol)
                         .resizable()
                         .scaledToFit()
+                        .foregroundStyle(.primary)
                         .frame(width: 14, height: 14)
                     if nextEvent.days < 0 {
                         Text("\(nextEvent.type.localizedName) \(String(localized: "seit")) \(-nextEvent.days) \(String(localized: "Tagen überfällig"))")
@@ -287,6 +357,7 @@ struct TimerIndicator: View {
             Image(eventType.symbol)
                 .resizable()
                 .scaledToFit()
+                .foregroundStyle(.primary)
                 .frame(width: 12, height: 12)
                 .opacity(0.7)
 
@@ -301,7 +372,10 @@ struct TimerIndicator: View {
 // MARK: - Globale Farbschema-Auswahl (3D-Kugeln mit -45° Lichteinfall)
 
 struct GlobalColorPicker: View {
-    @Binding var selectedScheme: FlowerColorScheme
+    /// Aktives Schema; nil, wenn eine freie Farbe gewaehlt ist
+    @Binding var selectedScheme: FlowerColorScheme?
+    /// Freie Glasfarbe fuer die Glasblumen (nur auf der Hauptseite waehlbar)
+    @Binding var customTint: Color
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 2) {
@@ -323,7 +397,16 @@ struct GlobalColorPicker: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel(Text(scheme.rawValue))
+                    .accessibilityIdentifier("colorScheme_\(scheme.rawValue)")
                 }
+
+                // Freie Glasfarbe
+                ColorPicker("Glasfarbe", selection: $customTint, supportsOpacity: false)
+                    .labelsHidden()
+                    .scaleEffect(0.8)
+                    .frame(width: 24, height: 22)
+                    .accessibilityIdentifier("colorScheme_custom")
             }
         }
     }

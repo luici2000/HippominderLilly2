@@ -47,6 +47,11 @@
 			path = .;
 			sourceTree = "<group>";
 		};
+		C7UITEST010000000840FAF00 /* HippominderLilly2UITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = HippominderLilly2UITests;
+			sourceTree = "<group>";
+		};
 		C7WATCH00C0000000840FAF00 /* WatchApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = WatchApp;
@@ -101,6 +106,7 @@
 				C7LOCA00100000000840FAF0 /* Localizable.xcstrings */,
 				C7LOCA00300000000840FAF0 /* InfoPlist.xcstrings */,
 				C78557002D71AB7500840FAF /* . */,
+				C7UITEST010000000840FAF00 /* HippominderLilly2UITests */,
 				C7WATCH00C0000000840FAF00 /* WatchApp */,
 				C7WATCH00D0000000840FAF00 /* Models */,
 				C78557412D734C0300840FAF /* Frameworks */,
@@ -184,6 +190,9 @@
 			);
 			dependencies = (
 				C785571E2D71AB7700840FAF /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C7UITEST010000000840FAF00 /* HippominderLilly2UITests */,
 			);
 			name = HippominderLilly2UITests;
 			packageProductDependencies = (
@@ -354,16 +363,23 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
-				DEVELOPMENT_TEAM = H5FBB5BQB6;
-				ENABLE_PREVIEWS = YES;
 				EXCLUDED_SOURCE_FILE_NAMES = (
 					"archiv/*",
 					"neu/*",
 					"aktuell/*",
 					"4Lilly/*",
 					"WatchApp/*",
+					"HippominderLilly2UITests/*",
+					"docs/*",
+					"docs/*/*",
+					"assets/*",
+					"assets/*/*",
+					CLAUDE.local.md,
+					.gitignore,
 					Info.plist,
 				);
+				DEVELOPMENT_TEAM = H5FBB5BQB6;
+				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Hippominder;
@@ -398,16 +414,23 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
-				DEVELOPMENT_TEAM = H5FBB5BQB6;
-				ENABLE_PREVIEWS = YES;
 				EXCLUDED_SOURCE_FILE_NAMES = (
 					"archiv/*",
 					"neu/*",
 					"aktuell/*",
 					"4Lilly/*",
 					"WatchApp/*",
+					"HippominderLilly2UITests/*",
+					"docs/*",
+					"docs/*/*",
+					"assets/*",
+					"assets/*/*",
+					CLAUDE.local.md,
+					.gitignore,
 					Info.plist,
 				);
+				DEVELOPMENT_TEAM = H5FBB5BQB6;
+				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Hippominder;

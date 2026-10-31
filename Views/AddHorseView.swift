@@ -108,6 +108,8 @@ struct AddHorseView: View {
             wurmkurIntervall: wurmkurIntervall
         )
         modelContext.insert(horse)
+        try? modelContext.save()
+        NotificationService.shared.scheduleAllNotifications(for: horse)
         dismiss()
     }
 }

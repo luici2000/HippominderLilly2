@@ -80,5 +80,6 @@ struct HippominderApp: App {
         for horse in horses {
             NotificationService.shared.scheduleAllNotifications(for: horse)
         }
+        NotificationService.shared.removeOrphanedNotifications(validHorseIDs: horses.map(\.id))
     }
 }

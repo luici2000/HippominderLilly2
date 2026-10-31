@@ -13,6 +13,8 @@ import SwiftUI
 
 struct HardwareStyleButtons: View {
     @Binding var value: Int
+    /// Optionaler Praefix fuer Accessibility-Identifier (UI-Tests): "<id>_minus", "<id>_value", "<id>_plus"
+    var identifier: String? = nil
     @State private var showingInput = false
     @State private var inputText = ""
 
@@ -24,6 +26,7 @@ struct HardwareStyleButtons: View {
             glassButton(symbol: "minus") {
                 if value > 1 { value -= 1 }
             }
+            .accessibilityIdentifier(identifier.map { "\($0)_minus" } ?? "")
 
             // Tappable value display
             Button(action: {
@@ -44,11 +47,13 @@ struct HardwareStyleButtons: View {
                     )
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier(identifier.map { "\($0)_value" } ?? "")
 
             // Plus Button
             glassButton(symbol: "plus") {
                 value += 1
             }
+            .accessibilityIdentifier(identifier.map { "\($0)_plus" } ?? "")
         }
         .alert("Wert eingeben", isPresented: $showingInput) {
             TextField("Tage", text: $inputText)

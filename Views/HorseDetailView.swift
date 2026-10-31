@@ -128,6 +128,7 @@ struct HorseDetailView: View {
                                 )
                             }
                             .buttonStyle(.plain)
+                            .accessibilityIdentifier("flower_\(eventType.rawValue)")
                         }
                     }
                     .padding(.vertical, 16)
@@ -137,24 +138,6 @@ struct HorseDetailView: View {
 
                 // Einstellungen
                 VStack(spacing: 14) {
-                    HStack {
-                        Image(systemName: "paintpalette.fill")
-                            .foregroundColor(.secondary)
-                            .frame(width: 20)
-
-                        Text("Glasfarbe")
-                            .font(.callout)
-
-                        Spacer()
-
-                        ColorPicker("", selection: Binding(
-                            get: { globalSettings.glassTint },
-                            set: { globalSettings.glassTint = $0 }
-                        ))
-                        .labelsHidden()
-                    }
-                    .padding(.horizontal)
-
                     HStack {
                         Image(systemName: "bell.fill")
                             .foregroundColor(.orange)
@@ -168,7 +151,7 @@ struct HorseDetailView: View {
                         HardwareStyleButtons(value: Binding(
                             get: { horse.benachrichtigungTageVorher },
                             set: { horse.benachrichtigungTageVorher = max(1, $0) }
-                        ))
+                        ), identifier: "reminder")
                     }
                     .padding(.horizontal)
 
@@ -188,7 +171,7 @@ struct HorseDetailView: View {
                             HardwareStyleButtons(value: Binding(
                                 get: { horse.holeIntervall(fuer: eventType) },
                                 set: { horse.setzeIntervall(max(1, $0), fuer: eventType) }
-                            ))
+                            ), identifier: "interval_\(eventType.rawValue)")
                         }
                         .padding(.horizontal)
                     }
@@ -205,8 +188,12 @@ struct HorseDetailView: View {
                                 .font(.subheadline.weight(.semibold))
 
                             let activeCount = activeNotifyCount
-                            if activeCount > 0 {
-                                Text("\(activeCount) Kontakt\(activeCount == 1 ? "" : "e") aktiv")
+                            if activeCount == 1 {
+                                Text("1 Kontakt aktiv")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            } else if activeCount > 1 {
+                                Text("\(activeCount) Kontakte aktiv")
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             } else {
@@ -232,6 +219,7 @@ struct HorseDetailView: View {
                     )
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("manageNotifications")
                 .padding(.horizontal)
 
                 // Action Buttons
@@ -250,6 +238,7 @@ struct HorseDetailView: View {
                         .overlay(Capsule().fill(Color.blue.opacity(0.08)))
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("saveCalendar")
 
                     Button(action: { showingEmailPicker = true }) {
                         HStack(spacing: 10) {
@@ -265,12 +254,18 @@ struct HorseDetailView: View {
                         .overlay(Capsule().fill(Color.green.opacity(0.08)))
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("sendEmail")
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 32)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        // Erinnerungs-Vorlauf oder Intervalle geaendert -> Benachrichtigungen neu planen
+        .onChange(of: horse.benachrichtigungTageVorher) { _, _ in rescheduleNotifications() }
+        .onChange(of: horse.hufschmiedIntervall) { _, _ in rescheduleNotifications() }
+        .onChange(of: horse.impfungIntervall) { _, _ in rescheduleNotifications() }
+        .onChange(of: horse.wurmkurIntervall) { _, _ in rescheduleNotifications() }
         .confirmationDialog(
             selectedEventType?.localizedName ?? "Termin",
             isPresented: $showingActionSheet,
@@ -336,6 +331,13 @@ struct HorseDetailView: View {
                 isPresented: $showingEmailPicker
             )
         }
+    }
+
+    // MARK: - Benachrichtigungen neu planen
+
+    private func rescheduleNotifications() {
+        NotificationService.shared.scheduleAllNotifications(for: horse)
+        WatchSyncService.shared.syncToWatch()
     }
 
     // MARK: - Aktive Benachrichtigungen zaehlen
@@ -425,6 +427,7 @@ struct HorseDetailView: View {
 struct NotificationSettingsView: View {
     @Bindable var horse: Horse
     @ObservedObject var contactSettings = ContactSettings.shared
+    @State private var showingContacts = false
 
     var body: some View {
         ScrollView {
@@ -462,12 +465,33 @@ struct NotificationSettingsView: View {
                 .background(Color.gray.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
                 .padding(.horizontal)
 
+                // Direkt zu den Kontakten, damit niemand erst zur Hauptseite zurueck muss
+                Button(action: { showingContacts = true }) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "person.crop.circle.badge.plus")
+                            .font(.system(size: 16, weight: .semibold))
+                        Text("Kontakte bearbeiten")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .foregroundColor(.primary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .overlay(Capsule().fill(Color.blue.opacity(0.08)))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("editContacts")
+                .padding(.horizontal)
+
                 Spacer()
             }
             .padding(.top, 8)
         }
         .navigationTitle("Benachrichtigungen")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showingContacts) {
+            ContactsView()
+        }
     }
 }
 
@@ -508,9 +532,10 @@ struct NotifyToggleRow: View {
             Toggle("", isOn: $isOn)
                 .labelsHidden()
                 .disabled(!contact.hasEmail)
+                .accessibilityIdentifier("notify_\(type.rawValue)")
         }
         .padding(.vertical, 2)
-        .opacity(contact.hasEmail ? 1.0 : 0.5)
+        .opacity(contact.hasEmail ? 1.0 : 0.7)
     }
 }
 

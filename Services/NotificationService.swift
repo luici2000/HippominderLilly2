@@ -38,17 +38,35 @@ class NotificationService {
             return
         }
 
-        // Only schedule if notification date is in the future
-        guard notificationDate > Date() else { return }
+        // Termin schon vorbei -> keine Erinnerung mehr planen
+        let now = Date()
+        guard nextDate > now else { return }
+
+        // Vorlauf-Tag schon vorbei (z.B. Vorlauf 3 Tage, Termin in 2 Tagen) -> naechster 9-Uhr-Zeitpunkt
+        var fireDate = notificationDate
+        var fireComponents = Calendar.current.dateComponents([.year, .month, .day], from: fireDate)
+        fireComponents.hour = 9
+        fireComponents.minute = 0
+        if let fireAt = Calendar.current.date(from: fireComponents), fireAt <= now {
+            fireDate = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: now)) ?? now
+            if let todayNine = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: now), todayNine > now {
+                fireDate = todayNine
+            }
+        }
+        let remainingDays = max(0, Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: fireDate), to: Calendar.current.startOfDay(for: nextDate)).day ?? daysBeforeEvent)
 
         // Create notification content (localized)
         let content = UNMutableNotificationContent()
         content.title = "Hippominder"
-        content.body = "\(horse.name): \(eventType.localizedName) " + String(localized: "in") + " \(daysBeforeEvent) " + String(localized: "Tagen fällig!")
+        if remainingDays == 0 {
+            content.body = "\(horse.name): \(eventType.localizedName) " + String(localized: "heute fällig!")
+        } else {
+            content.body = "\(horse.name): \(eventType.localizedName) " + String(localized: "in") + " \(remainingDays) " + String(localized: "Tagen fällig!")
+        }
         content.sound = .default
 
         // Create trigger at 9:00 AM on notification day
-        var components = Calendar.current.dateComponents([.year, .month, .day], from: notificationDate)
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: fireDate)
         components.hour = 9
         components.minute = 0
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
@@ -79,4 +97,40 @@ class NotificationService {
         let identifiers = Horse.EventType.allCases.map { "\(horse.id.uuidString)-\($0.rawValue)" }
         center.removePendingNotificationRequests(withIdentifiers: identifiers)
     }
+
+    /// Geplante Benachrichtigungen entfernen, deren Pferd nicht mehr existiert
+    /// (z.B. wenn die App direkt nach dem Loeschen beendet wurde)
+    func removeOrphanedNotifications(validHorseIDs: [UUID]) {
+        let validPrefixes = validHorseIDs.map { $0.uuidString }
+        let center = UNUserNotificationCenter.current()
+        center.getPendingNotificationRequests { requests in
+            let orphaned = requests
+                .map(\.identifier)
+                .filter { identifier in !validPrefixes.contains { identifier.hasPrefix($0) } }
+            if !orphaned.isEmpty {
+                center.removePendingNotificationRequests(withIdentifiers: orphaned)
+            }
+        }
+    }
+
+    #if DEBUG
+    /// Debug-Hilfe: Berechtigungsstatus und alle geplanten Benachrichtigungen auf die Konsole schreiben
+    func debugDumpPending() {
+        let center = UNUserNotificationCenter.current()
+        center.getNotificationSettings { settings in
+            print("NOTIFY_AUTH: \(settings.authorizationStatus.rawValue)")
+            center.getPendingNotificationRequests { requests in
+                print("NOTIFY_PENDING_COUNT: \(requests.count)")
+                for request in requests {
+                    var when = "-"
+                    if let trigger = request.trigger as? UNCalendarNotificationTrigger,
+                       let date = trigger.nextTriggerDate() {
+                        when = ISO8601DateFormatter().string(from: date)
+                    }
+                    print("NOTIFY_PENDING: \(request.identifier) | \(when) | \(request.content.body)")
+                }
+            }
+        }
+    }
+    #endif
 }

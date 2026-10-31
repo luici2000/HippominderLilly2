@@ -144,6 +144,7 @@ struct GlassStamp: View {
             Image(symbol)
                 .resizable()
                 .scaledToFit()
+                .foregroundStyle(.black)
                 .frame(width: size * 0.5, height: size * 0.5)
                 .shadow(color: .black.opacity(0.45), radius: 1.5, x: 0, y: 1)
         }
