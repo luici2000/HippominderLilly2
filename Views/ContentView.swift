@@ -94,16 +94,18 @@ struct ContentView: View {
                     .padding(.horizontal, 12)
                     .padding(.top, 4)
 
-                    // Farbschema-Auswahl rechts
-                    HStack {
-                        Spacer()
-                        GlobalColorPicker(selectedScheme: Binding(
-                            get: { globalSettings.flowerColorScheme },
-                            set: { globalSettings.flowerColorScheme = $0 }
-                        ))
+                    // Farbschema gilt nur fuer Classic - Glas hat die freie Farbwahl
+                    if globalSettings.designMode == .classic {
+                        HStack {
+                            Spacer()
+                            GlobalColorPicker(selectedScheme: Binding(
+                                get: { globalSettings.flowerColorScheme },
+                                set: { globalSettings.flowerColorScheme = $0 }
+                            ))
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.top, 2)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.top, 2)
 
                     // Debug-Anzeige (nur in Debug-Builds)
                     #if DEBUG

@@ -31,6 +31,11 @@ class GlobalSettings: ObservableObject {
         }
     }
 
+    /// Darstellung der Blumen-Timer: Glass oder Classic
+    @Published var designModeRaw: String = DesignMode.glass.rawValue {
+        didSet { UserDefaults.standard.set(designModeRaw, forKey: "designMode") }
+    }
+
     /// Freie Glasfarbe fuer die Glasblumen (RGB 0...1)
     @Published var glassTintRed: Double = 0.34 { didSet { persistTint() } }
     @Published var glassTintGreen: Double = 0.62 { didSet { persistTint() } }
@@ -40,6 +45,9 @@ class GlobalSettings: ObservableObject {
         flowerColorSchemeIndex = UserDefaults.standard.integer(forKey: "flowerColorSchemeIndex")
 
         let d = UserDefaults.standard
+        if let saved = d.string(forKey: "designMode") {
+            designModeRaw = saved
+        }
         if d.object(forKey: "glassTintRed") != nil {
             glassTintRed = d.double(forKey: "glassTintRed")
             glassTintGreen = d.double(forKey: "glassTintGreen")
@@ -51,6 +59,12 @@ class GlobalSettings: ObservableObject {
     var flowerColorScheme: FlowerColorScheme {
         get { FlowerColorScheme.allCases[safe: flowerColorSchemeIndex] ?? .hellblau }
         set { flowerColorSchemeIndex = FlowerColorScheme.allCases.firstIndex(of: newValue) ?? 0 }
+    }
+
+    /// Aktuelle Darstellung
+    var designMode: DesignMode {
+        get { DesignMode(rawValue: designModeRaw) ?? .glass }
+        set { designModeRaw = newValue.rawValue }
     }
 
     /// Glasfarbe als SwiftUI Color - beliebige Farbe, nicht auf Schemata beschraenkt
@@ -87,6 +101,31 @@ extension Color {
         #else
         return (0.34, 0.62, 0.94)
         #endif
+    }
+}
+
+// MARK: - Darstellung
+
+/// Classic ist der urspruengliche Hardware-Look: erhabene Flaechen, 3D-Kugeln,
+/// weiche Schatten. Glass ist die iOS-26-Variante mit Foto hinter dem Glas.
+enum DesignMode: String, CaseIterable, Identifiable {
+    case glass = "Glass"
+    case classic = "Classic"
+
+    var id: String { rawValue }
+
+    var localizedName: String {
+        switch self {
+        case .glass: return String(localized: "Glas")
+        case .classic: return String(localized: "Classic")
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .glass: return "circle.hexagongrid.fill"
+        case .classic: return "dial.medium.fill"
+        }
     }
 }
 

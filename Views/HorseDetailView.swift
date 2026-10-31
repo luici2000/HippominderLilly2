@@ -16,6 +16,7 @@ import SwiftUI
 import PhotosUI
 import EventKit
 import MessageUI
+import UIKit
 
 struct HorseDetailView: View {
     @Bindable var horse: Horse
@@ -35,6 +36,7 @@ struct HorseDetailView: View {
     @State private var mailResult: Result<MFMailComposeResult, Error>?
     @State private var showingImageCropper = false
     @State private var rawImageData: Data?
+    @State private var selectedBackgroundItem: PhotosPickerItem?
 
     var body: some View {
         ScrollView {
@@ -111,53 +113,107 @@ struct HorseDetailView: View {
                     .offset(x: 2, y: 2)
                 }
 
-                // Drei Glasblumen auf dem Pferdefoto
-                GlassFlowerStage(backgroundImage: horse.image) {
-                    HStack(alignment: .top, spacing: 4) {
+                // Darstellung umschalten
+                DesignModePicker(mode: Binding(
+                    get: { globalSettings.designMode },
+                    set: { globalSettings.designMode = $0 }
+                ))
+                .padding(.horizontal)
+
+                // Die drei Timer - je nach Darstellung
+                if globalSettings.designMode == .glass {
+                    ZStack(alignment: .bottomTrailing) {
+                        GlassFlowerStage(backgroundImage: horse.backgroundImage) {
+                            HStack(alignment: .top, spacing: 4) {
+                                ForEach(Horse.EventType.allCases, id: \.self) { eventType in
+                                    Button(action: {
+                                        selectedEventType = eventType
+                                        showingActionSheet = true
+                                    }) {
+                                        GlassFlowerTimerView(
+                                            eventType: eventType,
+                                            remainingDays: horse.tageBis(fuer: eventType),
+                                            interval: horse.holeIntervall(fuer: eventType),
+                                            nextDate: horse.naechsterTermin(fuer: eventType),
+                                            tint: globalSettings.glassTint
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.vertical, 16)
+                        }
+                        .frame(height: 250)
+
+                        // Hintergrundfoto waehlen
+                        PhotosPicker(selection: $selectedBackgroundItem, matching: .images) {
+                            HStack(spacing: 5) {
+                                Image(systemName: "photo.on.rectangle.angled")
+                                    .font(.system(size: 12, weight: .semibold))
+                                Text("Hintergrund")
+                                    .font(.caption2.weight(.semibold))
+                            }
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background {
+                                Capsule().fill(.ultraThinMaterial)
+                                    .overlay { Capsule().fill(.white.opacity(0.12)) }
+                                    .overlay { Capsule().strokeBorder(.white.opacity(0.45), lineWidth: 0.5) }
+                            }
+                        }
+                        .padding(10)
+                    }
+                    .padding(.horizontal, 12)
+                } else {
+                    // Classic: der urspruengliche Hardware-Look
+                    HStack(alignment: .top, spacing: 20) {
                         ForEach(Horse.EventType.allCases, id: \.self) { eventType in
                             Button(action: {
                                 selectedEventType = eventType
                                 showingActionSheet = true
                             }) {
-                                GlassFlowerTimerView(
+                                FlowerTimerView(
                                     eventType: eventType,
                                     remainingDays: horse.tageBis(fuer: eventType),
                                     interval: horse.holeIntervall(fuer: eventType),
                                     nextDate: horse.naechsterTermin(fuer: eventType),
-                                    tint: globalSettings.glassTint
+                                    colorScheme: globalSettings.flowerColorScheme
                                 )
+                                .frame(width: 100)
                             }
                             .buttonStyle(.plain)
                         }
                     }
-                    .padding(.vertical, 16)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
                 }
-                .frame(height: 250)
-                .padding(.horizontal, 12)
 
                 // Einstellungen
                 VStack(spacing: 14) {
-                    HStack {
-                        Image(systemName: "paintpalette.fill")
-                            .foregroundColor(.secondary)
-                            .frame(width: 20)
+                    if globalSettings.designMode == .glass {
+                        HStack {
+                            Image(systemName: "paintpalette.fill")
+                                .foregroundColor(.secondary)
+                                .frame(width: 20)
 
-                        Text("Glasfarbe")
-                            .font(.callout)
+                            Text("Glasfarbe")
+                                .font(.callout)
 
-                        Spacer()
+                            Spacer()
 
-                        ColorPicker("", selection: Binding(
-                            get: { globalSettings.glassTint },
-                            set: { globalSettings.glassTint = $0 }
-                        ))
-                        .labelsHidden()
+                            ColorPicker("", selection: Binding(
+                                get: { globalSettings.glassTint },
+                                set: { globalSettings.glassTint = $0 }
+                            ))
+                            .labelsHidden()
+                        }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
 
                     HStack {
                         Image(systemName: "bell.fill")
-                            .foregroundColor(.orange)
+                            .foregroundColor(.secondary)
                             .frame(width: 20)
 
                         Text("Erinnerung \(horse.benachrichtigungTageVorher) Tage vor Termin")
@@ -195,76 +251,31 @@ struct HorseDetailView: View {
                 }
 
                 // Benachrichtigungen verwalten
-                NavigationLink(destination: NotificationSettingsView(horse: horse)) {
-                    HStack(spacing: 10) {
-                        Image(systemName: "bell.badge.fill")
-                            .font(.system(size: 16, weight: .semibold))
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Benachrichtigungen verwalten")
-                                .font(.subheadline.weight(.semibold))
-
-                            let activeCount = activeNotifyCount
-                            if activeCount > 0 {
-                                Text("\(activeCount) Kontakt\(activeCount == 1 ? "" : "e") aktiv")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                            } else {
-                                Text("Keine Kontakte aktiviert")
-                                    .font(.caption2)
-                                    .foregroundColor(.orange)
-                            }
-                        }
-
-                        Spacer()
-
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(.secondary)
-                    }
-                    .foregroundColor(.primary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .padding(.horizontal, 20)
-                    .background(.ultraThinMaterial, in: Capsule())
-                    .overlay(
-                        Capsule().fill(Color.purple.opacity(0.08))
-                    )
-                }
-                .buttonStyle(.plain)
-                .padding(.horizontal)
-
-                // Action Buttons
                 VStack(spacing: 10) {
-                    Button(action: { saveToCalendar() }) {
-                        HStack(spacing: 10) {
-                            Image(systemName: "calendar.badge.plus")
-                                .font(.system(size: 16, weight: .semibold))
-                            Text("Termine im Kalender speichern")
-                                .font(.subheadline.weight(.semibold))
-                        }
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(.ultraThinMaterial, in: Capsule())
-                        .overlay(Capsule().fill(Color.blue.opacity(0.08)))
+                    NavigationLink(destination: NotificationSettingsView(horse: horse)) {
+                        DesignedActionButton(
+                            title: "Benachrichtigungen verwalten",
+                            systemImage: "bell.badge.fill",
+                            mode: globalSettings.designMode,
+                            subtitle: notifySubtitle,
+                            trailingChevron: true
+                        )
                     }
                     .buttonStyle(.plain)
 
-                    Button(action: { showingEmailPicker = true }) {
-                        HStack(spacing: 10) {
-                            Image(systemName: "envelope.fill")
-                                .font(.system(size: 16, weight: .semibold))
-                            Text("Erinnerung per E-Mail senden")
-                                .font(.subheadline.weight(.semibold))
-                        }
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(.ultraThinMaterial, in: Capsule())
-                        .overlay(Capsule().fill(Color.green.opacity(0.08)))
-                    }
-                    .buttonStyle(.plain)
+                    DesignedActionButton(
+                        title: "Termine im Kalender speichern",
+                        systemImage: "calendar.badge.plus",
+                        mode: globalSettings.designMode,
+                        action: { saveToCalendar() }
+                    )
+
+                    DesignedActionButton(
+                        title: "Erinnerung per E-Mail senden",
+                        systemImage: "envelope.fill",
+                        mode: globalSettings.designMode,
+                        action: { showingEmailPicker = true }
+                    )
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 32)
@@ -312,6 +323,17 @@ struct HorseDetailView: View {
                 }
             }
         }
+        .onChange(of: selectedBackgroundItem) { _, newItem in
+            Task {
+                guard let data = try? await newItem?.loadTransferable(type: Data.self) else { return }
+                // Kein Rundschnitt: das Hintergrundfoto bleibt rechteckig und gross.
+                // Skalieren laeuft abseits des Main Threads, sonst ruckelt die UI.
+                let prepared = await Task.detached(priority: .userInitiated) {
+                    BackgroundPhoto.downscaledJPEG(from: data) ?? data
+                }.value
+                horse.backgroundImageData = prepared
+            }
+        }
         .sheet(isPresented: $showingImageCropper) {
             if let data = rawImageData, let uiImage = UIImage(data: data) {
                 ImageCropperView(image: uiImage) { croppedImage in
@@ -339,6 +361,13 @@ struct HorseDetailView: View {
     }
 
     // MARK: - Aktive Benachrichtigungen zaehlen
+
+    private var notifySubtitle: String {
+        let count = activeNotifyCount
+        guard count > 0 else { return String(localized: "Keine Kontakte aktiviert") }
+        let word = count == 1 ? String(localized: "Kontakt") : String(localized: "Kontakte")
+        return "\(count) \(word) " + String(localized: "aktiv")
+    }
 
     private var activeNotifyCount: Int {
         let contactSettings = ContactSettings.shared
@@ -416,6 +445,142 @@ struct HorseDetailView: View {
                 }
                 showingCalendarAlert = true
             }
+        }
+    }
+}
+
+// MARK: - Hintergrundfoto aufbereiten
+
+/// Eigener Typ statt Methode in der View: so ist das Skalieren garantiert
+/// nicht an den Main Actor gebunden.
+enum BackgroundPhoto {
+    /// Skaliert auf hoechstens 1600px lange Kante. Ohne das landen 12-MP-Fotos
+    /// unveraendert in SwiftData.
+    static func downscaledJPEG(from data: Data, maxEdge: CGFloat = 1600) -> Data? {
+        guard let image = UIImage(data: data) else { return nil }
+        let longest = max(image.size.width, image.size.height)
+        guard longest > maxEdge else { return image.jpegData(compressionQuality: 0.85) }
+
+        let factor = maxEdge / longest
+        let target = CGSize(width: image.size.width * factor, height: image.size.height * factor)
+        let renderer = UIGraphicsImageRenderer(size: target)
+        let scaled = renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: target))
+        }
+        return scaled.jpegData(compressionQuality: 0.85)
+    }
+}
+
+// MARK: - Darstellung umschalten
+
+struct DesignModePicker: View {
+    @Binding var mode: DesignMode
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(DesignMode.allCases) { candidate in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { mode = candidate }
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: candidate.icon)
+                            .font(.system(size: 11, weight: .semibold))
+                        Text(candidate.localizedName)
+                            .font(.caption.weight(.semibold))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 7)
+                    .foregroundStyle(mode == candidate ? Color.primary : Color.secondary)
+                    .background {
+                        if mode == candidate {
+                            Capsule()
+                                .fill(Color(white: 1.0))
+                                .shadow(color: .black.opacity(0.12), radius: 2, x: 0, y: 1)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(3)
+        .background(Capsule().fill(Color.gray.opacity(0.14)))
+    }
+}
+
+// MARK: - Aktionsknopf, passend zur Darstellung
+
+/// Glass: Material mit hellem Rand. Classic: erhabene helle Flaeche mit
+/// weichem Schatten - wie die Pillen im urspruenglichen Hardware-Design.
+struct DesignedActionButton: View {
+    let title: LocalizedStringKey
+    let systemImage: String
+    let mode: DesignMode
+    var subtitle: String?
+    var trailingChevron = false
+    var action: (() -> Void)?
+
+    var body: some View {
+        if let action {
+            Button(action: action) { content }
+                .buttonStyle(.plain)
+        } else {
+            content
+        }
+    }
+
+    private var content: some View {
+        HStack(spacing: 10) {
+            Image(systemName: systemImage)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.secondary)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                if let subtitle {
+                    Text(subtitle)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer(minLength: 0)
+
+            if trailingChevron {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .foregroundStyle(Color.primary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 13)
+        .padding(.horizontal, 18)
+        .background(background)
+    }
+
+    @ViewBuilder
+    private var background: some View {
+        switch mode {
+        case .glass:
+            Capsule()
+                .fill(.ultraThinMaterial)
+                .overlay { Capsule().strokeBorder(.white.opacity(0.4), lineWidth: 0.5) }
+                .shadow(color: .black.opacity(0.08), radius: 3, x: 1, y: 2)
+        case .classic:
+            Capsule()
+                .fill(Color(white: 0.98))
+                .overlay {
+                    Capsule().fill(
+                        LinearGradient(
+                            colors: [.white.opacity(0.9), .clear],
+                            startPoint: .topLeading,
+                            endPoint: .bottom
+                        )
+                    )
+                }
+                .overlay { Capsule().strokeBorder(Color.black.opacity(0.06), lineWidth: 0.5) }
+                .shadow(color: .black.opacity(0.14), radius: 4, x: 1, y: 2)
         }
     }
 }

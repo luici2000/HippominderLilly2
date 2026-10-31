@@ -24,7 +24,11 @@ import AppKit
 class Horse {
     var id: UUID
     var name: String
+    /// Profilbild - rund zugeschnitten fuer den Avatar
     var imageData: Data?
+    /// Hintergrundfoto fuer die Glasblumen - voll, unbeschnitten.
+    /// Bewusst getrennt vom Avatar: der ist kreisrund und nur 280px gross.
+    var backgroundImageData: Data?
 
     // Intervalle in Tagen
     var hufschmiedIntervall: Int
@@ -73,7 +77,16 @@ class Horse {
 
     /// Plattformuebergreifende Bild-Property
     var image: Image? {
-        guard let data = imageData else { return nil }
+        Self.makeImage(from: imageData)
+    }
+
+    /// Hintergrundfoto fuer die Glasblumen; faellt auf den Avatar zurueck
+    var backgroundImage: Image? {
+        Self.makeImage(from: backgroundImageData) ?? image
+    }
+
+    private static func makeImage(from data: Data?) -> Image? {
+        guard let data else { return nil }
         #if canImport(UIKit)
         guard let uiImage = UIImage(data: data) else { return nil }
         return Image(uiImage: uiImage)
