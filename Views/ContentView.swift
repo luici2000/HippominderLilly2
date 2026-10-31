@@ -94,18 +94,10 @@ struct ContentView: View {
                     .padding(.horizontal, 12)
                     .padding(.top, 4)
 
-                    // Farbschema gilt nur fuer Classic - Glas hat die freie Farbwahl
-                    if globalSettings.designMode == .classic {
-                        HStack {
-                            Spacer()
-                            GlobalColorPicker(selectedScheme: Binding(
-                                get: { globalSettings.flowerColorScheme },
-                                set: { globalSettings.flowerColorScheme = $0 }
-                            ))
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.top, 2)
-                    }
+                    // Kein Farbschema mehr auf der Hauptseite: Classic ist das
+                    // monochrome Geraete-LCD, Glas hat die freie Farbwahl in der
+                    // Detailansicht. GlobalColorPicker bleibt fuer die PNG-Blumen
+                    // erhalten, falls sie zurueckkehren.
 
                     // Debug-Anzeige (nur in Debug-Builds)
                     #if DEBUG

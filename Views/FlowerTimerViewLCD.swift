@@ -24,18 +24,34 @@ import SwiftUI
 
 // MARK: - LCD-Palette
 
-/// Graugruenes Segment-LCD, Farben aus dem Flyerfoto des Geraets gemessen.
+/// Farben aus Detail_Display.jpg gemessen: der Grund ist ein entsaettigtes
+/// Olivgrau (#959585), kein frisches Gruen.
 enum LCDPalette {
     /// Displayflaeche
-    static let base = Color(red: 0.70, green: 0.77, blue: 0.69)
+    static let base = Color(red: 0.66, green: 0.69, blue: 0.62)
     /// Leichter Verlauf zum Rand, damit die Flaeche nicht flach wirkt
-    static let baseEdge = Color(red: 0.63, green: 0.71, blue: 0.63)
+    static let baseEdge = Color(red: 0.58, green: 0.61, blue: 0.54)
     /// Eingeschaltetes Segment
-    static let on = Color(red: 0.14, green: 0.17, blue: 0.15)
-    /// Ausgeschaltetes Segment - bei echten LCDs schwach sichtbar
-    static let ghost = Color(red: 0.62, green: 0.69, blue: 0.61)
+    static let on = Color(red: 0.16, green: 0.17, blue: 0.15)
+    /// Kontur eines ausgeschalteten Segments - auf dem Geraet immer sichtbar
+    static let ghostLine = Color(red: 0.16, green: 0.17, blue: 0.15).opacity(0.45)
+    /// Fuellung eines ausgeschalteten Segments: knapp heller als der Grund
+    static let ghostFill = Color(red: 0.69, green: 0.72, blue: 0.65)
     /// Gehaeuse um das Display
     static let bezel = Color(red: 0.34, green: 0.36, blue: 0.34)
+}
+
+// MARK: - Geometrie des Geraets
+
+/// Am Foto des Original-Displays vermessen. Weicht bewusst leicht von
+/// FlowerGeometry ab: die LCD-Segmente sind schmaler als in den PNG-Vorlagen,
+/// und der Punkt nach Ablauf ist deutlich fetter.
+enum LCDGeometry {
+    static let petalWidth: CGFloat = 0.089
+    static let petalLength: CGFloat = 0.23
+    static let radialDistance: CGFloat = 0.354
+    /// Punkt nach Ablauf - reicht fast an die Blattwurzeln
+    static let dotDiameter: CGFloat = 0.38
 }
 
 // MARK: - Eine Rose im LCD
@@ -45,35 +61,45 @@ struct LCDRose: View {
     let isExpired: Bool
     var size: CGFloat = 86
 
-    private var petalWidth: CGFloat { size * FlowerGeometry.petalWidth }
-    private var petalLength: CGFloat { size * FlowerGeometry.petalLength }
-    private var radialDistance: CGFloat { size * FlowerGeometry.radialDistance }
-    private var kranzDiameter: CGFloat { size * FlowerGeometry.stampDiameter }
+    private var petalWidth: CGFloat { size * LCDGeometry.petalWidth }
+    private var petalLength: CGFloat { size * LCDGeometry.petalLength }
+    private var radialDistance: CGFloat { size * LCDGeometry.radialDistance }
+    private var dotDiameter: CGFloat { size * LCDGeometry.dotDiameter }
 
     var body: some View {
         ZStack {
-            // Segmente 1-12
+            // Segmente 1-12, Start bei 1 Uhr im Uhrzeigersinn
             ForEach(0..<FlowerGeometry.petalCount, id: \.self) { index in
-                Capsule()
-                    .fill(index < filledPetals ? LCDPalette.on : LCDPalette.ghost)
+                segment(isOn: index < filledPetals)
                     .frame(width: petalWidth, height: petalLength)
                     .offset(y: -radialDistance)
                     .rotationEffect(.degrees(FlowerGeometry.angle(for: index)))
             }
 
-            // Kranz - steht auch beim Clear, also immer sichtbar
-            Circle()
-                .strokeBorder(LCDPalette.on, lineWidth: max(1, size * 0.022))
-                .frame(width: kranzDiameter, height: kranzDiameter)
-
-            // Mittelpunkt - Segment 13, erscheint erst nach Ablauf
+            // Segment 13 - erscheint erst nach Ablauf. Die Mitte ist sonst leer;
+            // auf dem Geraet gibt es dort keinen Ring.
             if isExpired {
                 Circle()
                     .fill(LCDPalette.on)
-                    .frame(width: kranzDiameter * 0.56, height: kranzDiameter * 0.56)
+                    .frame(width: dotDiameter, height: dotDiameter)
             }
         }
         .frame(width: size, height: size)
+    }
+
+    /// Ein ausgeschaltetes Segment bleibt auf einem echten LCD als feine
+    /// Kontur sichtbar - das macht den Unterschied zu einer flachen Grafik.
+    @ViewBuilder
+    private func segment(isOn: Bool) -> some View {
+        if isOn {
+            Capsule().fill(LCDPalette.on)
+        } else {
+            Capsule()
+                .fill(LCDPalette.ghostFill)
+                .overlay {
+                    Capsule().strokeBorder(LCDPalette.ghostLine, lineWidth: 0.7)
+                }
+        }
     }
 }
 
@@ -94,6 +120,8 @@ struct LCDFlowerTimerView: View {
 
     var filledPetals: Int {
         if remainingDays <= 0 { return FlowerGeometry.petalCount }
+        // interval 0 wuerde die Division zu .infinity machen, Int(.infinity) trappt
+        guard interval > 0 else { return 0 }
         let remainingShare = Double(remainingDays) / Double(interval)
         let filled = FlowerGeometry.petalCount - Int(remainingShare * Double(FlowerGeometry.petalCount))
         return min(FlowerGeometry.petalCount, max(0, filled))
@@ -116,13 +144,16 @@ struct LCDFlowerTimerView: View {
                 size: roseSize
             )
 
-            // Symbol unter der Rose - blinkt bewusst nicht, wie im Original
+            // Symbol unter der Rose, leicht links - so sitzt es auf dem Geraet.
+            // Blinkt bewusst nicht: laut Firmware blinkt bei Alarm nur die Glocke.
             Image(eventType.symbol)
                 .resizable()
                 .renderingMode(.template)
                 .scaledToFit()
-                .frame(width: roseSize * 0.2, height: roseSize * 0.2)
+                .frame(width: roseSize * 0.26, height: roseSize * 0.26)
                 .foregroundStyle(LCDPalette.on)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading, roseSize * 0.14)
 
             Text(formattedDays)
                 .font(.system(size: roseSize * 0.12, weight: .semibold, design: .rounded))
@@ -198,11 +229,21 @@ struct LCDPanel<Content: View>: View {
                 }
                 .shadow(color: .black.opacity(0.18), radius: 6, x: 2, y: 4)
         }
-        .onAppear {
-            guard alarmActive else { return }
-            withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
-                bellOn = false
-            }
+        .onAppear { syncBell() }
+        // Ohne das bliebe die Glocke haengen, wenn ein Termin erledigt oder
+        // faellig wird waehrend die Ansicht offen ist
+        .onChange(of: alarmActive) { _, _ in syncBell() }
+    }
+
+    private func syncBell() {
+        guard alarmActive else {
+            // Daueranimation anhalten: Wert ohne Animation zuruecksetzen
+            withTransaction(Transaction(animation: nil)) { bellOn = true }
+            return
+        }
+        withTransaction(Transaction(animation: nil)) { bellOn = true }
+        withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
+            bellOn = false
         }
     }
 }
