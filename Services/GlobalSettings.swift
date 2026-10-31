@@ -31,6 +31,11 @@ class GlobalSettings: ObservableObject {
         }
     }
 
+    /// Darstellung der Blumen-Timer: Glass, Classic oder Blume
+    @Published var designModeRaw: String = DesignMode.glass.rawValue {
+        didSet { UserDefaults.standard.set(designModeRaw, forKey: "designMode") }
+    }
+
     /// Freie Glasfarbe fuer die Glasblumen (RGB 0...1)
     @Published var glassTintRed: Double = 0.34 { didSet { persistTint() } }
     @Published var glassTintGreen: Double = 0.62 { didSet { persistTint() } }
@@ -40,6 +45,9 @@ class GlobalSettings: ObservableObject {
         flowerColorSchemeIndex = UserDefaults.standard.integer(forKey: "flowerColorSchemeIndex")
 
         let d = UserDefaults.standard
+        if let saved = d.string(forKey: "designMode") {
+            designModeRaw = saved
+        }
         if d.object(forKey: "glassTintRed") != nil {
             glassTintRed = d.double(forKey: "glassTintRed")
             glassTintGreen = d.double(forKey: "glassTintGreen")
@@ -74,6 +82,12 @@ class GlobalSettings: ObservableObject {
                 && abs(rgb.green - glassTintGreen) < 0.02
                 && abs(rgb.blue - glassTintBlue) < 0.02
         }
+    }
+
+    /// Aktuelle Darstellung
+    var designMode: DesignMode {
+        get { DesignMode(rawValue: designModeRaw) ?? .glass }
+        set { designModeRaw = newValue.rawValue }
     }
 
     /// Glasfarbe als SwiftUI Color - beliebige Farbe, nicht auf Schemata beschraenkt
@@ -111,6 +125,37 @@ extension Color {
         return (0.34, 0.62, 0.94)
         #endif
     }
+}
+
+// MARK: - Darstellung
+
+/// Drei Darstellungen derselben Blume:
+/// - glass:   iOS 26 Liquid Glass, Pferdefoto scheint durch
+/// - classic: das LCD des Original-Geraets von 2006
+/// - blume:   Mathias' vorgerenderte Icon-Composer-Blumen
+enum DesignMode: String, CaseIterable, Identifiable {
+    case glass = "Glass"
+    case classic = "Classic"
+    case blume = "Blume"
+
+    var id: String { rawValue }
+
+    var localizedName: String {
+        switch self {
+        case .glass: return String(localized: "Glas")
+        case .classic: return String(localized: "Classic")
+        case .blume: return String(localized: "Blume")
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .glass: return "circle.hexagongrid.fill"
+        case .classic: return "dial.medium.fill"
+        case .blume: return "camera.macro"
+        }
+    }
+
 }
 
 // MARK: - Farbschema Enum

@@ -122,6 +122,15 @@ final class HippominderUITests: XCTestCase {
 
         // --- Hauptseite, leerer Zustand ---
         XCTAssertTrue(app.staticTexts["Farbschema"].waitForExistence(timeout: timeout))
+        // Ein Demo-Pferd aus einem frueheren Lauf wuerde die Paywall ausloesen
+        // (ein Pferd kostenlos) - vorher wegwischen
+        if app.buttons["horseRow_Demo"].exists {
+            app.buttons["horseRow_Demo"].firstMatch.swipeLeft()
+            let delete = app.buttons["Löschen"]
+            XCTAssertTrue(delete.waitForExistence(timeout: timeout), "Loeschen per Wischen fehlt")
+            delete.tap()
+            XCTAssertFalse(app.buttons["horseRow_Demo"].waitForExistence(timeout: 2), "Demo-Pferd wurde nicht geloescht")
+        }
         screenshot("01_hauptseite_leer")
 
         // --- Pferd anlegen ---
@@ -131,7 +140,10 @@ final class HippominderUITests: XCTestCase {
             addButton.tap()
 
             let nameField = app.textFields["Pferdename"]
-            XCTAssertTrue(nameField.waitForExistence(timeout: timeout))
+            if !nameField.waitForExistence(timeout: timeout) {
+                screenshot("01b_nach_pferd_plus")
+                XCTFail("Formular 'Neues Pferd' erschien nicht")
+            }
             nameField.tap()
             nameField.typeText(horseName)
 
@@ -322,6 +334,39 @@ final class HippominderUITests: XCTestCase {
         back(app)
         XCTAssertTrue(app.buttons["horseRow_Demo"].waitForExistence(timeout: timeout))
         screenshot("25_hauptseite_mit_demo")
+    }
+
+    /// Umschalter Glas / Classic / Blume: je ein Screenshot, danach zurueck auf Glas
+    func test07_designModi() throws {
+        let app = launch(demoArguments(daysAgo: "30,120,10", photo: true))
+        waitForDetail(app)
+        for (mode, shot) in [("Glass", "30_modus_glas"), ("Classic", "31_modus_classic"), ("Blume", "32_modus_blume")] {
+            let button = app.buttons["designMode_\(mode)"]
+            XCTAssertTrue(button.waitForExistence(timeout: timeout), "Umschalter \(mode) fehlt")
+            button.tap()
+            XCTAssertTrue(app.buttons["flower_Hufschmied"].waitForExistence(timeout: timeout), "Blumen in \(mode) fehlen")
+            XCTAssertEqual(days(of: "flower_Hufschmied", in: app), 12, "Tage in \(mode)")
+            screenshot(shot)
+            // Aktionsknoepfe unterhalb der Blumen
+            app.swipeUp()
+            XCTAssertTrue(app.buttons["sendEmail"].waitForExistence(timeout: timeout), "E-Mail-Knopf in \(mode) fehlt")
+            screenshot(shot + "_knoepfe")
+            app.swipeDown()
+            // Hauptseite: Farbwahl je nach Modus
+            back(app)
+            XCTAssertTrue(app.buttons["horseRow_Demo"].waitForExistence(timeout: timeout))
+            let custom = app.descendants(matching: .any)["colorScheme_custom"].exists
+            let spheres = app.buttons["colorScheme_Hellblau"].exists
+            switch mode {
+            case "Glass":   XCTAssertTrue(custom && spheres, "Glas: Kugeln + Farbwahl")
+            case "Blume":   XCTAssertTrue(spheres && !custom, "Blume: nur Kugeln")
+            default:        XCTAssertTrue(!spheres && !custom, "Classic: keine Farbwahl")
+            }
+            screenshot(shot + "_hauptseite")
+            app.buttons["horseRow_Demo"].tap()
+            waitForDetail(app)
+        }
+        app.buttons["designMode_Glass"].tap()
     }
 
     func test03_designOhneFoto() throws {

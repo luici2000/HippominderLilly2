@@ -26,13 +26,20 @@ import SwiftUI
 // MARK: - Proportionen aus den Original-PNGs
 
 /// Alle Werte als Anteil der Blumenbreite, vermessen an flower_6.png (1024x1024).
-private enum FlowerGeometry {
+/// Die Original-Firmware (docs/original_geraet/fet430_1.c) bestaetigt den Aufbau:
+/// 12 Segmente, "Rosen fangen bei 1 Uhr an".
+enum FlowerGeometry {
     static let petalWidth: CGFloat = 0.117
     static let petalLength: CGFloat = 0.255
     /// Abstand Blumenmitte -> Mitte eines Bluetenblatts
     static let radialDistance: CGFloat = 0.363
     static let stampDiameter: CGFloat = 0.298
     static let petalCount = 12
+
+    /// Winkel eines Blattes. Index 0 liegt auf 1 Uhr, dann im Uhrzeigersinn.
+    static func angle(for index: Int) -> Double {
+        Double(index + 1) * 30
+    }
 }
 
 // MARK: - Einzelnes Glas-Bluetenblatt
@@ -209,6 +216,8 @@ struct GlassFlowerTimerView: View {
     /// Gefuellte Blaetter wachsen mit dem verstrichenen Anteil des Intervalls
     var filledPetals: Int {
         if remainingDays <= 0 { return FlowerGeometry.petalCount }
+        // interval 0 wuerde die Division zu .infinity machen, Int(.infinity) trappt
+        guard interval > 0 else { return 0 }
         let remainingShare = Double(remainingDays) / Double(interval)
         let filled = FlowerGeometry.petalCount - Int(remainingShare * Double(FlowerGeometry.petalCount))
         return min(FlowerGeometry.petalCount, max(0, filled))
@@ -255,12 +264,10 @@ struct GlassFlowerTimerView: View {
                     }
                 }
                 .opacity(isExpired && duePulse ? 0.5 : 1.0)
-                .onAppear {
-                    guard isExpired else { return }
-                    withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
-                        duePulse = true
-                    }
-                }
+                .onAppear { syncPulse() }
+                // Sonst pulst die Pille weiter, wenn der Termin waehrend der
+                // Anzeige erledigt wird
+                .onChange(of: isExpired) { _, _ in syncPulse() }
 
             Text(eventType.localizedName)
                 .font(.caption2.weight(.semibold))
@@ -273,6 +280,14 @@ struct GlassFlowerTimerView: View {
                 .foregroundStyle(.white.opacity(0.75))
                 .lineLimit(1)
                 .shadow(color: .black.opacity(0.55), radius: 3, x: 0, y: 1)
+        }
+    }
+
+    private func syncPulse() {
+        withTransaction(Transaction(animation: nil)) { duePulse = false }
+        guard isExpired else { return }
+        withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+            duePulse = true
         }
     }
 }

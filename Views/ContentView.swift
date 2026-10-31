@@ -97,22 +97,41 @@ struct ContentView: View {
                     .padding(.horizontal, 12)
                     .padding(.top, 4)
 
-                    // Farbschema-Auswahl rechts
-                    HStack {
-                        Spacer()
-                        GlobalColorPicker(
-                            selectedScheme: Binding(
-                                get: { globalSettings.matchingColorScheme },
-                                set: { if let scheme = $0 { globalSettings.flowerColorScheme = scheme } }
-                            ),
-                            customTint: Binding(
-                                get: { globalSettings.glassTint },
-                                set: { globalSettings.glassTint = $0 }
+                    // Farbschema-Auswahl rechts. Glas: drei Schemata + freie Farbe,
+                    // Blume: nur die drei Schemata, Classic ist monochrom.
+                    if globalSettings.designMode != .classic {
+                        HStack {
+                            Spacer()
+                            GlobalColorPicker(
+                                selectedScheme: Binding(
+                                    get: {
+                                        globalSettings.designMode == .glass
+                                            ? globalSettings.matchingColorScheme
+                                            : globalSettings.flowerColorScheme
+                                    },
+                                    set: { scheme in
+                                        guard let scheme else { return }
+                                        if globalSettings.designMode == .glass {
+                                            // Schema + Glasfarbe
+                                            globalSettings.flowerColorScheme = scheme
+                                        } else {
+                                            // Blume: nur das Schema, die frei gewaehlte
+                                            // Glasfarbe bleibt erhalten
+                                            globalSettings.flowerColorSchemeIndex =
+                                                FlowerColorScheme.allCases.firstIndex(of: scheme) ?? 0
+                                        }
+                                    }
+                                ),
+                                customTint: Binding(
+                                    get: { globalSettings.glassTint },
+                                    set: { globalSettings.glassTint = $0 }
+                                ),
+                                showsCustomTint: globalSettings.designMode == .glass
                             )
-                        )
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.top, 2)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.top, 2)
 
                     // Debug-Anzeige (nur in Debug-Builds)
                     #if DEBUG
@@ -316,11 +335,12 @@ struct HorseRowView: View {
             Spacer()
 
             // Timer-Indikatoren mit Icons
-            HStack(spacing: 8) {
+            HStack(spacing: 6) {
                 ForEach(Horse.EventType.allCases, id: \.self) { eventType in
                     TimerIndicator(
                         eventType: eventType,
-                        days: horse.tageBis(fuer: eventType)
+                        days: horse.tageBis(fuer: eventType),
+                        interval: horse.holeIntervall(fuer: eventType)
                     )
                 }
             }
@@ -343,29 +363,75 @@ struct HorseRowView: View {
 struct TimerIndicator: View {
     let eventType: Horse.EventType
     let days: Int
+    let interval: Int
 
-    var indicatorColor: Color {
-        if days <= 0 { return .red }
+    private var indicatorColor: Color {
         if days <= 7 { return .red }
         if days <= 14 { return .orange }
         return .green
     }
 
+    private var isExpired: Bool { days <= 0 }
+
+    /// Gleiche Rechnung wie in den grossen Timern
+    private var filledPetals: Int {
+        if isExpired { return FlowerGeometry.petalCount }
+        guard interval > 0 else { return 0 }
+        let share = Double(days) / Double(interval)
+        let filled = FlowerGeometry.petalCount - Int(share * Double(FlowerGeometry.petalCount))
+        return min(FlowerGeometry.petalCount, max(0, filled))
+    }
+
     var body: some View {
         VStack(spacing: 2) {
-            // Icon
             Image(eventType.symbol)
                 .resizable()
                 .scaledToFit()
                 .foregroundStyle(.primary)
-                .frame(width: 12, height: 12)
+                .frame(width: 11, height: 11)
                 .opacity(0.7)
 
-            // Farbiger Punkt
-            Circle()
-                .fill(indicatorColor)
-                .frame(width: 8, height: 8)
+            MiniRose(
+                filledPetals: filledPetals,
+                isExpired: isExpired,
+                color: indicatorColor
+            )
         }
+    }
+}
+
+// MARK: - Mini-Rose fuer die Liste
+
+/// Dieselbe Blume wie in der Detailansicht, nur klein: zeigt auf einen Blick
+/// wie weit das Intervall fortgeschritten ist, nicht nur ob es knapp wird.
+struct MiniRose: View {
+    let filledPetals: Int
+    let isExpired: Bool
+    let color: Color
+    var size: CGFloat = 30
+
+    private var petalWidth: CGFloat { max(1.8, size * LCDGeometry.petalWidth) }
+    private var petalLength: CGFloat { size * LCDGeometry.petalLength }
+    private var radialDistance: CGFloat { size * LCDGeometry.radialDistance }
+    private var dotDiameter: CGFloat { size * LCDGeometry.dotDiameter }
+
+    var body: some View {
+        ZStack {
+            ForEach(0..<FlowerGeometry.petalCount, id: \.self) { index in
+                Capsule()
+                    .fill(index < filledPetals ? color : Color.gray.opacity(0.25))
+                    .frame(width: petalWidth, height: petalLength)
+                    .offset(y: -radialDistance)
+                    .rotationEffect(.degrees(FlowerGeometry.angle(for: index)))
+            }
+
+            if isExpired {
+                Circle()
+                    .fill(color)
+                    .frame(width: dotDiameter, height: dotDiameter)
+            }
+        }
+        .frame(width: size, height: size)
     }
 }
 
@@ -376,6 +442,8 @@ struct GlobalColorPicker: View {
     @Binding var selectedScheme: FlowerColorScheme?
     /// Freie Glasfarbe fuer die Glasblumen (nur auf der Hauptseite waehlbar)
     @Binding var customTint: Color
+    /// Freie Farbe nur fuer die Glasblumen anbieten
+    var showsCustomTint: Bool = true
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 2) {
@@ -402,11 +470,13 @@ struct GlobalColorPicker: View {
                 }
 
                 // Freie Glasfarbe
-                ColorPicker("Glasfarbe", selection: $customTint, supportsOpacity: false)
-                    .labelsHidden()
-                    .scaleEffect(0.8)
-                    .frame(width: 24, height: 22)
-                    .accessibilityIdentifier("colorScheme_custom")
+                if showsCustomTint {
+                    ColorPicker("Glasfarbe", selection: $customTint, supportsOpacity: false)
+                        .labelsHidden()
+                        .scaleEffect(0.8)
+                        .frame(width: 24, height: 22)
+                        .accessibilityIdentifier("colorScheme_custom")
+                }
             }
         }
     }
