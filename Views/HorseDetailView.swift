@@ -21,6 +21,7 @@ struct HorseDetailView: View {
     @Bindable var horse: Horse
     @Environment(\.modelContext) private var modelContext
     @ObservedObject var debugSettings = DebugSettings.shared
+    @ObservedObject var globalSettings = GlobalSettings.shared
 
     @State private var selectedEventType: Horse.EventType?
     @State private var showingDatePicker = false
@@ -110,29 +111,50 @@ struct HorseDetailView: View {
                     .offset(x: 2, y: 2)
                 }
 
-                // Drei Blumen-Timer
-                HStack(alignment: .top, spacing: 20) {
-                    ForEach(Horse.EventType.allCases, id: \.self) { eventType in
-                        Button(action: {
-                            selectedEventType = eventType
-                            showingActionSheet = true
-                        }) {
-                            GlassFlowerTimerView(
-                                eventType: eventType,
-                                remainingDays: horse.tageBis(fuer: eventType),
-                                interval: horse.holeIntervall(fuer: eventType),
-                                nextDate: horse.naechsterTermin(fuer: eventType),
-                                colorScheme: GlobalSettings.shared.flowerColorScheme
-                            )
+                // Drei Glasblumen auf dem Pferdefoto
+                GlassFlowerStage(backgroundImage: horse.image) {
+                    HStack(alignment: .top, spacing: 4) {
+                        ForEach(Horse.EventType.allCases, id: \.self) { eventType in
+                            Button(action: {
+                                selectedEventType = eventType
+                                showingActionSheet = true
+                            }) {
+                                GlassFlowerTimerView(
+                                    eventType: eventType,
+                                    remainingDays: horse.tageBis(fuer: eventType),
+                                    interval: horse.holeIntervall(fuer: eventType),
+                                    nextDate: horse.naechsterTermin(fuer: eventType),
+                                    tint: globalSettings.glassTint
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .padding(.vertical, 16)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
+                .frame(height: 250)
+                .padding(.horizontal, 12)
 
                 // Einstellungen
                 VStack(spacing: 14) {
+                    HStack {
+                        Image(systemName: "paintpalette.fill")
+                            .foregroundColor(.secondary)
+                            .frame(width: 20)
+
+                        Text("Glasfarbe")
+                            .font(.callout)
+
+                        Spacer()
+
+                        ColorPicker("", selection: Binding(
+                            get: { globalSettings.glassTint },
+                            set: { globalSettings.glassTint = $0 }
+                        ))
+                        .labelsHidden()
+                    }
+                    .padding(.horizontal)
+
                     HStack {
                         Image(systemName: "bell.fill")
                             .foregroundColor(.orange)
