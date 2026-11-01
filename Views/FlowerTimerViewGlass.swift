@@ -40,6 +40,21 @@ enum FlowerGeometry {
     static func angle(for index: Int) -> Double {
         Double(index + 1) * 30
     }
+
+    /// Wie viele Blaetter gefuellt sind. Eine Quelle fuer alle drei
+    /// Darstellungen, damit sie nie auseinanderlaufen.
+    ///
+    /// Ein Blatt deckt ein Zwoelftel des Intervalls ab, die Blume ist also
+    /// schon voll bevor der Termin faellig ist - bei 90 Tagen ab 7 Tagen
+    /// Rest. Den Unterschied zu wirklich faellig macht der Mittelpunkt.
+    static func filledPetals(remainingDays: Int, interval: Int) -> Int {
+        if remainingDays <= 0 { return petalCount }
+        // interval 0 wuerde die Division zu .infinity machen, Int(.infinity) trappt
+        guard interval > 0 else { return 0 }
+        let remainingShare = Double(remainingDays) / Double(interval)
+        let filled = petalCount - Int(remainingShare * Double(petalCount))
+        return min(petalCount, max(0, filled))
+    }
 }
 
 // MARK: - Einzelnes Glas-Bluetenblatt
@@ -215,12 +230,7 @@ struct GlassFlowerTimerView: View {
 
     /// Gefuellte Blaetter wachsen mit dem verstrichenen Anteil des Intervalls
     var filledPetals: Int {
-        if remainingDays <= 0 { return FlowerGeometry.petalCount }
-        // interval 0 wuerde die Division zu .infinity machen, Int(.infinity) trappt
-        guard interval > 0 else { return 0 }
-        let remainingShare = Double(remainingDays) / Double(interval)
-        let filled = FlowerGeometry.petalCount - Int(remainingShare * Double(FlowerGeometry.petalCount))
-        return min(FlowerGeometry.petalCount, max(0, filled))
+        FlowerGeometry.filledPetals(remainingDays: remainingDays, interval: interval)
     }
 
     var isExpired: Bool { remainingDays <= 0 }

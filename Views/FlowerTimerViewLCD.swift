@@ -119,12 +119,7 @@ struct LCDFlowerTimerView: View {
     }()
 
     var filledPetals: Int {
-        if remainingDays <= 0 { return FlowerGeometry.petalCount }
-        // interval 0 wuerde die Division zu .infinity machen, Int(.infinity) trappt
-        guard interval > 0 else { return 0 }
-        let remainingShare = Double(remainingDays) / Double(interval)
-        let filled = FlowerGeometry.petalCount - Int(remainingShare * Double(FlowerGeometry.petalCount))
-        return min(FlowerGeometry.petalCount, max(0, filled))
+        FlowerGeometry.filledPetals(remainingDays: remainingDays, interval: interval)
     }
 
     var isExpired: Bool { remainingDays <= 0 }

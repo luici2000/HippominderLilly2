@@ -373,13 +373,8 @@ struct TimerIndicator: View {
 
     private var isExpired: Bool { days <= 0 }
 
-    /// Gleiche Rechnung wie in den grossen Timern
     private var filledPetals: Int {
-        if isExpired { return FlowerGeometry.petalCount }
-        guard interval > 0 else { return 0 }
-        let share = Double(days) / Double(interval)
-        let filled = FlowerGeometry.petalCount - Int(share * Double(FlowerGeometry.petalCount))
-        return min(FlowerGeometry.petalCount, max(0, filled))
+        FlowerGeometry.filledPetals(remainingDays: days, interval: interval)
     }
 
     var body: some View {

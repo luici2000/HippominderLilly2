@@ -52,6 +52,11 @@
 			path = HippominderLilly2UITests;
 			sourceTree = "<group>";
 		};
+		C7UNITTEST0000000840FAF0 /* HippominderLilly2Tests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = HippominderLilly2Tests;
+			sourceTree = "<group>";
+		};
 		C7WATCH00C0000000840FAF00 /* WatchApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = WatchApp;
@@ -107,6 +112,7 @@
 				C7LOCA00300000000840FAF0 /* InfoPlist.xcstrings */,
 				C78557002D71AB7500840FAF /* . */,
 				C7UITEST010000000840FAF00 /* HippominderLilly2UITests */,
+				C7UNITTEST0000000840FAF0 /* HippominderLilly2Tests */,
 				C7WATCH00C0000000840FAF00 /* WatchApp */,
 				C7WATCH00D0000000840FAF00 /* Models */,
 				C78557412D734C0300840FAF /* Frameworks */,
@@ -170,6 +176,9 @@
 			);
 			dependencies = (
 				C78557142D71AB7700840FAF /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C7UNITTEST0000000840FAF0 /* HippominderLilly2Tests */,
 			);
 			name = HippominderLilly2Tests;
 			packageProductDependencies = (
@@ -370,6 +379,7 @@
 					"4Lilly/*",
 					"WatchApp/*",
 					"HippominderLilly2UITests/*",
+					"HippominderLilly2Tests/*",
 					"docs/*",
 					"docs/*/*",
 					"assets/*",
@@ -421,6 +431,7 @@
 					"4Lilly/*",
 					"WatchApp/*",
 					"HippominderLilly2UITests/*",
+					"HippominderLilly2Tests/*",
 					"docs/*",
 					"docs/*/*",
 					"assets/*",
