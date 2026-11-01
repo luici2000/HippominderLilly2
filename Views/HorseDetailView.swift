@@ -237,9 +237,11 @@ struct HorseDetailView: View {
 
                     ForEach(Horse.EventType.allCases, id: \.self) { eventType in
                         HStack {
+                            // Template-Assets: ohne Farbe waere das Symbol blau
                             Image(eventType.symbol)
                                 .resizable()
                                 .scaledToFit()
+                                .foregroundStyle(.primary)
                                 .frame(width: 20, height: 20)
                                 .opacity(0.7)
 

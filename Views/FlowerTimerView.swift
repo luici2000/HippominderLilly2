@@ -186,9 +186,12 @@ struct Symbol3DCircle: View {
                 )
                 .frame(width: 36, height: 36)
 
+            // Die Assets rendern als Template, brauchen also eine Farbe -
+            // sonst erscheinen sie in der Akzentfarbe statt schwarz
             Image(eventType.symbol)
                 .resizable()
                 .scaledToFit()
+                .foregroundStyle(.black)
                 .frame(width: 20, height: 20)
                 .opacity(0.85)
         }
