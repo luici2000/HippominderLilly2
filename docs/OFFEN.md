@@ -29,7 +29,17 @@ wurde.
 - [ ] **[Build]** Mini-Blumen in der Pferdeliste: sind die zwölf Blätter
       auf dem Gerät noch zählbar? Am Rechner war 30 pt die Untergrenze.
 - [ ] **[Build]** Uhr ansehen. Dort ist die Blume neu, vorher waren es
-      Ampelpunkte und ein Balken.
+      Ampelpunkte und ein Balken. Layout wurde bei 162–205 pt gerendert
+      geprüft und passt, auch auf der 40 mm.
+- [ ] **[Build, wichtig]** „War heute da" auf der Uhr testen. Der Rückkanal
+      Uhr → iPhone ist **neu und noch nie gelaufen**. Zu prüfen:
+      1. Termin auf der Uhr abhaken, während das iPhone in der Nähe ist →
+         kommt er im iPhone an?
+      2. Dasselbe mit iPhone außer Reichweite (Flugmodus), danach wieder
+         verbinden → wird die Meldung nachgereicht? Das läuft über
+         `transferUserInfo` und ist der eigentliche Stallfall.
+      3. Läuft keine Schleife? iPhone antwortet mit `syncToWatch`, die Uhr
+         darf darauf nicht erneut melden.
 
 ## Bekannte Schwachstellen
 

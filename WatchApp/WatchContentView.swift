@@ -150,7 +150,8 @@ struct WatchHorseDetailView: View {
                     WatchTimerCard(
                         eventType: eventType,
                         days: horse.tageBis(fuer: eventType),
-                        interval: horse.holeIntervall(fuer: eventType)
+                        interval: horse.holeIntervall(fuer: eventType),
+                        horse: horse
                     )
                 }
             }
@@ -166,6 +167,10 @@ struct WatchTimerCard: View {
     let eventType: Horse.EventType
     let days: Int
     let interval: Int
+    /// Fehlt in der Vorschau, dann wird nur angezeigt
+    var horse: Horse? = nil
+
+    @State private var gemeldet = false
 
     private var filledPetals: Int {
         FlowerGeometry.filledPetals(remainingDays: days, interval: interval)
@@ -176,6 +181,20 @@ struct WatchTimerCard: View {
         if days <= 7 { return .red }
         if days <= 14 { return .orange }
         return .green
+    }
+
+    /// Traegt den Termin sofort lokal ein, damit die Uhr nicht auf das
+    /// iPhone warten muss, und meldet ihn dorthin. Der naechste Sync vom
+    /// iPhone bestaetigt denselben Stand.
+    private func erledigt(_ horse: Horse) {
+        let jetzt = Date()
+        horse.setzeTermin(jetzt, fuer: eventType)
+        WatchSyncReceiver.shared.meldeTerminErledigt(
+            horseID: horse.id,
+            eventType: eventType,
+            datum: jetzt
+        )
+        withAnimation { gemeldet = true }
     }
 
     var body: some View {
@@ -203,6 +222,23 @@ struct WatchTimerCard: View {
             Text("Intervall: \(interval) Tage")
                 .font(.system(size: 9))
                 .foregroundColor(.secondary)
+
+            // Im Stall hat man die Uhr am Arm und das iPhone in der Tasche -
+            // darum laesst sich der Termin hier direkt abhaken.
+            if let horse {
+                Button {
+                    erledigt(horse)
+                } label: {
+                    Label(gemeldet ? "Eingetragen" : "War heute da",
+                          systemImage: gemeldet ? "checkmark.circle.fill" : "checkmark")
+                        .font(.system(size: 11, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .tint(gemeldet ? .green : .accentColor)
+                .disabled(gemeldet)
+                .padding(.top, 2)
+            }
         }
         .padding(8)
         .background(

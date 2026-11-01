@@ -34,6 +34,34 @@ class WatchSyncReceiver: NSObject, ObservableObject {
         WCSession.default.activate()
     }
 
+    /// Meldet dem iPhone, dass ein Termin heute erledigt wurde.
+    ///
+    /// Im Stall ist das iPhone oft nicht in Reichweite, darum
+    /// `transferUserInfo`: das stellt zu, sobald wieder Verbindung besteht,
+    /// statt die Meldung zu verlieren. Ist das iPhone erreichbar, geht
+    /// zusaetzlich sofort eine Nachricht raus.
+    func meldeTerminErledigt(horseID: UUID, eventType: Horse.EventType, datum: Date) {
+        guard WCSession.default.activationState == .activated else { return }
+
+        let payload: [String: Any] = [
+            Self.actionKey: Self.actionTerminErledigt,
+            "horseID": horseID.uuidString,
+            "eventType": eventType.rawValue,
+            "datum": datum.timeIntervalSince1970
+        ]
+
+        WCSession.default.transferUserInfo(payload)
+
+        if WCSession.default.isReachable {
+            WCSession.default.sendMessage(payload, replyHandler: nil)
+        }
+    }
+
+    /// Kennzeichnet Rueckmeldungen der Uhr. Ein Datensatz vom iPhone traegt
+    /// stattdessen "horses" - so lassen sich beide Richtungen unterscheiden.
+    static let actionKey = "action"
+    static let actionTerminErledigt = "terminErledigt"
+
     private func processPayload(_ payload: [String: Any]) {
         guard let container = modelContainer else { return }
         guard let horseDataArray = payload["horses"] as? [[String: Any]] else { return }

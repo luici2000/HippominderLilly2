@@ -66,6 +66,35 @@ class WatchSyncService: NSObject, ObservableObject {
             WCSession.default.sendMessage(payload, replyHandler: nil)
         }
     }
+
+    // MARK: - Rueckmeldung von der Uhr
+
+    /// Kennzeichnet Rueckmeldungen der Uhr (siehe WatchSyncReceiver)
+    private static let actionKey = "action"
+    private static let actionTerminErledigt = "terminErledigt"
+
+    /// Traegt einen auf der Uhr abgehakten Termin ein und spiegelt den
+    /// neuen Stand zurueck, damit beide Geraete uebereinstimmen.
+    fileprivate func verarbeiteUhrMeldung(_ payload: [String: Any]) {
+        guard payload[Self.actionKey] as? String == Self.actionTerminErledigt,
+              let container = modelContainer,
+              let idString = payload["horseID"] as? String,
+              let uuid = UUID(uuidString: idString),
+              let typRaw = payload["eventType"] as? String,
+              let eventType = Horse.EventType(rawValue: typRaw),
+              let stamp = payload["datum"] as? TimeInterval
+        else { return }
+
+        let context = container.mainContext
+        let descriptor = FetchDescriptor<Horse>(predicate: #Predicate { $0.id == uuid })
+        guard let horse = try? context.fetch(descriptor).first else { return }
+
+        horse.setzeTermin(Date(timeIntervalSince1970: stamp), fuer: eventType)
+        try? context.save()
+
+        NotificationService.shared.scheduleAllNotifications(for: horse)
+        syncToWatch()
+    }
 }
 
 // MARK: - WCSessionDelegate
@@ -76,6 +105,20 @@ extension WatchSyncService: WCSessionDelegate {
             Task { @MainActor in
                 self.syncToWatch()
             }
+        }
+    }
+
+    /// Sofortmeldung, wenn die Uhr gerade erreichbar ist
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        Task { @MainActor in
+            self.verarbeiteUhrMeldung(message)
+        }
+    }
+
+    /// Nachgereichte Meldung, wenn die Uhr ausser Reichweite war
+    nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
+        Task { @MainActor in
+            self.verarbeiteUhrMeldung(userInfo)
         }
     }
 
