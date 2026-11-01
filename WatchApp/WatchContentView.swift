@@ -100,19 +100,27 @@ struct WatchHorseRow: View {
                 }
             }
 
-            // Mini-Ampeln
-            HStack(spacing: 6) {
+            // Mini-Blumen statt Ampelpunkten: zeigen auch, wie weit
+            // das Intervall schon gelaufen ist
+            HStack(spacing: 7) {
                 ForEach(Horse.EventType.allCases, id: \.self) { eventType in
-                    HStack(spacing: 2) {
+                    let days = horse.tageBis(fuer: eventType)
+                    VStack(spacing: 1) {
                         Image(systemName: eventType.systemSymbol)
-                            .font(.system(size: 8))
-                        Circle()
-                            .fill(colorForDays(horse.tageBis(fuer: eventType)))
-                            .frame(width: 6, height: 6)
+                            .font(.system(size: 7))
+                            .foregroundColor(.secondary)
+                        WatchFlower(
+                            filledPetals: FlowerGeometry.filledPetals(
+                                remainingDays: days,
+                                interval: horse.holeIntervall(fuer: eventType)
+                            ),
+                            isExpired: days <= 0,
+                            color: colorForDays(days),
+                            size: 24
+                        )
                     }
                 }
             }
-            .foregroundColor(.secondary)
         }
         .padding(.vertical, 2)
     }
@@ -159,9 +167,8 @@ struct WatchTimerCard: View {
     let days: Int
     let interval: Int
 
-    private var progress: Double {
-        if days <= 0 { return 1.0 }
-        return 1.0 - (Double(days) / Double(interval))
+    private var filledPetals: Int {
+        FlowerGeometry.filledPetals(remainingDays: days, interval: interval)
     }
 
     private var statusColor: Color {
@@ -185,19 +192,13 @@ struct WatchTimerCard: View {
                     .foregroundColor(statusColor)
             }
 
-            // Fortschrittsbalken
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(height: 6)
-
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(statusColor)
-                        .frame(width: geo.size.width * min(1.0, max(0, progress)), height: 6)
-                }
-            }
-            .frame(height: 6)
+            WatchFlower(
+                filledPetals: filledPetals,
+                isExpired: days <= 0,
+                color: statusColor,
+                size: 44
+            )
+            .padding(.vertical, 2)
 
             Text("Intervall: \(interval) Tage")
                 .font(.system(size: 9))

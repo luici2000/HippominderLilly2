@@ -26,7 +26,12 @@ Aufbau, belegt durch Firmware und Gerätefoto:
   **fetter Punkt** (Segment 13 der Firmware), etwa 0,38 der Blumenbreite.
 - **Bei Alarm blinkt nur die Glocke**, nie die Symbole.
 
-Maße als Anteil der Blumenbreite, in `FlowerGeometry` bzw. `LCDGeometry`:
+Maße und Rechnung stehen **einmal** in `Models/FlowerGeometry.swift`
+(`FlowerGeometry` und `LCDGeometry`). Dort, weil das Watch-Target nur
+`WatchApp` und `Models` synchronisiert — so rechnen Uhr, iPhone und Mac
+mit denselben Werten. Bitte nicht wieder in die Views kopieren.
+
+Maße als Anteil der Blumenbreite:
 
 | | aus den PNGs | am Gerät gemessen |
 |---|---|---|
@@ -47,6 +52,11 @@ Maße als Anteil der Blumenbreite, in `FlowerGeometry` bzw. `LCDGeometry`:
   das macht den LCD-Charakter. Grundton olivgrau (#959585), gemessen.
 - **Blume** — `FlowerTimerView.swift`. Mathias' vorgerenderte
   Icon-Composer-PNGs mit den drei Farbschemata.
+
+Auch die Pferdeliste (`MiniRose` in `ContentView.swift`) und die Uhr
+(`WatchApp/WatchFlower.swift`) zeigen dieselbe Blume, nur kleiner — statt
+eines Ampelpunkts oder Balkens. Unter etwa 30 pt lassen sich die zwölf
+Blätter nicht mehr zählen; das wurde durch Rendern geprüft.
 
 Lichteinfall überall **−45°** (oben links). Bei gedrehten Blättern wird
 der Glanz gegenrotiert, sonst wandert das Licht mit.

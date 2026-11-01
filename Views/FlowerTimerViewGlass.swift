@@ -23,39 +23,6 @@
 
 import SwiftUI
 
-// MARK: - Proportionen aus den Original-PNGs
-
-/// Alle Werte als Anteil der Blumenbreite, vermessen an flower_6.png (1024x1024).
-/// Die Original-Firmware (docs/original_geraet/fet430_1.c) bestaetigt den Aufbau:
-/// 12 Segmente, "Rosen fangen bei 1 Uhr an".
-enum FlowerGeometry {
-    static let petalWidth: CGFloat = 0.117
-    static let petalLength: CGFloat = 0.255
-    /// Abstand Blumenmitte -> Mitte eines Bluetenblatts
-    static let radialDistance: CGFloat = 0.363
-    static let stampDiameter: CGFloat = 0.298
-    static let petalCount = 12
-
-    /// Winkel eines Blattes. Index 0 liegt auf 1 Uhr, dann im Uhrzeigersinn.
-    static func angle(for index: Int) -> Double {
-        Double(index + 1) * 30
-    }
-
-    /// Wie viele Blaetter gefuellt sind. Eine Quelle fuer alle drei
-    /// Darstellungen, damit sie nie auseinanderlaufen.
-    ///
-    /// Ein Blatt deckt ein Zwoelftel des Intervalls ab, die Blume ist also
-    /// schon voll bevor der Termin faellig ist - bei 90 Tagen ab 7 Tagen
-    /// Rest. Den Unterschied zu wirklich faellig macht der Mittelpunkt.
-    static func filledPetals(remainingDays: Int, interval: Int) -> Int {
-        if remainingDays <= 0 { return petalCount }
-        // interval 0 wuerde die Division zu .infinity machen, Int(.infinity) trappt
-        guard interval > 0 else { return 0 }
-        let remainingShare = Double(remainingDays) / Double(interval)
-        let filled = petalCount - Int(remainingShare * Double(petalCount))
-        return min(petalCount, max(0, filled))
-    }
-}
 
 // MARK: - Einzelnes Glas-Bluetenblatt
 

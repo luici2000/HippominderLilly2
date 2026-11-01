@@ -41,18 +41,6 @@ enum LCDPalette {
     static let bezel = Color(red: 0.34, green: 0.36, blue: 0.34)
 }
 
-// MARK: - Geometrie des Geraets
-
-/// Am Foto des Original-Displays vermessen. Weicht bewusst leicht von
-/// FlowerGeometry ab: die LCD-Segmente sind schmaler als in den PNG-Vorlagen,
-/// und der Punkt nach Ablauf ist deutlich fetter.
-enum LCDGeometry {
-    static let petalWidth: CGFloat = 0.089
-    static let petalLength: CGFloat = 0.23
-    static let radialDistance: CGFloat = 0.354
-    /// Punkt nach Ablauf - reicht fast an die Blattwurzeln
-    static let dotDiameter: CGFloat = 0.38
-}
 
 // MARK: - Eine Rose im LCD
 
