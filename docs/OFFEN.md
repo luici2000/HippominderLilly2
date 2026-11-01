@@ -33,11 +33,14 @@ wurde.
 
 ## Bekannte Schwachstellen
 
-- [ ] Die Symbole im Classic-Modus sind für ein Segment-LCD zu fein
-      gezeichnet, besonders die Spritze. Auf dem Original sind sie grob
-      und kräftig. Vergleich: `docs/original_geraet/Detail_Display.jpg`.
-- [ ] Der Umschalter hat jetzt drei Knöpfe. Auf schmalen Geräten prüfen,
-      ob „Classic" noch lesbar ist oder abgeschnitten wird.
+- [ ] Die Symbole im Classic-Modus sind für ein Segment-LCD fein
+      gezeichnet, besonders die Spritze; auf dem Original wirken sie
+      gröber. **Bewusst nicht geändert** — Mathias' Ansage war, seine
+      Grafiken zu verwenden und keine neuen zu erfinden. Falls gewünscht,
+      wäre der Weg: dieselben SVGs kräftiger rendern, nicht neu zeichnen.
+- [x] ~~Umschalter mit drei Knöpfen auf schmalen Geräten~~ — nachgemessen
+      bei 320, 375, 390 und 430 pt: nichts wird abgeschnitten, auch nicht
+      auf dem kleinsten iPhone SE.
 
 ## Für TestFlight
 

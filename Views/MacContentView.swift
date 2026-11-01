@@ -831,6 +831,8 @@ struct MacTimerCard: View {
 
     private var progress: Double {
         if days <= 0 { return 1.0 }
+        // interval 0 ergaebe -.infinity und damit eine NaN-Balkenbreite
+        guard interval > 0 else { return 0 }
         return 1.0 - (Double(days) / Double(interval))
     }
 

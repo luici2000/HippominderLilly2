@@ -28,11 +28,11 @@ struct FlowerTimerView: View {
         return f
     }()
 
-    // Berechne gefuellte Bluetenblaetter basierend auf verbleibendem Fortschritt
+    // Gemeinsame Rechnung aus Models/FlowerGeometry: faengt interval 0 ab
+    // (sonst wird die Division .infinity und Int(.infinity) stuerzt ab) und
+    // begrenzt auf 0...12, damit nie ein Bildname wie "flower_-18" entsteht.
     var filledPetals: Int {
-        if remainingDays <= 0 { return 12 } // Ueberfaellig = voll
-        let progress = Double(remainingDays) / Double(interval)
-        return 12 - Int(progress * 12)
+        FlowerGeometry.filledPetals(remainingDays: remainingDays, interval: interval)
     }
 
     // Timer ist abgelaufen wenn 0 oder negative Tage uebrig
