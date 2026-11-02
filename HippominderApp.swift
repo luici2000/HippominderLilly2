@@ -53,6 +53,9 @@ struct HippominderApp: App {
                     if newPhase == .active {
                         WatchSyncService.shared.syncToWatch()
                     }
+                    // Auch beim Verlassen: der Nutzer hat gerade vielleicht
+                    // einen Termin eingetragen, dann muss die Zahl sinken
+                    refreshBadge()
                 }
             #endif
         }
@@ -81,5 +84,15 @@ struct HippominderApp: App {
             NotificationService.shared.scheduleAllNotifications(for: horse)
         }
         NotificationService.shared.removeOrphanedNotifications(validHorseIDs: horses.map(\.id))
+        NotificationService.shared.updateBadge(for: horses)
+    }
+
+    /// Zahl am App-Symbol neu berechnen. Tage vergehen auch ohne die App,
+    /// darum bei jedem Wechsel der Szene statt nur beim Start.
+    private func refreshBadge() {
+        let context = sharedModelContainer.mainContext
+        let descriptor = FetchDescriptor<Horse>()
+        guard let horses = try? context.fetch(descriptor) else { return }
+        NotificationService.shared.updateBadge(for: horses)
     }
 }

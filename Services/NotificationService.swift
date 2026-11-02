@@ -12,6 +12,7 @@
 
 import Foundation
 import UserNotifications
+import SwiftData
 
 class NotificationService {
     static let shared = NotificationService()
@@ -141,6 +142,31 @@ class NotificationService {
 
     /// Kennung der woechentlichen Wiederholung, abgeleitet von der Hauptmeldung
     static func overdueIdentifier(_ base: String) -> String { base + "-ueberfaellig" }
+
+    // MARK: - Zahl am App-Symbol
+
+    /// Setzt die rote Zahl am App-Symbol auf die Anzahl ueberfaelliger
+    /// Termine ueber alle Pferde. So ist vom Startbildschirm aus sichtbar,
+    /// dass etwas ansteht, ohne die App zu oeffnen.
+    func updateBadge(for horses: [Horse]) {
+        let ueberfaellig = horses.reduce(0) { summe, horse in
+            summe + Horse.EventType.allCases.filter { horse.tageBis(fuer: $0) <= 0 }.count
+        }
+        UNUserNotificationCenter.current().setBadgeCount(ueberfaellig) { error in
+            if let error {
+                print("Error setting badge: \(error)")
+            }
+        }
+    }
+
+    /// Variante fuer Aufrufer, die nur ihren Kontext zur Hand haben -
+    /// die Zahl zaehlt immer alle Pferde, nicht nur das gerade bearbeitete.
+    @MainActor
+    func updateBadge(using context: ModelContext) {
+        let descriptor = FetchDescriptor<Horse>()
+        guard let horses = try? context.fetch(descriptor) else { return }
+        updateBadge(for: horses)
+    }
 
     /// Schedule notifications for all event types of a horse
     func scheduleAllNotifications(for horse: Horse) {

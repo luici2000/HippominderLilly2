@@ -273,6 +273,8 @@ struct ContentView: View {
         }
         // Sofort sichern, damit das Loeschen auch bei sofortigem App-Ende erhalten bleibt
         try? modelContext.save()
+        // Sonst bliebe die Zahl am App-Symbol fuer ein geloeschtes Pferd stehen
+        NotificationService.shared.updateBadge(using: modelContext)
         WatchSyncService.shared.syncToWatch()
     }
 }

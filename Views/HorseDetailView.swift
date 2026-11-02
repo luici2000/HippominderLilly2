@@ -307,6 +307,7 @@ struct HorseDetailView: View {
                 Button("War heute da") {
                     horse.setzeTermin(debugSettings.simulatedDate, fuer: eventType)
                     NotificationService.shared.scheduleAllNotifications(for: horse)
+                    NotificationService.shared.updateBadge(using: modelContext)
                     WatchSyncService.shared.syncToWatch()
                 }
                 Button("Datum manuell wählen") {
@@ -324,6 +325,7 @@ struct HorseDetailView: View {
                         set: {
                             horse.setzeTermin($0, fuer: eventType)
                             NotificationService.shared.scheduleAllNotifications(for: horse)
+                            NotificationService.shared.updateBadge(using: modelContext)
                             WatchSyncService.shared.syncToWatch()
                         }
                     ),

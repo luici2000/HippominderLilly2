@@ -93,6 +93,7 @@ class WatchSyncService: NSObject, ObservableObject {
         try? context.save()
 
         NotificationService.shared.scheduleAllNotifications(for: horse)
+        NotificationService.shared.updateBadge(using: context)
         syncToWatch()
     }
 }
