@@ -124,10 +124,7 @@ struct HorseDetailView: View {
                 switch globalSettings.designMode {
                 case .glass:
                     ZStack(alignment: .bottomTrailing) {
-                        GlassFlowerStage(
-                            backgroundImage: horse.backgroundImage,
-                            format: Self.buehnenFormat
-                        ) {
+                        GlassFlowerStage(backgroundImage: horse.backgroundImage) { blumengroesse in
                             HStack(alignment: .top, spacing: 4) {
                                 ForEach(Horse.EventType.allCases, id: \.self) { eventType in
                                     Button(action: {
@@ -139,14 +136,14 @@ struct HorseDetailView: View {
                                             remainingDays: horse.tageBis(fuer: eventType),
                                             interval: horse.holeIntervall(fuer: eventType),
                                             nextDate: horse.naechsterTermin(fuer: eventType),
-                                            tint: globalSettings.glassTint
+                                            tint: globalSettings.glassTint,
+                                            flowerSize: blumengroesse
                                         )
                                     }
                                     .buttonStyle(.plain)
                                     .accessibilityIdentifier("flower_\(eventType.rawValue)")
                                 }
                             }
-                            .padding(.vertical, 18)
                         }
 
                         // Nur das Symbol, nicht beschriftet: der Knopf lag
@@ -401,9 +398,9 @@ struct HorseDetailView: View {
 
     // MARK: - Aktive Benachrichtigungen zaehlen
 
-    /// Seitenverhaeltnis der Fotobuehne (Breite zu Hoehe). Der Zuschnitt
-    /// benutzt dasselbe Mass, damit das gewaehlte Bild genau passt.
-    static let buehnenFormat: CGFloat = 1.7
+    /// Format der Fotobuehne - der Zuschnitt benutzt dasselbe Mass,
+    /// damit das gewaehlte Bild genau hineinpasst
+    static var buehnenFormat: CGFloat { GlassFlowerStageMasse.format }
 
     /// Mindestens ein Termin faellig - im Original blinkt dann die Glocke
     private var hasDueEvent: Bool {

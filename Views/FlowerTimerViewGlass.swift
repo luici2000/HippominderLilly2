@@ -271,6 +271,24 @@ struct GlassFlowerTimerView: View {
     }
 }
 
+// MARK: - Masse der Fotobuehne
+
+/// Form und Blumengroesse der Buehne. Beide Werte haengen zusammen: das
+/// Format bestimmt die Hoehe, in die drei Blumen samt Beschriftung passen
+/// muessen - auf dem iPhone SE genauso wie auf dem Pro Max.
+enum GlassFlowerStageMasse {
+    /// Breite zu Hoehe. 1,45 statt breiter, weil sonst auf schmalen
+    /// Geraeten die Hoehe fuer Blume plus drei Textzeilen nicht reicht.
+    static let format: CGFloat = 1.45
+
+    /// Die groesste Blume, bei der drei nebeneinander in die Breite passen.
+    /// Fest 106 pt waren auf dem iPhone SE breiter als der Bildschirm.
+    static func blumengroesse(fuerBreite breite: CGFloat) -> CGFloat {
+        let proSpalte = (breite - 24) / 3
+        return min(112, max(72, proSpalte))
+    }
+}
+
 // MARK: - Fotobuehne fuer die Glasblumen
 
 /// Haelt das Pferdefoto hinter den Glasblumen, damit das Glas etwas zu brechen hat.
@@ -278,25 +296,24 @@ struct GlassFlowerStage<Content: View>: View {
     let backgroundImage: Image?
     /// Breite zu Hoehe. Der Zuschnitt des Hintergrundfotos benutzt dasselbe
     /// Mass, damit das gewaehlte Bild genau passt und nichts wegfaellt.
-    var format: CGFloat = 1.7
-    @ViewBuilder var content: Content
+    var format: CGFloat = GlassFlowerStageMasse.format
+    /// Bekommt die Blumengroesse, die in die gemessene Breite passt
+    @ViewBuilder var content: (CGFloat) -> Content
 
     var body: some View {
-        content
-            .frame(maxWidth: .infinity)
-            // Mindesthoehe aus dem Format, waechst aber mit, wenn der Text
-            // bei grosser Systemschrift mehr Platz braucht
-            .frame(minHeight: minimalHoehe)
-            .background { untergrund }
-            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-    }
-
-    @Environment(\.horizontalSizeClass) private var sizeClass
-
-    private var minimalHoehe: CGFloat {
-        // Nur ein Richtwert: die echte Breite kennt erst das Layout.
-        // Zu klein ist unkritisch, der Inhalt schiebt dann auf.
-        (sizeClass == .regular ? 520 : 360) / format
+        GeometryReader { geo in
+            content(GlassFlowerStageMasse.blumengroesse(fuerBreite: geo.size.width))
+                .frame(width: geo.size.width, height: geo.size.height)
+                // Schrift nicht unbegrenzt wachsen lassen, sonst sprengt
+                // sie die feste Buehne
+                .dynamicTypeSize(...DynamicTypeSize.xLarge)
+        }
+        .background { untergrund }
+        // Feste Form: die Breite gibt das Geraet vor, die Hoehe folgt aus
+        // dem Format. Damit ist die Buehne auf jedem iPhone gleich
+        // proportioniert und der Zuschnitt passt genau hinein.
+        .aspectRatio(format, contentMode: .fit)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 
     private var untergrund: some View {
@@ -306,6 +323,10 @@ struct GlassFlowerStage<Content: View>: View {
                     backgroundImage
                         .resizable()
                         .scaledToFill()
+                        // Ohne clipped() bleibt das ueberstehende Bild
+                        // layoutwirksam und sprengt die Buehne - genau das
+                        // ging auf Mathias' iPhone schief.
+                        .clipped()
                         // Echtes Glas zeigt den Hintergrund unscharf. Dazu
                         // praktisch: helle Fotos schlucken sonst die
                         // Bluetenblaetter, weil beide hell sind.
@@ -344,14 +365,15 @@ struct GlassFlowerStage<Content: View>: View {
 #if DEBUG
 #Preview("Glasblumen auf Foto") {
     // Werte aus Horse.preview
-    GlassFlowerStage(backgroundImage: nil) {
+    GlassFlowerStage(backgroundImage: nil) { groesse in
         HStack(alignment: .top, spacing: 2) {
             GlassFlowerTimerView(
                 eventType: .hufschmied,
                 remainingDays: 151,
                 interval: 180,
                 nextDate: Date().addingTimeInterval(151 * 86400),
-                tint: Color(red: 0.34, green: 0.62, blue: 0.94)
+                tint: Color(red: 0.34, green: 0.62, blue: 0.94),
+                flowerSize: groesse
             )
 
             GlassFlowerTimerView(
@@ -359,7 +381,8 @@ struct GlassFlowerStage<Content: View>: View {
                 remainingDays: 46,
                 interval: 49,
                 nextDate: Date().addingTimeInterval(46 * 86400),
-                tint: Color(red: 0.34, green: 0.62, blue: 0.94)
+                tint: Color(red: 0.34, green: 0.62, blue: 0.94),
+                flowerSize: groesse
             )
 
             GlassFlowerTimerView(
@@ -367,12 +390,11 @@ struct GlassFlowerStage<Content: View>: View {
                 remainingDays: 11,
                 interval: 101,
                 nextDate: Date().addingTimeInterval(11 * 86400),
-                tint: Color(red: 0.34, green: 0.62, blue: 0.94)
+                tint: Color(red: 0.34, green: 0.62, blue: 0.94),
+                flowerSize: groesse
             )
         }
-        .padding(.vertical, 14)
     }
-    .frame(height: 230)
     .padding()
 }
 #endif
