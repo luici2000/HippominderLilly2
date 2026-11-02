@@ -30,185 +30,381 @@ struct ContentView: View {
     @State private var navigationPath = NavigationPath()
     @State private var demoSeeded = false
     @State private var notificationsDumped = false
+    /// Auf dem iPad gewaehltes Pferd (zweispaltige Ansicht)
+    @State private var ausgewaehltesPferd: Horse?
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
+        Group {
+            // Auf dem iPad zwei Spalten, auf dem iPhone unveraendert der
+            // bisherige Stapel - so bleibt die kleine Ansicht unberuehrt.
+            if sizeClass == .regular {
+                geteilteAnsicht
+            } else {
+                stapelAnsicht
+            }
+        }
+        .onAppear { seedDemoHorseIfRequested() }
+        .sheet(isPresented: $showingAddHorse, onDismiss: {
+            WatchSyncService.shared.syncToWatch()
+        }) {
+            AddHorseView()
+        }
+        .sheet(isPresented: $showingContacts) { ContactsView() }
+        .sheet(isPresented: $showingPaywall) { PaywallView() }
+        .sheet(isPresented: $showingBetaInfo) { BetaInfoView() }
+    }
+
+    // MARK: - iPhone: ein Stapel
+
+    private var stapelAnsicht: some View {
         NavigationStack(path: $navigationPath) {
             VStack(spacing: 0) {
-                // Header-Bereich: Icons + Logo + Farbschema
-                VStack(spacing: 0) {
-                    // Obere Zeile: Kontakte-Button | Logo | Pferd+-Button
-                    HStack(alignment: .top) {
-                        // Kontakte-Button (Icon + Label getrennt)
-                        Button(action: { showingContacts = true }) {
-                            VStack(spacing: 3) {
-                                Image(systemName: "person.2.fill")
-                                    .font(.system(size: 20))
-                                    .frame(width: 44, height: 36)
-                                Text("Kontakte")
-                                    .font(.system(size: 9, weight: .medium))
-                            }
-                            .foregroundColor(.secondary)
+            // Header-Bereich: Icons + Logo + Farbschema
+            VStack(spacing: 0) {
+                // Obere Zeile: Kontakte-Button | Logo | Pferd+-Button
+                HStack(alignment: .top) {
+                    // Kontakte-Button (Icon + Label getrennt)
+                    Button(action: { showingContacts = true }) {
+                        VStack(spacing: 3) {
+                            Image(systemName: "person.2.fill")
+                                .font(.system(size: 20))
+                                .frame(width: 44, height: 36)
+                            Text("Kontakte")
+                                .font(.system(size: 9, weight: .medium))
                         }
-                        .buttonStyle(.plain)
+                        .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
 
-                        Spacer()
+                    Spacer()
 
-                        // Logo zentriert (5x tippen = Beta-Info / Debug)
-                        Image("hippominder_logo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 50)
-                            .onTapGesture {
-                                logoTapCount += 1
-                                if logoTapCount >= 5 {
-                                    showingBetaInfo = true
-                                    logoTapCount = 0
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                    logoTapCount = 0
-                                }
+                    // Logo zentriert (5x tippen = Beta-Info / Debug)
+                    Image("hippominder_logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 50)
+                        .onTapGesture {
+                            logoTapCount += 1
+                            if logoTapCount >= 5 {
+                                showingBetaInfo = true
+                                logoTapCount = 0
                             }
-
-                        Spacer()
-
-                        // Pferd hinzufuegen Button (Icon + Label getrennt)
-                        Button(action: {
-                            if storeManager.canAddHorse(currentCount: horses.count) {
-                                showingAddHorse = true
-                            } else {
-                                showingPaywall = true
-                            }
-                        }) {
-                            VStack(spacing: 3) {
-                                Image("plushorse")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 32, height: 32)
-                                    .clipShape(Circle())
-                                    .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
-                                    .frame(height: 36)
-                                Text("Pferd +")
-                                    .font(.system(size: 9, weight: .medium))
-                                    .foregroundColor(.secondary)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                logoTapCount = 0
                             }
                         }
-                        .buttonStyle(.plain)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.top, 4)
 
-                    // Farbschema-Auswahl rechts. Glas: drei Schemata + freie Farbe,
-                    // Blume: nur die drei Schemata, Classic ist monochrom.
-                    if globalSettings.designMode != .classic {
-                        HStack {
-                            Spacer()
-                            GlobalColorPicker(
-                                selectedScheme: Binding(
-                                    get: {
-                                        globalSettings.designMode == .glass
-                                            ? globalSettings.matchingColorScheme
-                                            : globalSettings.flowerColorScheme
-                                    },
-                                    set: { scheme in
-                                        guard let scheme else { return }
-                                        if globalSettings.designMode == .glass {
-                                            // Schema + Glasfarbe
-                                            globalSettings.flowerColorScheme = scheme
-                                        } else {
-                                            // Blume: nur das Schema, die frei gewaehlte
-                                            // Glasfarbe bleibt erhalten
-                                            globalSettings.flowerColorSchemeIndex =
-                                                FlowerColorScheme.allCases.firstIndex(of: scheme) ?? 0
-                                        }
-                                    }
-                                ),
-                                customTint: Binding(
-                                    get: { globalSettings.glassTint },
-                                    set: { globalSettings.glassTint = $0 }
-                                ),
-                                showsCustomTint: globalSettings.designMode == .glass
-                            )
+                    Spacer()
+
+                    // Pferd hinzufuegen Button (Icon + Label getrennt)
+                    Button(action: {
+                        if storeManager.canAddHorse(currentCount: horses.count) {
+                            showingAddHorse = true
+                        } else {
+                            showingPaywall = true
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.top, 2)
-                    }
-
-                    // Debug-Anzeige (nur in Debug-Builds)
-                    #if DEBUG
-                    if debugSettings.timeOffsetDays != 0 {
-                        Text("DEBUG: \(debugSettings.simulatedDateString)")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 2)
-                            .background(Color.orange.opacity(0.2))
-                            .cornerRadius(4)
-                            .padding(.top, 2)
-                    }
-                    #endif
-                }
-                .padding(.bottom, 4)
-                .frame(maxWidth: .infinity)
-                .background(.ultraThinMaterial)
-
-                // Inhalt
-                Group {
-                    if horses.isEmpty {
-                        // Leerer Zustand
-                        VStack(spacing: 20) {
-                            Spacer()
-
-                            Image("horse_silhouette")
+                    }) {
+                        VStack(spacing: 3) {
+                            Image("plushorse")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(height: 80)
-                                .opacity(0.15)
-
-                            Text("Noch keine Pferde")
-                                .font(.title2)
-                                .foregroundColor(.gray)
-
-                            Button(action: { showingAddHorse = true }) {
-                                Label("Pferd hinzufügen", systemImage: "plus.circle.fill")
-                                    .font(.headline)
-                            }
-
-                            Spacer()
+                                .frame(width: 32, height: 32)
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+                                .frame(height: 36)
+                            Text("Pferd +")
+                                .font(.system(size: 9, weight: .medium))
+                                .foregroundColor(.secondary)
                         }
-                    } else {
-                        // Pferdeliste
-                        List {
-                            ForEach(horses) { horse in
-                                NavigationLink(destination: HorseDetailView(horse: horse)) {
-                                    HorseRowView(horse: horse)
-                                }
-                                .accessibilityIdentifier("horseRow_\(horse.name)")
-                            }
-                            .onDelete(perform: deleteHorses)
-                        }
-                        .listStyle(.plain)
                     }
+                    .buttonStyle(.plain)
                 }
+                .padding(.horizontal, 12)
+                .padding(.top, 4)
+
+                // Farbschema-Auswahl rechts. Glas: drei Schemata + freie Farbe,
+                // Blume: nur die drei Schemata, Classic ist monochrom.
+                if globalSettings.designMode != .classic {
+                    HStack {
+                        Spacer()
+                        GlobalColorPicker(
+                            selectedScheme: Binding(
+                                get: {
+                                    globalSettings.designMode == .glass
+                                        ? globalSettings.matchingColorScheme
+                                        : globalSettings.flowerColorScheme
+                                },
+                                set: { scheme in
+                                    guard let scheme else { return }
+                                    if globalSettings.designMode == .glass {
+                                        // Schema + Glasfarbe
+                                        globalSettings.flowerColorScheme = scheme
+                                    } else {
+                                        // Blume: nur das Schema, die frei gewaehlte
+                                        // Glasfarbe bleibt erhalten
+                                        globalSettings.flowerColorSchemeIndex =
+                                            FlowerColorScheme.allCases.firstIndex(of: scheme) ?? 0
+                                    }
+                                }
+                            ),
+                            customTint: Binding(
+                                get: { globalSettings.glassTint },
+                                set: { globalSettings.glassTint = $0 }
+                            ),
+                            showsCustomTint: globalSettings.designMode == .glass
+                        )
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.top, 2)
+                }
+
+                // Debug-Anzeige (nur in Debug-Builds)
+                #if DEBUG
+                if debugSettings.timeOffsetDays != 0 {
+                    Text("DEBUG: \(debugSettings.simulatedDateString)")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.orange.opacity(0.2))
+                        .cornerRadius(4)
+                        .padding(.top, 2)
+                }
+                #endif
+            }
+            .padding(.bottom, 4)
+            .frame(maxWidth: .infinity)
+            .background(.ultraThinMaterial)
+
+            // Inhalt
+            Group {
+                if horses.isEmpty {
+                    // Leerer Zustand
+                    VStack(spacing: 20) {
+                        Spacer()
+
+                        Image("horse_silhouette")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 80)
+                            .opacity(0.15)
+
+                        Text("Noch keine Pferde")
+                            .font(.title2)
+                            .foregroundColor(.gray)
+
+                        Button(action: { showingAddHorse = true }) {
+                            Label("Pferd hinzufügen", systemImage: "plus.circle.fill")
+                                .font(.headline)
+                        }
+
+                        Spacer()
+                    }
+                } else {
+                    // Pferdeliste
+                    List {
+                        ForEach(horses) { horse in
+                            NavigationLink(destination: HorseDetailView(horse: horse)) {
+                                HorseRowView(horse: horse)
+                            }
+                            .accessibilityIdentifier("horseRow_\(horse.name)")
+                        }
+                        .onDelete(perform: deleteHorses)
+                    }
+                    .listStyle(.plain)
+                }
+            }
             }
             .navigationBarHidden(true)
             .navigationDestination(for: Horse.self) { horse in
                 HorseDetailView(horse: horse)
             }
-            .onAppear { seedDemoHorseIfRequested() }
-            .sheet(isPresented: $showingAddHorse, onDismiss: {
-                WatchSyncService.shared.syncToWatch()
-            }) {
-                AddHorseView()
+        }
+    }
+
+    // MARK: - iPad: Liste links, Pferd rechts
+
+    private var geteilteAnsicht: some View {
+        NavigationSplitView {
+            VStack(spacing: 0) {
+            // Header-Bereich: Icons + Logo + Farbschema
+            VStack(spacing: 0) {
+                // Obere Zeile: Kontakte-Button | Logo | Pferd+-Button
+                HStack(alignment: .top) {
+                    // Kontakte-Button (Icon + Label getrennt)
+                    Button(action: { showingContacts = true }) {
+                        VStack(spacing: 3) {
+                            Image(systemName: "person.2.fill")
+                                .font(.system(size: 20))
+                                .frame(width: 44, height: 36)
+                            Text("Kontakte")
+                                .font(.system(size: 9, weight: .medium))
+                        }
+                        .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(.plain)
+
+                    Spacer()
+
+                    // Logo zentriert (5x tippen = Beta-Info / Debug)
+                    Image("hippominder_logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 50)
+                        .onTapGesture {
+                            logoTapCount += 1
+                            if logoTapCount >= 5 {
+                                showingBetaInfo = true
+                                logoTapCount = 0
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                logoTapCount = 0
+                            }
+                        }
+
+                    Spacer()
+
+                    // Pferd hinzufuegen Button (Icon + Label getrennt)
+                    Button(action: {
+                        if storeManager.canAddHorse(currentCount: horses.count) {
+                            showingAddHorse = true
+                        } else {
+                            showingPaywall = true
+                        }
+                    }) {
+                        VStack(spacing: 3) {
+                            Image("plushorse")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 32, height: 32)
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+                                .frame(height: 36)
+                            Text("Pferd +")
+                                .font(.system(size: 9, weight: .medium))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 12)
+                .padding(.top, 4)
+
+                // Farbschema-Auswahl rechts. Glas: drei Schemata + freie Farbe,
+                // Blume: nur die drei Schemata, Classic ist monochrom.
+                if globalSettings.designMode != .classic {
+                    HStack {
+                        Spacer()
+                        GlobalColorPicker(
+                            selectedScheme: Binding(
+                                get: {
+                                    globalSettings.designMode == .glass
+                                        ? globalSettings.matchingColorScheme
+                                        : globalSettings.flowerColorScheme
+                                },
+                                set: { scheme in
+                                    guard let scheme else { return }
+                                    if globalSettings.designMode == .glass {
+                                        // Schema + Glasfarbe
+                                        globalSettings.flowerColorScheme = scheme
+                                    } else {
+                                        // Blume: nur das Schema, die frei gewaehlte
+                                        // Glasfarbe bleibt erhalten
+                                        globalSettings.flowerColorSchemeIndex =
+                                            FlowerColorScheme.allCases.firstIndex(of: scheme) ?? 0
+                                    }
+                                }
+                            ),
+                            customTint: Binding(
+                                get: { globalSettings.glassTint },
+                                set: { globalSettings.glassTint = $0 }
+                            ),
+                            showsCustomTint: globalSettings.designMode == .glass
+                        )
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.top, 2)
+                }
+
+                // Debug-Anzeige (nur in Debug-Builds)
+                #if DEBUG
+                if debugSettings.timeOffsetDays != 0 {
+                    Text("DEBUG: \(debugSettings.simulatedDateString)")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.orange.opacity(0.2))
+                        .cornerRadius(4)
+                        .padding(.top, 2)
+                }
+                #endif
             }
-            .sheet(isPresented: $showingContacts) {
-                ContactsView()
+            .padding(.bottom, 4)
+            .frame(maxWidth: .infinity)
+            .background(.ultraThinMaterial)
+
+            // Inhalt
+            Group {
+                if horses.isEmpty {
+                    // Leerer Zustand
+                    VStack(spacing: 20) {
+                        Spacer()
+
+                        Image("horse_silhouette")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 80)
+                            .opacity(0.15)
+
+                        Text("Noch keine Pferde")
+                            .font(.title2)
+                            .foregroundColor(.gray)
+
+                        Button(action: { showingAddHorse = true }) {
+                            Label("Pferd hinzufügen", systemImage: "plus.circle.fill")
+                                .font(.headline)
+                        }
+
+                        Spacer()
+                    }
+                } else {
+                    // Pferdeliste
+                    List(selection: $ausgewaehltesPferd) {
+                        ForEach(horses) { horse in
+                            HorseRowView(horse: horse)
+                                .tag(horse)
+                                .accessibilityIdentifier("horseRow_\(horse.name)")
+                        }
+                        .onDelete(perform: deleteHorses)
+                    }
+                    .listStyle(.plain)
+                }
             }
-            .sheet(isPresented: $showingPaywall) {
-                PaywallView()
             }
-            .sheet(isPresented: $showingBetaInfo) {
-                BetaInfoView()
+            .navigationBarHidden(true)
+        } detail: {
+            if let pferd = ausgewaehltesPferd {
+                HorseDetailView(horse: pferd)
+            } else {
+                auswahlHinweis
             }
+        }
+        .navigationSplitViewStyle(.balanced)
+    }
+
+    /// Rechte Spalte, solange nichts gewaehlt ist
+    private var auswahlHinweis: some View {
+        VStack(spacing: 14) {
+            Image("horse_silhouette")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 90)
+                .opacity(0.15)
+            Text("Pferd auswählen")
+                .font(.title3)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -267,8 +463,12 @@ struct ContentView: View {
     private func deleteHorses(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
-                NotificationService.shared.removeAllNotifications(for: horses[index])
-                modelContext.delete(horses[index])
+                let pferd = horses[index]
+                // Sonst zeigt die rechte Spalte auf dem iPad ein
+                // geloeschtes Pferd weiter an
+                if ausgewaehltesPferd == pferd { ausgewaehltesPferd = nil }
+                NotificationService.shared.removeAllNotifications(for: pferd)
+                modelContext.delete(pferd)
             }
         }
         // Sofort sichern, damit das Loeschen auch bei sofortigem App-Ende erhalten bleibt

@@ -60,6 +60,17 @@ wurde.
       4. Liegen `AppIcon-Ueberfaellig@2x/@3x.png` wirklich flach im Bundle?
          In einem Unterordner findet iOS sie nicht.
 
+- [ ] **[Build]** iPad-Layout prüfen. Auf dem iPad läuft jetzt eine
+      zweispaltige Ansicht (Liste links, Pferd rechts), auf dem iPhone
+      unverändert der bisherige Stapel. Zu prüfen:
+      1. iPad: Pferd antippen → erscheint es rechts? Vorher steht dort
+         „Pferd auswählen".
+      2. iPad: Pferd löschen, das gerade rechts steht → leert sich die
+         rechte Spalte, oder zeigt sie ein gelöschtes Tier?
+      3. iPhone: Navigation muss **genau wie vorher** funktionieren —
+         der Zweig ist unverändert, aber der Umbau war invasiv.
+      4. Quer/Hochformat und Splitscreen auf dem iPad.
+
 ## Bekannte Schwachstellen
 
 - [ ] Die Symbole im Classic-Modus sind für ein Segment-LCD fein
