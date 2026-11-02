@@ -37,34 +37,36 @@ struct GlassPetal: View {
             // Sattes, getoentes Milchglas
             Capsule()
                 .fill(.ultraThinMaterial)
-                .overlay { Capsule().fill(tint.opacity(0.74)) }
+                .overlay { Capsule().fill(tint.opacity(0.85)) }
                 .overlay { specular(strength: 0.6) }
                 .overlay {
                     Capsule().strokeBorder(
                         LinearGradient(
-                            colors: [.white.opacity(0.5), .white.opacity(0.16)],
+                            colors: [.white.opacity(0.6), .white.opacity(0.2)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
                         lineWidth: 1
                     )
                 }
-                .shadow(color: .black.opacity(0.28), radius: 2, x: 0, y: 1)
+                // Dunkler Saum: gibt dem Blatt auch vor hellem Foto eine Kante
+                .shadow(color: .black.opacity(0.5), radius: 2.5, x: 0, y: 1)
         } else {
             // Klares Fensterglas - nur Kontur, maximaler Kontrast zum gefuellten
             Capsule()
-                .fill(.white.opacity(0.05))
-                .overlay { specular(strength: 0.26) }
+                .fill(.black.opacity(0.1))
+                .overlay { specular(strength: 0.3) }
                 .overlay {
                     Capsule().strokeBorder(
                         LinearGradient(
-                            colors: [.white.opacity(0.42), .white.opacity(0.14)],
+                            colors: [.white.opacity(0.65), .white.opacity(0.28)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
                         lineWidth: 1
                     )
                 }
+                .shadow(color: .black.opacity(0.35), radius: 1.5, x: 0, y: 1)
         }
     }
 
@@ -277,12 +279,26 @@ struct GlassFlowerStage<Content: View>: View {
     @ViewBuilder var content: Content
 
     var body: some View {
+        // Der Inhalt bestimmt die Hoehe, das Foto liegt dahinter. Vorher
+        // war es umgekehrt mit fester Hoehe - bei groesserer Systemschrift
+        // wurde der Text dann abgeschnitten.
+        content
+            .frame(maxWidth: .infinity)
+            .background { untergrund }
+            .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    private var untergrund: some View {
         ZStack {
             Group {
                 if let backgroundImage {
                     backgroundImage
                         .resizable()
                         .scaledToFill()
+                        // Echtes Glas zeigt den Hintergrund unscharf. Dazu
+                        // praktisch: helle Fotos schlucken sonst die
+                        // Bluetenblaetter, weil beide hell sind.
+                        .blur(radius: 7)
                 } else {
                     LinearGradient(
                         colors: [
@@ -294,21 +310,19 @@ struct GlassFlowerStage<Content: View>: View {
                     )
                 }
             }
-            // Foto beruhigen, damit die Glasfarbe traegt
+            // Deutlich abdunkeln: die Blumen muessen auch auf einem hellen
+            // Foto lesbar bleiben, nicht nur auf einem dunklen.
             .overlay(
                 LinearGradient(
                     colors: [
-                        Color(red: 0.07, green: 0.08, blue: 0.11).opacity(0.2),
-                        Color(red: 0.07, green: 0.08, blue: 0.11).opacity(0.32)
+                        Color(red: 0.07, green: 0.08, blue: 0.11).opacity(0.42),
+                        Color(red: 0.07, green: 0.08, blue: 0.11).opacity(0.55)
                     ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
             )
-
-            content
         }
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 }
 

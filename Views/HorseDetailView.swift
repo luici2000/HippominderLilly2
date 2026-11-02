@@ -141,28 +141,24 @@ struct HorseDetailView: View {
                                     .accessibilityIdentifier("flower_\(eventType.rawValue)")
                                 }
                             }
-                            .padding(.vertical, 16)
+                            .padding(.vertical, 18)
                         }
-                        .frame(height: 250)
 
-                        // Hintergrundfoto waehlen
+                        // Nur das Symbol, nicht beschriftet: der Knopf lag
+                        // sonst auf dem Datum der dritten Blume
                         PhotosPicker(selection: $selectedBackgroundItem, matching: .images) {
-                            HStack(spacing: 5) {
-                                Image(systemName: "photo.on.rectangle.angled")
-                                    .font(.system(size: 12, weight: .semibold))
-                                Text("Hintergrund")
-                                    .font(.caption2.weight(.semibold))
-                            }
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background {
-                                Capsule().fill(.ultraThinMaterial)
-                                    .overlay { Capsule().fill(.white.opacity(0.12)) }
-                                    .overlay { Capsule().strokeBorder(.white.opacity(0.45), lineWidth: 0.5) }
-                            }
+                            Image(systemName: "photo.on.rectangle.angled")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 30, height: 30)
+                                .background {
+                                    Circle().fill(.ultraThinMaterial)
+                                        .overlay { Circle().fill(.black.opacity(0.25)) }
+                                        .overlay { Circle().strokeBorder(.white.opacity(0.45), lineWidth: 0.5) }
+                                }
                         }
-                        .padding(10)
+                        .padding(8)
+                        .accessibilityLabel("Hintergrundfoto wählen")
                     }
                     .padding(.horizontal, 12)
 
