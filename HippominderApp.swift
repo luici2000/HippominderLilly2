@@ -85,6 +85,9 @@ struct HippominderApp: App {
         }
         NotificationService.shared.removeOrphanedNotifications(validHorseIDs: horses.map(\.id))
         NotificationService.shared.updateBadge(for: horses)
+        #if os(iOS)
+        AppIconService.aktualisiere(for: horses)
+        #endif
     }
 
     /// Zahl am App-Symbol neu berechnen. Tage vergehen auch ohne die App,
@@ -94,5 +97,8 @@ struct HippominderApp: App {
         let descriptor = FetchDescriptor<Horse>()
         guard let horses = try? context.fetch(descriptor) else { return }
         NotificationService.shared.updateBadge(for: horses)
+        #if os(iOS)
+        AppIconService.aktualisiere(for: horses)
+        #endif
     }
 }

@@ -12,5 +12,23 @@
     <string>Hippominder möchte dich an Termine erinnern.</string>
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
+    <!-- Wechselndes App-Symbol: rote Fassung, wenn Termine ueberfaellig
+         sind. Alternative Symbole muessen als lose Dateien im Bundle
+         liegen, nicht im Asset-Katalog. -->
+    <key>CFBundleIcons</key>
+    <dict>
+        <key>CFBundleAlternateIcons</key>
+        <dict>
+            <key>Ueberfaellig</key>
+            <dict>
+                <key>CFBundleIconFiles</key>
+                <array>
+                    <string>AppIcon-Ueberfaellig</string>
+                </array>
+                <key>UIPrerenderedIcon</key>
+                <false/>
+            </dict>
+        </dict>
+    </dict>
 </dict>
 </plist>

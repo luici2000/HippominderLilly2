@@ -50,6 +50,16 @@ wurde.
          Sonst mahnt sie ewig. Mit dem Debug-Dump der geplanten
          Benachrichtigungen kontrollierbar.
 
+- [ ] **[Build]** Wechselndes App-Symbol prüfen. Bei überfälligen Terminen
+      soll das Symbol rot werden, sonst orange. Zu prüfen:
+      1. Termin überfällig machen → wird das Symbol rot? iOS zeigt dabei
+         einen Systemhinweis, das ist normal und nicht zu vermeiden.
+      2. Termin eintragen → wird es wieder orange?
+      3. App mehrmals starten, ohne dass sich etwas ändert → darf **kein**
+         Hinweis erscheinen. Sonst greift die Zustandsprüfung nicht.
+      4. Liegen `AppIcon-Ueberfaellig@2x/@3x.png` wirklich flach im Bundle?
+         In einem Unterordner findet iOS sie nicht.
+
 ## Bekannte Schwachstellen
 
 - [ ] Die Symbole im Classic-Modus sind für ein Segment-LCD fein
