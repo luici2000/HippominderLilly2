@@ -15,7 +15,6 @@ import SwiftUI
 #if os(iOS)
 import PhotosUI
 import EventKit
-import MessageUI
 import UIKit
 
 struct HorseDetailView: View {
@@ -33,7 +32,6 @@ struct HorseDetailView: View {
     @State private var showingCalendarAlert = false
     @State private var calendarAlertMessage = ""
     @State private var showingEmailPicker = false
-    @State private var mailResult: Result<MFMailComposeResult, Error>?
     @State private var showingImageCropper = false
     @State private var rawImageData: Data?
     @State private var selectedBackgroundItem: PhotosPickerItem?
