@@ -109,27 +109,20 @@ class NotificationService {
             + String(localized: "ist überfällig")
         content.sound = .default
 
-        // Erste Meldung am naechsten 9-Uhr-Zeitpunkt. Ohne sie bliebe es
-        // bis zu sieben Tage still, weil ein Wochenrhythmus erst beim
-        // naechsten passenden Wochentag zuendet.
+        // Woechentlich, verankert am naechsten 9-Uhr-Zeitpunkt. Dadurch
+        // kommt die erste Meldung innerhalb eines Tages statt erst beim
+        // naechsten passenden Wochentag.
+        //
+        // Frueher stand hier zusaetzlich eine einmalige Meldung fuer genau
+        // diesen Zeitpunkt. Vor 9 Uhr traf die aber auf denselben Wochentag
+        // wie die Wiederholung - beide feuerten gleichzeitig und es kamen
+        // zwei identische Hinweise.
         let now = Date()
         let naechsteNeun = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: now)
             .flatMap { $0 > now ? $0 : Calendar.current.date(byAdding: .day, value: 1, to: $0) }
+            ?? now
 
-        if let naechsteNeun {
-            let sofort = UNCalendarNotificationTrigger(
-                dateMatching: Calendar.current.dateComponents(
-                    [.year, .month, .day, .hour, .minute], from: naechsteNeun
-                ),
-                repeats: false
-            )
-            center.add(UNNotificationRequest(
-                identifier: identifier, content: content, trigger: sofort
-            ))
-        }
-
-        // Danach woechentlich am selben Wochentag, 9 Uhr
-        var weekly = Calendar.current.dateComponents([.weekday], from: now)
+        var weekly = Calendar.current.dateComponents([.weekday], from: naechsteNeun)
         weekly.hour = 9
         weekly.minute = 0
 

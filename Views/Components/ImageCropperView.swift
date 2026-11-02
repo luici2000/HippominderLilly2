@@ -166,13 +166,18 @@ struct ImageCropperView: View {
 
         let renderer = UIGraphicsImageRenderer(size: ausgabe)
         let ergebnis = renderer.image { _ in
-            // Das Bild wird genauso gezeichnet wie in der Vorschau, nur
-            // um die Ausgabegroesse hochskaliert - sonst sitzt der
-            // Ausschnitt woanders als auf dem Bildschirm gewaehlt.
-            let aspectRatio = image.size.width / image.size.height
-            let drawWidth = cropSize * scale
-            let drawHeight = aspectRatio > 1 ? drawWidth / aspectRatio : drawWidth
-            let actualDrawWidth = drawHeight * aspectRatio
+            // Exakt wie die Vorschau rechnen, nur hochskaliert. Die
+            // Vorschau benutzt scaledToFill in einem Rahmen von
+            // cropSize*scale - also der groessere der beiden Faktoren.
+            // Vorher stand hier die Fit-Rechnung: ein 4000x3000-Foto wurde
+            // als 280x210 gespeichert, obwohl 373x280 zu sehen waren, und
+            // der Rest kam als schwarzer Rand mit, weil JPEG nichts
+            // Durchsichtiges kennt.
+            let fensterKante = cropSize * scale
+            let faktor = max(fensterKante / image.size.width,
+                             fensterKante / image.size.height)
+            let actualDrawWidth = image.size.width * faktor
+            let drawHeight = image.size.height * faktor
 
             let drawX = (cropSize - actualDrawWidth) / 2 + offset.width
             let drawY = (cropHeight - drawHeight) / 2 + offset.height

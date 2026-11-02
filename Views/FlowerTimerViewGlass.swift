@@ -309,7 +309,9 @@ struct GlassFlowerStage<Content: View>: View {
                         // Echtes Glas zeigt den Hintergrund unscharf. Dazu
                         // praktisch: helle Fotos schlucken sonst die
                         // Bluetenblaetter, weil beide hell sind.
-                        .blur(radius: 7)
+                        // opaque, sonst zieht der Blur an den Kanten
+                        // Transparenz herein und es entsteht ein heller Saum.
+                        .blur(radius: 7, opaque: true)
                 } else {
                     LinearGradient(
                         colors: [
