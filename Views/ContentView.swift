@@ -12,6 +12,7 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 
 #if os(iOS)
 struct ContentView: View {
@@ -32,13 +33,14 @@ struct ContentView: View {
     @State private var notificationsDumped = false
     /// Auf dem iPad gewaehltes Pferd (zweispaltige Ansicht)
     @State private var ausgewaehltesPferd: Horse?
-    @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
         Group {
-            // Auf dem iPad zwei Spalten, auf dem iPhone unveraendert der
-            // bisherige Stapel - so bleibt die kleine Ansicht unberuehrt.
-            if sizeClass == .regular {
+            // Nach Geraetetyp, nicht nach Groessenklasse: ein iPhone Pro Max
+            // meldet quer ebenfalls .regular und waere mitten im Betrieb auf
+            // die geteilte Ansicht gesprungen - die offene Detailseite haette
+            // sich beim Drehen geschlossen.
+            if UIDevice.current.userInterfaceIdiom == .pad {
                 geteilteAnsicht
             } else {
                 stapelAnsicht
@@ -385,10 +387,16 @@ struct ContentView: View {
             }
             .navigationBarHidden(true)
         } detail: {
-            if let pferd = ausgewaehltesPferd {
-                HorseDetailView(horse: pferd)
-            } else {
-                auswahlHinweis
+            // Eigener Stapel: ohne ihn waere der Link zu den
+            // Benachrichtigungen in der Detailansicht wirkungslos, und es
+            // gaebe keine Leiste, ueber die sich die eingeklappte Liste
+            // wieder oeffnen laesst.
+            NavigationStack {
+                if let pferd = ausgewaehltesPferd {
+                    HorseDetailView(horse: pferd)
+                } else {
+                    auswahlHinweis
+                }
             }
         }
         .navigationSplitViewStyle(.balanced)
@@ -455,7 +463,13 @@ struct ContentView: View {
         try? modelContext.save()
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-            if navigationPath.isEmpty { navigationPath.append(horse) }
+            // Auf dem iPad gibt es keinen Pfad, dort oeffnet die Auswahl
+            // die rechte Spalte - sonst bliebe sie beim UI-Test leer
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                ausgewaehltesPferd = horse
+            } else if navigationPath.isEmpty {
+                navigationPath.append(horse)
+            }
         }
         #endif
     }
