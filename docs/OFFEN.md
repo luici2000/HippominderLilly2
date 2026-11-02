@@ -41,6 +41,15 @@ wurde.
       3. Läuft keine Schleife? iPhone antwortet mit `syncToWatch`, die Uhr
          darf darauf nicht erneut melden.
 
+- [ ] **[Build]** Überfällige Erinnerungen prüfen. Bisher verstummte die
+      App genau dann, wenn ein Termin vergessen wurde — jetzt meldet sie
+      sich am nächsten Morgen und danach wöchentlich. Zu prüfen:
+      1. Termin in die Vergangenheit setzen (Debug-Zeitreise), App neu
+         starten → steht eine Meldung für den nächsten 9-Uhr-Zeitpunkt an?
+      2. Termin dann eintragen → ist die wöchentliche Wiederholung weg?
+         Sonst mahnt sie ewig. Mit dem Debug-Dump der geplanten
+         Benachrichtigungen kontrollierbar.
+
 ## Bekannte Schwachstellen
 
 - [ ] Die Symbole im Classic-Modus sind für ein Segment-LCD fein

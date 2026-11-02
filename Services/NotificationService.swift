@@ -26,9 +26,12 @@ class NotificationService {
     ) {
         let center = UNUserNotificationCenter.current()
 
-        // Remove existing notification for this horse+event
+        // Beide Kennungen loeschen: sonst mahnt die woechentliche
+        // Wiederholung weiter, obwohl der Termin eingetragen wurde
         let identifier = "\(horse.id.uuidString)-\(eventType.rawValue)"
-        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+        center.removePendingNotificationRequests(
+            withIdentifiers: [identifier, Self.overdueIdentifier(identifier)]
+        )
 
         // Calculate next appointment date
         let nextDate = horse.naechsterTermin(fuer: eventType)
@@ -38,9 +41,15 @@ class NotificationService {
             return
         }
 
-        // Termin schon vorbei -> keine Erinnerung mehr planen
         let now = Date()
-        guard nextDate > now else { return }
+
+        // Ueberfaellig: weiter erinnern, nicht verstummen. Frueher wurde hier
+        // abgebrochen - ausgerechnet dann, wenn der Termin vergessen wurde,
+        // kam keine Meldung mehr. Jetzt woechentlich, bis er eingetragen ist.
+        guard nextDate > now else {
+            scheduleOverdueReminder(for: horse, eventType: eventType, identifier: identifier)
+            return
+        }
 
         // Vorlauf-Tag schon vorbei (z.B. Vorlauf 3 Tage, Termin in 2 Tagen) -> naechster 9-Uhr-Zeitpunkt
         var fireDate = notificationDate
@@ -80,6 +89,59 @@ class NotificationService {
         }
     }
 
+    /// Woechentliche Erinnerung fuer einen bereits verstrichenen Termin.
+    ///
+    /// Taeglich waere aufdringlich, einmalig zu wenig: ohne Wiederholung
+    /// bliebe es bei einer einzigen Meldung, und wer die wegwischt, hoert
+    /// nie wieder davon. Die Wiederholung endet, sobald der Termin
+    /// eingetragen wird - dann plant scheduleNotification neu.
+    private func scheduleOverdueReminder(
+        for horse: Horse,
+        eventType: Horse.EventType,
+        identifier: String
+    ) {
+        let center = UNUserNotificationCenter.current()
+
+        let content = UNMutableNotificationContent()
+        content.title = "Hippominder"
+        content.body = "\(horse.name): \(eventType.localizedName) "
+            + String(localized: "ist überfällig")
+        content.sound = .default
+
+        // Erste Meldung am naechsten 9-Uhr-Zeitpunkt. Ohne sie bliebe es
+        // bis zu sieben Tage still, weil ein Wochenrhythmus erst beim
+        // naechsten passenden Wochentag zuendet.
+        let now = Date()
+        let naechsteNeun = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: now)
+            .flatMap { $0 > now ? $0 : Calendar.current.date(byAdding: .day, value: 1, to: $0) }
+
+        if let naechsteNeun {
+            let sofort = UNCalendarNotificationTrigger(
+                dateMatching: Calendar.current.dateComponents(
+                    [.year, .month, .day, .hour, .minute], from: naechsteNeun
+                ),
+                repeats: false
+            )
+            center.add(UNNotificationRequest(
+                identifier: identifier, content: content, trigger: sofort
+            ))
+        }
+
+        // Danach woechentlich am selben Wochentag, 9 Uhr
+        var weekly = Calendar.current.dateComponents([.weekday], from: now)
+        weekly.hour = 9
+        weekly.minute = 0
+
+        center.add(UNNotificationRequest(
+            identifier: Self.overdueIdentifier(identifier),
+            content: content,
+            trigger: UNCalendarNotificationTrigger(dateMatching: weekly, repeats: true)
+        ))
+    }
+
+    /// Kennung der woechentlichen Wiederholung, abgeleitet von der Hauptmeldung
+    static func overdueIdentifier(_ base: String) -> String { base + "-ueberfaellig" }
+
     /// Schedule notifications for all event types of a horse
     func scheduleAllNotifications(for horse: Horse) {
         for eventType in Horse.EventType.allCases {
@@ -94,7 +156,10 @@ class NotificationService {
     /// Remove all notifications for a horse
     func removeAllNotifications(for horse: Horse) {
         let center = UNUserNotificationCenter.current()
-        let identifiers = Horse.EventType.allCases.map { "\(horse.id.uuidString)-\($0.rawValue)" }
+        let identifiers = Horse.EventType.allCases.flatMap { typ -> [String] in
+            let base = "\(horse.id.uuidString)-\(typ.rawValue)"
+            return [base, Self.overdueIdentifier(base)]
+        }
         center.removePendingNotificationRequests(withIdentifiers: identifiers)
     }
 
