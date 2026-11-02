@@ -14,8 +14,18 @@ import SwiftUI
 #if os(iOS)
 import UIKit
 
+/// Welcher Ausschnitt gewaehlt wird
+enum CropShape {
+    /// Rund - fuer das Profilbild
+    case circle
+    /// Rechteckig im angegebenen Seitenverhaeltnis (Breite/Hoehe) -
+    /// fuer das Hintergrundfoto, das die Fotobuehne fuellt
+    case rect(aspect: CGFloat)
+}
+
 struct ImageCropperView: View {
     let image: UIImage
+    var shape: CropShape = .circle
     let onCrop: (UIImage) -> Void
     @Environment(\.dismiss) private var dismiss
 
@@ -26,10 +36,25 @@ struct ImageCropperView: View {
 
     private let cropSize: CGFloat = 280
 
+    /// Hoehe des Ausschnittfensters
+    private var cropHeight: CGFloat {
+        switch shape {
+        case .circle: return cropSize
+        case .rect(let aspect): return cropSize / max(0.2, aspect)
+        }
+    }
+
+    private var titel: String {
+        switch shape {
+        case .circle: return String(localized: "Ausschnitt wählen")
+        case .rect: return String(localized: "Hintergrund zuschneiden")
+        }
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
-                Text("Ausschnitt wählen")
+                Text(titel)
                     .font(.headline)
                     .padding(.top)
 
@@ -66,18 +91,20 @@ struct ImageCropperView: View {
                                 }
                         )
 
-                    Circle()
+                    // Rahmen des gewaehlten Ausschnitts
+                    ausschnittForm
                         .stroke(Color.white, lineWidth: 2)
-                        .frame(width: cropSize, height: cropSize)
+                        .frame(width: cropSize, height: cropHeight)
 
+                    // Alles ausserhalb abdunkeln
                     Rectangle()
-                        .fill(Color.black.opacity(0.4))
-                        .frame(width: cropSize + 40, height: cropSize + 40)
+                        .fill(Color.black.opacity(0.45))
+                        .frame(width: cropSize + 60, height: cropSize + 60)
                         .mask(
                             ZStack {
                                 Rectangle()
-                                Circle()
-                                    .frame(width: cropSize, height: cropSize)
+                                ausschnittForm
+                                    .frame(width: cropSize, height: cropHeight)
                                     .blendMode(.destinationOut)
                             }
                             .compositingGroup()
@@ -115,35 +142,54 @@ struct ImageCropperView: View {
         }
     }
 
-    private func cropAndSave() {
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: cropSize, height: cropSize))
-        let cropped = renderer.image { ctx in
-            let imageSize = image.size
-            let drawWidth = cropSize * scale
-            let drawHeight: CGFloat
-            let aspectRatio = imageSize.width / imageSize.height
+    /// Form des Ausschnittfensters, als Shape fuer Rahmen und Maske
+    private var ausschnittForm: AnyShape {
+        switch shape {
+        case .circle: return AnyShape(Circle())
+        case .rect: return AnyShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        }
+    }
 
-            if aspectRatio > 1 {
-                drawHeight = drawWidth / aspectRatio
-            } else {
-                drawHeight = drawWidth
-            }
+    private func cropAndSave() {
+        // Das Ausschnittfenster ist beim Hintergrund breiter als hoch,
+        // beim Profilbild quadratisch.
+        let ziel = CGSize(width: cropSize, height: cropHeight)
+
+        // Hintergrundfotos fuellen eine grosse Flaeche - in Fenstergroesse
+        // gerendert waeren sie matschig.
+        let skalierung: CGFloat
+        switch shape {
+        case .circle: skalierung = 1
+        case .rect: skalierung = 4
+        }
+        let ausgabe = CGSize(width: ziel.width * skalierung, height: ziel.height * skalierung)
+
+        let renderer = UIGraphicsImageRenderer(size: ausgabe)
+        let ergebnis = renderer.image { _ in
+            // Das Bild wird genauso gezeichnet wie in der Vorschau, nur
+            // um die Ausgabegroesse hochskaliert - sonst sitzt der
+            // Ausschnitt woanders als auf dem Bildschirm gewaehlt.
+            let aspectRatio = image.size.width / image.size.height
+            let drawWidth = cropSize * scale
+            let drawHeight = aspectRatio > 1 ? drawWidth / aspectRatio : drawWidth
             let actualDrawWidth = drawHeight * aspectRatio
 
             let drawX = (cropSize - actualDrawWidth) / 2 + offset.width
-            let drawY = (cropSize - drawHeight) / 2 + offset.height
+            let drawY = (cropHeight - drawHeight) / 2 + offset.height
 
-            image.draw(in: CGRect(x: drawX, y: drawY, width: actualDrawWidth, height: drawHeight))
+            if case .circle = shape {
+                UIBezierPath(ovalIn: CGRect(origin: .zero, size: ausgabe)).addClip()
+            }
+
+            image.draw(in: CGRect(
+                x: drawX * skalierung,
+                y: drawY * skalierung,
+                width: actualDrawWidth * skalierung,
+                height: drawHeight * skalierung
+            ))
         }
 
-        let circleRenderer = UIGraphicsImageRenderer(size: CGSize(width: cropSize, height: cropSize))
-        let circularImage = circleRenderer.image { ctx in
-            let rect = CGRect(x: 0, y: 0, width: cropSize, height: cropSize)
-            UIBezierPath(ovalIn: rect).addClip()
-            cropped.draw(in: rect)
-        }
-
-        onCrop(circularImage)
+        onCrop(ergebnis)
     }
 }
 #endif

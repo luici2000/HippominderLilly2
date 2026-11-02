@@ -66,9 +66,13 @@ der Glanz gegenrotiert, sonst wandert das Licht mit.
 - **Die Event-Icons rendern als Template.** Jedes `Image(eventType.symbol)`
   braucht ein explizites `foregroundStyle`, sonst erscheint es in der
   Akzentfarbe statt schwarz.
-- **Profilbild ≠ Hintergrundfoto.** Der Cropper schneidet kreisrund und
-  speichert JPEG, das keine Transparenz kann — als Hintergrund gäbe das
-  schwarze Ecken. Dafür gibt es `Horse.backgroundImageData`, ohne Schnitt.
+- **Profilbild ≠ Hintergrundfoto.** Beide gehen durch `ImageCropperView`,
+  aber mit unterschiedlicher Form: der Avatar rund (`.circle`), das
+  Hintergrundfoto rechteckig im Format der Fotobühne
+  (`.rect(aspect:)`, siehe `HorseDetailView.buehnenFormat`). Beide Maße
+  müssen zusammenpassen, sonst wird der gewählte Ausschnitt wieder
+  beschnitten. Der runde Schnitt taugt **nicht** als Hintergrund: JPEG
+  kann keine Transparenz, das gäbe schwarze Ecken.
 - **`interval == 0`** machte die Division `.infinity`, und `Int(.infinity)`
   stürzt ab. Abgefangen in `FlowerGeometry.filledPetals`.
 - **Blinkanimationen** brauchen `.onChange`, nicht nur `.onAppear` — sonst

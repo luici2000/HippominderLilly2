@@ -35,6 +35,8 @@ struct HorseDetailView: View {
     @State private var showingImageCropper = false
     @State private var rawImageData: Data?
     @State private var selectedBackgroundItem: PhotosPickerItem?
+    @State private var showingBackgroundCropper = false
+    @State private var rawBackgroundImage: UIImage?
 
     var body: some View {
         ScrollView {
@@ -122,7 +124,10 @@ struct HorseDetailView: View {
                 switch globalSettings.designMode {
                 case .glass:
                     ZStack(alignment: .bottomTrailing) {
-                        GlassFlowerStage(backgroundImage: horse.backgroundImage) {
+                        GlassFlowerStage(
+                            backgroundImage: horse.backgroundImage,
+                            format: Self.buehnenFormat
+                        ) {
                             HStack(alignment: .top, spacing: 4) {
                                 ForEach(Horse.EventType.allCases, id: \.self) { eventType in
                                     Button(action: {
@@ -336,13 +341,27 @@ struct HorseDetailView: View {
         }
         .onChange(of: selectedBackgroundItem) { _, newItem in
             Task {
-                guard let data = try? await newItem?.loadTransferable(type: Data.self) else { return }
-                // Kein Rundschnitt: das Hintergrundfoto bleibt rechteckig und gross.
-                // Skalieren laeuft abseits des Main Threads, sonst ruckelt die UI.
-                let prepared = await Task.detached(priority: .userInitiated) {
-                    BackgroundPhoto.downscaledJPEG(from: data) ?? data
-                }.value
-                horse.backgroundImageData = prepared
+                guard let data = try? await newItem?.loadTransferable(type: Data.self),
+                      let bild = UIImage(data: data) else { return }
+                // Erst den Ausschnitt waehlen lassen - sonst entscheidet
+                // der Zufall, welcher Teil des Fotos hinter den Blumen landet
+                rawBackgroundImage = bild
+                showingBackgroundCropper = true
+            }
+        }
+        .sheet(isPresented: $showingBackgroundCropper) {
+            if let bild = rawBackgroundImage {
+                ImageCropperView(image: bild, shape: .rect(aspect: Self.buehnenFormat)) { zugeschnitten in
+                    showingBackgroundCropper = false
+                    Task {
+                        guard let data = zugeschnitten.jpegData(compressionQuality: 0.9) else { return }
+                        // Skalieren abseits des Main Threads, sonst ruckelt die UI
+                        let fertig = await Task.detached(priority: .userInitiated) {
+                            BackgroundPhoto.downscaledJPEG(from: data) ?? data
+                        }.value
+                        horse.backgroundImageData = fertig
+                    }
+                }
             }
         }
         .sheet(isPresented: $showingImageCropper) {
@@ -379,6 +398,10 @@ struct HorseDetailView: View {
     }
 
     // MARK: - Aktive Benachrichtigungen zaehlen
+
+    /// Seitenverhaeltnis der Fotobuehne (Breite zu Hoehe). Der Zuschnitt
+    /// benutzt dasselbe Mass, damit das gewaehlte Bild genau passt.
+    static let buehnenFormat: CGFloat = 1.7
 
     /// Mindestens ein Termin faellig - im Original blinkt dann die Glocke
     private var hasDueEvent: Bool {

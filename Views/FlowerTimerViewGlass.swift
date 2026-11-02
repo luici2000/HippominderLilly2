@@ -276,16 +276,27 @@ struct GlassFlowerTimerView: View {
 /// Haelt das Pferdefoto hinter den Glasblumen, damit das Glas etwas zu brechen hat.
 struct GlassFlowerStage<Content: View>: View {
     let backgroundImage: Image?
+    /// Breite zu Hoehe. Der Zuschnitt des Hintergrundfotos benutzt dasselbe
+    /// Mass, damit das gewaehlte Bild genau passt und nichts wegfaellt.
+    var format: CGFloat = 1.7
     @ViewBuilder var content: Content
 
     var body: some View {
-        // Der Inhalt bestimmt die Hoehe, das Foto liegt dahinter. Vorher
-        // war es umgekehrt mit fester Hoehe - bei groesserer Systemschrift
-        // wurde der Text dann abgeschnitten.
         content
             .frame(maxWidth: .infinity)
+            // Mindesthoehe aus dem Format, waechst aber mit, wenn der Text
+            // bei grosser Systemschrift mehr Platz braucht
+            .frame(minHeight: minimalHoehe)
             .background { untergrund }
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    @Environment(\.horizontalSizeClass) private var sizeClass
+
+    private var minimalHoehe: CGFloat {
+        // Nur ein Richtwert: die echte Breite kennt erst das Layout.
+        // Zu klein ist unkritisch, der Inhalt schiebt dann auf.
+        (sizeClass == .regular ? 520 : 360) / format
     }
 
     private var untergrund: some View {
