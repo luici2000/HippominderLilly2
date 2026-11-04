@@ -18,7 +18,15 @@ struct HardwareStyleButtons: View {
     @State private var showingInput = false
     @State private var inputText = ""
 
-    private let buttonColor = Color(red: 0.35, green: 0.35, blue: 0.35)
+    @ObservedObject private var globalSettings = GlobalSettings.shared
+
+    /// Am Foto des Geraets gemessen: Tastenflaeche #E6ECEE,
+    /// Symbolkreis #1E3436 - fast weisser Taster, sehr dunkler Kreis
+    private static let tasteHell = Color(red: 0.90, green: 0.925, blue: 0.933)
+    private static let tasteKante = Color(red: 0.78, green: 0.81, blue: 0.82)
+    private static let symbolKreis = Color(red: 0.118, green: 0.203, blue: 0.212)
+
+    private var istClassic: Bool { globalSettings.designMode == .classic }
 
     var body: some View {
         HStack(spacing: 6) {
@@ -38,8 +46,12 @@ struct HardwareStyleButtons: View {
                     .foregroundColor(.primary)
                     .frame(width: 54, height: 44)
                     .background(
+                        // Classic: vertieftes Anzeigefenster wie auf dem
+                        // Geraet, Glas: durchscheinend
                         RoundedRectangle(cornerRadius: 6)
-                            .fill(.ultraThinMaterial)
+                            .fill(istClassic
+                                  ? AnyShapeStyle(Self.tasteHell.opacity(0.75))
+                                  : AnyShapeStyle(.ultraThinMaterial))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 6)
                                     .stroke(.white.opacity(0.3), lineWidth: 0.5)
@@ -69,48 +81,83 @@ struct HardwareStyleButtons: View {
         }
     }
 
-    /// Reusable glass-style circle button (deduplicated minus/plus)
+    /// Knopf im Stil der jeweiligen Darstellung
     @ViewBuilder
     private func glassButton(symbol: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(.ultraThinMaterial)
-                    .frame(width: 44, height: 44)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(
-                                LinearGradient(
-                                    colors: [.white.opacity(0.5), .white.opacity(0.2)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1
-                            )
-                    )
-                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                if istClassic { tastenKoerper } else { glasKoerper }
 
+                // Dunkler Kreis mit weissem Symbol - auf dem Geraet sitzt
+                // in jeder Taste so einer
                 Circle()
-                    .fill(buttonColor)
-                    .frame(width: 28, height: 28)
-                    .overlay(
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [.white.opacity(0.2), .clear],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
+                    .fill(istClassic ? Self.symbolKreis : Color(white: 0.3))
+                    .frame(width: 26, height: 26)
+                    .overlay {
+                        Circle().fill(
+                            LinearGradient(
+                                colors: [.white.opacity(0.22), .clear],
+                                startPoint: .topLeading,
+                                endPoint: .bottom
                             )
-                    )
-                    .overlay(
+                        )
+                    }
+                    .overlay {
                         Image(systemName: symbol)
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white)
-                    )
-                    .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(.white)
+                    }
+                    .shadow(color: .black.opacity(0.25), radius: 1.5, x: 0, y: 1)
             }
         }
         .buttonStyle(.plain)
+    }
+
+    /// Classic: Kunststofftaster wie auf dem Geraet - heller Koerper,
+    /// Lichtkante oben, feine Fuge zum Gehaeuse
+    private var tastenKoerper: some View {
+        RoundedRectangle(cornerRadius: 9, style: .continuous)
+            .fill(
+                LinearGradient(
+                    colors: [.white, Self.tasteHell],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .frame(width: 44, height: 44)
+            .overlay {
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .strokeBorder(Self.tasteKante, lineWidth: 0.8)
+            }
+            .shadow(color: .black.opacity(0.18), radius: 1.5, x: 0, y: 1.5)
+    }
+
+    /// Glas: durchscheinendes Material mit Glanzkante bei -45 Grad
+    private var glasKoerper: some View {
+        RoundedRectangle(cornerRadius: 11, style: .continuous)
+            .fill(.ultraThinMaterial)
+            .frame(width: 44, height: 44)
+            .overlay {
+                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [.white.opacity(0.3), .clear, .black.opacity(0.06)],
+                            startPoint: UnitPoint(x: 0.15, y: 0),
+                            endPoint: UnitPoint(x: 0.85, y: 1)
+                        )
+                    )
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [.white.opacity(0.65), .white.opacity(0.15)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            }
+            .shadow(color: .black.opacity(0.12), radius: 3, x: 1, y: 2)
     }
 }

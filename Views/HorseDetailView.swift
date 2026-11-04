@@ -608,6 +608,14 @@ struct DesignedActionButton: View {
         colorScheme == .dark ? .white.opacity(0.12) : .black.opacity(0.06)
     }
 
+    /// Classic: Farben am Foto des Geraets gemessen (#E6ECEE, Kante)
+    private var tasteFill: Color {
+        colorScheme == .dark ? Color(white: 0.19) : Color(red: 0.90, green: 0.925, blue: 0.933)
+    }
+    private var tasteKante: Color {
+        colorScheme == .dark ? .white.opacity(0.14) : Color(red: 0.78, green: 0.81, blue: 0.82)
+    }
+
     var body: some View {
         if let action {
             Button(action: action) { content }
@@ -652,11 +660,49 @@ struct DesignedActionButton: View {
     private var background: some View {
         switch mode {
         case .glass:
+            // Echtes Glas: Material, Glanz von oben links (-45 Grad),
+            // unten eine Spur Tiefe, helle Kante ringsum
             Capsule()
                 .fill(.ultraThinMaterial)
-                .overlay { Capsule().strokeBorder(.white.opacity(0.4), lineWidth: 0.5) }
-                .shadow(color: .black.opacity(0.08), radius: 3, x: 1, y: 2)
-        case .classic, .blume:
+                .overlay {
+                    Capsule().fill(
+                        LinearGradient(
+                            colors: [.white.opacity(0.35), .clear, .black.opacity(0.07)],
+                            startPoint: UnitPoint(x: 0.1, y: 0),
+                            endPoint: UnitPoint(x: 0.9, y: 1)
+                        )
+                    )
+                }
+                .overlay {
+                    Capsule().strokeBorder(
+                        LinearGradient(
+                            colors: [.white.opacity(0.7), .white.opacity(0.15)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+                }
+                .shadow(color: .black.opacity(0.1), radius: 4, x: 1, y: 2)
+
+        case .classic:
+            // Kunststofftaster wie am Geraet: abgerundetes Rechteck statt
+            // Kapsel, Lichtkante oben, feine Fuge ringsum
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [colorScheme == .dark ? Color(white: 0.24) : .white, tasteFill],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .overlay {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .strokeBorder(tasteKante, lineWidth: 0.8)
+                }
+                .shadow(color: .black.opacity(0.18), radius: 2, x: 0, y: 2)
+
+        case .blume:
             Capsule()
                 .fill(raisedFill)
                 .overlay {
