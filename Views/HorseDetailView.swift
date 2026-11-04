@@ -17,6 +17,29 @@ import PhotosUI
 import EventKit
 import UIKit
 
+/// Alle Blätter dieser Ansicht in einem Zustand.
+///
+/// SwiftUI zeigt pro Ansicht nur ein `.sheet` zuverlässig. Mehrere
+/// nebeneinander blockieren sich: ein Dialog liess sich dann nicht mehr
+/// oeffnen, ein anderer nie. Darum ein einziges Blatt mit Fallunterscheidung.
+enum HorseDetailBlatt: Identifiable {
+    case datumWaehlen(Horse.EventType)
+    case profilbildZuschneiden(UIImage)
+    case hintergrundZuschneiden(UIImage)
+    case zeitreise
+    case emailWaehlen
+
+    var id: String {
+        switch self {
+        case .datumWaehlen(let typ): return "datum-\(typ.rawValue)"
+        case .profilbildZuschneiden: return "profilbild"
+        case .hintergrundZuschneiden: return "hintergrund"
+        case .zeitreise: return "zeitreise"
+        case .emailWaehlen: return "email"
+        }
+    }
+}
+
 struct HorseDetailView: View {
     @Bindable var horse: Horse
     @Environment(\.modelContext) private var modelContext
@@ -24,19 +47,14 @@ struct HorseDetailView: View {
     @ObservedObject var globalSettings = GlobalSettings.shared
 
     @State private var selectedEventType: Horse.EventType?
-    @State private var showingDatePicker = false
     @State private var selectedPhotoItem: PhotosPickerItem?
-    @State private var showingDebugView = false
     @State private var logoTapCount = 0
     @State private var showingActionSheet = false
     @State private var showingCalendarAlert = false
     @State private var calendarAlertMessage = ""
-    @State private var showingEmailPicker = false
-    @State private var showingImageCropper = false
-    @State private var rawImageData: Data?
     @State private var selectedBackgroundItem: PhotosPickerItem?
-    @State private var showingBackgroundCropper = false
-    @State private var rawBackgroundImage: UIImage?
+    /// Das eine Blatt, das gerade offen ist
+    @State private var aktivesBlatt: HorseDetailBlatt?
 
     var body: some View {
         ScrollView {
@@ -50,7 +68,7 @@ struct HorseDetailView: View {
                     .onTapGesture {
                         logoTapCount += 1
                         if logoTapCount >= 5 {
-                            showingDebugView = true
+                            aktivesBlatt = .zeitreise
                             logoTapCount = 0
                         }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
@@ -281,7 +299,7 @@ struct HorseDetailView: View {
                         title: "Erinnerung per E-Mail senden",
                         systemImage: "envelope.fill",
                         mode: globalSettings.designMode,
-                        action: { showingEmailPicker = true }
+                        action: { aktivesBlatt = .emailWaehlen }
                     )
                     .accessibilityIdentifier("sendEmail")
                 }
@@ -308,34 +326,16 @@ struct HorseDetailView: View {
                     WatchSyncService.shared.syncToWatch()
                 }
                 Button("Datum manuell wählen") {
-                    showingDatePicker = true
+                    if let typ = selectedEventType { aktivesBlatt = .datumWaehlen(typ) }
                 }
                 Button("Abbrechen", role: .cancel) { }
             }
         }
-        .sheet(isPresented: $showingDatePicker) {
-            if let eventType = selectedEventType {
-                DatePickerSheet(
-                    title: "\(eventType.localizedName) \(String(localized: "Termin"))",
-                    date: Binding(
-                        get: { horse.holeTermin(fuer: eventType) },
-                        set: {
-                            horse.setzeTermin($0, fuer: eventType)
-                            NotificationService.shared.scheduleAllNotifications(for: horse)
-                            NotificationService.shared.updateBadge(using: modelContext)
-                            WatchSyncService.shared.syncToWatch()
-                        }
-                    ),
-                    isPresented: $showingDatePicker
-                )
-            }
-        }
         .onChange(of: selectedPhotoItem) { _, newItem in
             Task {
-                if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                    rawImageData = data
-                    showingImageCropper = true
-                }
+                guard let data = try? await newItem?.loadTransferable(type: Data.self),
+                      let bild = UIImage(data: data) else { return }
+                aktivesBlatt = .profilbildZuschneiden(bild)
             }
         }
         .onChange(of: selectedBackgroundItem) { _, newItem in
@@ -344,48 +344,71 @@ struct HorseDetailView: View {
                       let bild = UIImage(data: data) else { return }
                 // Erst den Ausschnitt waehlen lassen - sonst entscheidet
                 // der Zufall, welcher Teil des Fotos hinter den Blumen landet
-                rawBackgroundImage = bild
-                showingBackgroundCropper = true
+                aktivesBlatt = .hintergrundZuschneiden(bild)
             }
         }
-        .sheet(isPresented: $showingBackgroundCropper) {
-            if let bild = rawBackgroundImage {
+        // EIN Blatt fuer alles. Vorher hingen fuenf .sheet nebeneinander an
+        // derselben Ansicht - SwiftUI zeigt davon nur eines zuverlaessig,
+        // der Rest blockierte sich gegenseitig: der Blumen-Dialog ging
+        // irgendwann nicht mehr auf, und der Zuschnitt erschien nie.
+        .sheet(item: $aktivesBlatt) { blatt in
+            switch blatt {
+            case .datumWaehlen(let eventType):
+                DatePickerSheet(
+                    title: "\(eventType.localizedName) \(String(localized: "Termin"))",
+                    date: Binding(
+                        get: { horse.holeTermin(fuer: eventType) },
+                        set: { neu in
+                            horse.setzeTermin(neu, fuer: eventType)
+                            NotificationService.shared.scheduleAllNotifications(for: horse)
+                            NotificationService.shared.updateBadge(using: modelContext)
+                            WatchSyncService.shared.syncToWatch()
+                        }
+                    ),
+                    isPresented: Binding(
+                        get: { aktivesBlatt != nil },
+                        set: { if !$0 { aktivesBlatt = nil } }
+                    )
+                )
+
+            case .profilbildZuschneiden(let bild):
+                ImageCropperView(image: bild) { zugeschnitten in
+                    if let daten = zugeschnitten.jpegData(compressionQuality: 0.8) {
+                        horse.imageData = daten
+                    }
+                    aktivesBlatt = nil
+                }
+
+            case .hintergrundZuschneiden(let bild):
                 ImageCropperView(image: bild, shape: .rect(aspect: Self.buehnenFormat)) { zugeschnitten in
-                    showingBackgroundCropper = false
+                    aktivesBlatt = nil
                     Task {
-                        guard let data = zugeschnitten.jpegData(compressionQuality: 0.9) else { return }
+                        guard let daten = zugeschnitten.jpegData(compressionQuality: 0.9) else { return }
                         // Skalieren abseits des Main Threads, sonst ruckelt die UI
                         let fertig = await Task.detached(priority: .userInitiated) {
-                            BackgroundPhoto.downscaledJPEG(from: data) ?? data
+                            BackgroundPhoto.downscaledJPEG(from: daten) ?? daten
                         }.value
                         horse.backgroundImageData = fertig
                     }
                 }
+
+            case .zeitreise:
+                DebugTimeView()
+
+            case .emailWaehlen:
+                EmailTypePickerView(
+                    horse: horse,
+                    isPresented: Binding(
+                        get: { aktivesBlatt != nil },
+                        set: { if !$0 { aktivesBlatt = nil } }
+                    )
+                )
             }
-        }
-        .sheet(isPresented: $showingImageCropper) {
-            if let data = rawImageData, let uiImage = UIImage(data: data) {
-                ImageCropperView(image: uiImage) { croppedImage in
-                    if let jpegData = croppedImage.jpegData(compressionQuality: 0.8) {
-                        horse.imageData = jpegData
-                    }
-                    showingImageCropper = false
-                }
-            }
-        }
-        .sheet(isPresented: $showingDebugView) {
-            DebugTimeView()
         }
         .alert("Kalender", isPresented: $showingCalendarAlert) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(calendarAlertMessage)
-        }
-        .sheet(isPresented: $showingEmailPicker) {
-            EmailTypePickerView(
-                horse: horse,
-                isPresented: $showingEmailPicker
-            )
         }
     }
 
