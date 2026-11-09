@@ -217,6 +217,8 @@ struct ContentView: View {
                     .listStyle(.plain)
                 }
             }
+
+            versionsFuss
             }
             .navigationBarHidden(true)
             .navigationDestination(for: Horse.self) { horse in
@@ -384,6 +386,8 @@ struct ContentView: View {
                     .listStyle(.plain)
                 }
             }
+
+            versionsFuss
             }
             .navigationBarHidden(true)
         } detail: {
@@ -400,6 +404,23 @@ struct ContentView: View {
             }
         }
         .navigationSplitViewStyle(.balanced)
+    }
+
+    /// Version und Bauzeit, ganz unten und klein.
+    ///
+    /// Steht da, damit beim Bauen aufs Geraet zu sehen ist, ob der neue
+    /// Stand wirklich angekommen ist. Die Bauzeit ist dabei das
+    /// Entscheidende - die Nummer allein bleibt zwischen zwei Builds gleich.
+    /// Antippen oeffnet die Beta-Info, ohne fuenfmal aufs Logo zu muessen.
+    private var versionsFuss: some View {
+        Text(Versionsinfo.zeile)
+            .font(.system(size: 10))
+            .foregroundStyle(.tertiary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 3)
+            .contentShape(Rectangle())
+            .onTapGesture { showingBetaInfo = true }
+            .accessibilityIdentifier("versionsFuss")
     }
 
     /// Rechte Spalte, solange nichts gewaehlt ist

@@ -97,6 +97,23 @@ vertragen das schlecht. Bei merkwürdigen Git-Fehlern (beschädigter
 Index, fehlende Objekte) ist iCloud die erste Vermutung, nicht der Code —
 darum liegt das Repository bewusst nicht darin.
 
+## Version — in der App und in `docs/VERSION.md`
+
+Beim Bauen aufs Gerät ist die Frage nie „welche Version", sondern **„ist
+mein Stand angekommen?"** Darum zeigen iPhone, iPad, Mac und Uhr unten
+eine kleine Zeile mit Version **und Bauzeit** — die Nummer bleibt
+zwischen zwei Builds gleich, die Bauzeit nicht. Gelesen wird sie vom
+Programm selbst (Änderungsdatum der Binary), also nichts, was von Hand
+gepflegt werden muss.
+
+Die Auskunft kommt aus **`Models/Versionsinfo.swift`** — in `Models`,
+damit die Uhr sie auch hat. Bitte nicht erneut `Bundle.main.infoDictionary`
+in einer View aufrufen.
+
+Wer `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` anhebt, schreibt eine
+Zeile in **`docs/VERSION.md`**. Beide müssen dasselbe sagen, sonst weiß
+die nächste Sitzung nicht, was auf dem Gerät liegt.
+
 ## Arbeitsweise
 
 Mathias arbeitet aus dem Bett am iPad und schaut selten in Xcode. Was

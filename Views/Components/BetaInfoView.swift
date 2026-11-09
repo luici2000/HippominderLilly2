@@ -17,13 +17,10 @@ struct BetaInfoView: View {
     @ObservedObject var debugSettings = DebugSettings.shared
     @ObservedObject var storeManager = StoreManager.shared
 
-    private var appVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "–"
-    }
-
-    private var buildNumber: String {
-        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "–"
-    }
+    // Auskunft kommt aus Versionsinfo, damit Fusszeile, Beta-Info und Uhr
+    // dasselbe sagen
+    private var appVersion: String { Versionsinfo.version }
+    private var buildNumber: String { Versionsinfo.build }
 
     var body: some View {
         NavigationStack {
@@ -42,6 +39,12 @@ struct BetaInfoView: View {
 
                         Text("Version \(appVersion) (Build \(buildNumber))")
                             .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        // Die Bauzeit ist beim Testen das Entscheidende: nur
+                        // sie aendert sich bei jedem Build
+                        Text("gebaut am \(Versionsinfo.bauzeitLang)")
+                            .font(.caption2)
                             .foregroundColor(.secondary)
 
                         Text("Beta-Testphase")

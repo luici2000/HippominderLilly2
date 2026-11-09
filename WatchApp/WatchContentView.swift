@@ -37,6 +37,12 @@ struct WatchContentView: View {
                             .font(.caption2)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
+                        // Auch ohne Pferde soll ablesbar sein, welcher
+                        // Stand hier liegt
+                        Text(Versionsinfo.zeileKurz)
+                            .font(.system(size: 9))
+                            .foregroundColor(.secondary)
+                            .padding(.top, 2)
                     }
                 }
             } else {
@@ -47,12 +53,19 @@ struct WatchContentView: View {
                         }
                     }
 
-                    if let lastSync = syncReceiver.lastSyncDate {
-                        Section {
+                    // Letzter Sync und Version. Die Version steht da, damit
+                    // beim Bauen zu sehen ist, welcher Stand auf der Uhr
+                    // wirklich liegt - die Uhr bekommt ihn oft spaeter als
+                    // das iPhone.
+                    Section {
+                        if let lastSync = syncReceiver.lastSyncDate {
                             Text("Sync: \(lastSync, style: .relative) her")
                                 .font(.system(size: 9))
                                 .foregroundColor(.secondary)
                         }
+                        Text(Versionsinfo.zeileKurz)
+                            .font(.system(size: 9))
+                            .foregroundColor(.secondary)
                     }
                 }
                 .navigationTitle("Hippominder")

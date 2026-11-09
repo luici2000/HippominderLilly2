@@ -128,6 +128,8 @@ struct MacContentView: View {
                     }
                     .listStyle(.sidebar)
                 }
+
+                versionsFuss
             }
             .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 320)
             .toolbar {
@@ -181,6 +183,21 @@ struct MacContentView: View {
             PaywallView()
                 .frame(width: 400, height: 500)
         }
+    }
+
+    /// Version und Bauzeit unten in der Seitenleiste.
+    ///
+    /// Dieselbe Auskunft wie auf dem iPhone, damit beim Bauen zu sehen ist,
+    /// welcher Stand hier wirklich laeuft. Antippen oeffnet die Beta-Info.
+    private var versionsFuss: some View {
+        Text(Versionsinfo.zeile)
+            .font(.system(size: 10))
+            .foregroundStyle(.tertiary)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
+            .onTapGesture { showingBetaInfo = true }
+            .accessibilityIdentifier("versionsFuss")
     }
 }
 
