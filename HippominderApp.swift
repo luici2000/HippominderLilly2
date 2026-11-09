@@ -23,16 +23,42 @@ struct HippominderApp: App {
         requestNotificationPermission()
     }
 
-    var sharedModelContainer: ModelContainer = {
+    var sharedModelContainer: ModelContainer = Self.ladeContainer()
+
+    /// Pferde liegen in iCloud, damit sie auf iPhone und Mac dieselben sind
+    /// und ein verlorenes Geraet sie nicht mitnimmt. Kostet nichts: CloudKit
+    /// nutzt den iCloud-Speicher des Nutzers, und Termine sind winzig.
+    ///
+    /// Ist iCloud abgeschaltet oder nicht eingerichtet, laeuft die App rein
+    /// oertlich weiter. Frueher stand hier ein fatalError - die App waere in
+    /// dem Fall gar nicht erst gestartet.
+    private static func ladeContainer() -> ModelContainer {
         let schema = Schema([Horse.self])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            return try ModelContainer(
+                for: schema,
+                configurations: [ModelConfiguration(schema: schema, cloudKitDatabase: .automatic)]
+            )
         } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+            print("iCloud nicht verfuegbar, arbeite oertlich weiter: \(error)")
         }
-    }()
+
+        do {
+            return try ModelContainer(
+                for: schema,
+                configurations: [ModelConfiguration(schema: schema, cloudKitDatabase: .none)]
+            )
+        } catch {
+            // Auch oertlich kein Speicher: lieber ohne Sicherung arbeiten
+            // lassen als den Start zu verweigern
+            print("Kein dauerhafter Speicher moeglich: \(error)")
+            return try! ModelContainer(
+                for: schema,
+                configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)]
+            )
+        }
+    }
 
     var body: some Scene {
         WindowGroup {

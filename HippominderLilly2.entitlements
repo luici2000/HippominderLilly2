@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict/>
+<dict>
+	<!-- Pferde werden ueber iCloud zwischen iPhone und Mac abgeglichen und
+	     gesichert. Der Container muss in Xcode unter Signing & Capabilities
+	     mit "iCloud" / CloudKit angelegt werden, sonst greift das hier nicht. -->
+	<key>com.apple.developer.icloud-container-identifiers</key>
+	<array>
+		<string>iCloud.com.roboterwerk.HippominderLilly2</string>
+	</array>
+	<key>com.apple.developer.icloud-services</key>
+	<array>
+		<string>CloudKit</string>
+	</array>
+	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
+	<string>$(TeamIdentifierPrefix)$(CFBundleIdentifier)</string>
+	<!-- Hintergrundabgleich: ohne das holt die App Aenderungen erst beim
+	     naechsten Start statt waehrend sie laeuft -->
+	<key>aps-environment</key>
+	<string>development</string>
+</dict>
 </plist>

@@ -71,6 +71,22 @@ wurde.
          der Zweig ist unverändert, aber der Umbau war invasiv.
       4. Quer/Hochformat und Splitscreen auf dem iPad.
 
+- [ ] **[Build, wichtig]** iCloud-Abgleich in Betrieb nehmen. Die Pferde
+      liegen jetzt in iCloud statt nur auf dem Gerät. **Vor dem ersten
+      Start mit den echten Daten:**
+      1. In Xcode unter *Signing & Capabilities* **iCloud** hinzufügen und
+         **CloudKit** ankreuzen, Container
+         `iCloud.com.roboterwerk.HippominderLilly2`. Ohne das greifen die
+         Entitlements nicht und die App fällt auf lokal zurück.
+      2. Ebenfalls dort **Background Modes → Remote notifications**, sonst
+         kommen Änderungen erst beim nächsten Start an.
+      3. Erst auf einem Testgerät prüfen, dass vorhandene Pferde die
+         Umstellung überstehen — das Datenmodell hat Standardwerte
+         bekommen, was eine leichte Migration auslöst.
+      4. Dann auf zwei Geräten: Pferd auf dem Mac anlegen → erscheint es
+         auf dem iPhone?
+      5. iCloud testweise abschalten → läuft die App weiter (lokal)?
+
 ## Bekannte Schwachstellen
 
 - [ ] Die Symbole im Classic-Modus sind für ein Segment-LCD fein

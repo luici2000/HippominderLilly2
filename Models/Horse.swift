@@ -20,10 +20,14 @@ import UIKit
 import AppKit
 #endif
 
+/// Hinweis zu iCloud: Jede nicht-optionale Eigenschaft braucht einen
+/// Standardwert, sonst laesst sich der Speicher nicht mit iCloud abgleichen -
+/// CloudKit kann Datensaetze anlegen, in denen ein Feld noch fehlt.
+/// Die Werte hier entsprechen denen im `init`.
 @Model
 class Horse {
-    var id: UUID
-    var name: String
+    var id: UUID = UUID()
+    var name: String = ""
     /// Profilbild - rund zugeschnitten fuer den Avatar
     var imageData: Data?
     /// Hintergrundfoto fuer die Glasblumen - voll, unbeschnitten.
@@ -31,17 +35,17 @@ class Horse {
     @Attribute(.externalStorage) var backgroundImageData: Data?
 
     // Intervalle in Tagen
-    var hufschmiedIntervall: Int
-    var impfungIntervall: Int
-    var wurmkurIntervall: Int
+    var hufschmiedIntervall: Int = 42
+    var impfungIntervall: Int = 180
+    var wurmkurIntervall: Int = 90
 
     // Letzte Termine
-    var letzterHufschmiedTermin: Date
-    var letzterImpfungTermin: Date
-    var letzterWurmkurTermin: Date
+    var letzterHufschmiedTermin: Date = Date()
+    var letzterImpfungTermin: Date = Date()
+    var letzterWurmkurTermin: Date = Date()
 
     // Benachrichtigung Tage vorher
-    var benachrichtigungTageVorher: Int
+    var benachrichtigungTageVorher: Int = 3
 
     // Benachrichtigungs-Flags (pro Pferd, Kontaktdaten global in ContactSettings)
     var notifyApotheker: Bool = false

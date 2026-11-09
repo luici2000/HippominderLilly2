@@ -14,13 +14,22 @@ import SwiftData
 
 @main
 struct HippominderWatchApp: App {
+    /// Die Uhr bleibt bewusst oertlich statt an iCloud: im Stall hat sie oft
+    /// kein Netz, und der Direktfunk zum iPhone traegt auch dann.
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([Horse.self])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            return try ModelContainer(
+                for: schema,
+                configurations: [ModelConfiguration(schema: schema, cloudKitDatabase: .none)]
+            )
         } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+            // Lieber ohne Sicherung laufen als gar nicht starten
+            print("Kein dauerhafter Speicher auf der Uhr: \(error)")
+            return try! ModelContainer(
+                for: schema,
+                configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)]
+            )
         }
     }()
 
