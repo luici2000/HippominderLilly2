@@ -86,12 +86,16 @@ der Glanz gegenrotiert, sonst wandert das Licht mit.
 ## Wo das Projekt liegt
 
 Mathias sammelt seine Projekte in iCloud unter
-`dm_code_reader/projekte/hippominder/` — **nicht** im Home-Ordner. Neue
-Kopien gehören dorthin; `Projekt umziehen.command` erledigt das.
+`dm_code_reader/projekte/hippominder/` — dort sucht er sie, und dort
+muss das Projekt auftauchen.
 
-Nebenwirkung, die man kennen muss: iCloud lädt Dateien bei Platzmangel
-aus und gleicht laufend ab. Bei merkwürdigen Git-Fehlern (beschädigter
-Index, fehlende Objekte) ist das die erste Vermutung, nicht der Code.
+Die Arbeitskopie selbst liegt aber **örtlich** (`~/Developer`), und in
+`dm_code_reader` steht nur eine **Verknüpfung** darauf;
+`Projekt umziehen.command` legt sie an. Grund: iCloud lädt Dateien bei
+Platzmangel aus und gleicht laufend ab. Ein `.git`-Ordner und Xcode
+vertragen das schlecht. Bei merkwürdigen Git-Fehlern (beschädigter
+Index, fehlende Objekte) ist iCloud die erste Vermutung, nicht der Code —
+darum liegt das Repository bewusst nicht darin.
 
 ## Arbeitsweise
 
