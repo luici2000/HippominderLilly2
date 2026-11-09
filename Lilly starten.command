@@ -44,6 +44,32 @@ if ! git rev-parse --git-dir >/dev/null 2>&1; then
 else
   git fetch --quiet origin 2>/dev/null
 
+  # Halbfertiges Zusammenfuehren zuerst aufraeumen. Solange das liegt,
+  # scheitert jedes Beiseitelegen mit "needs merge" und das Holen geht
+  # gar nicht erst los.
+  # Zurueckgesetzt wird nur auf den eigenen Stand (HEAD), der Branch
+  # bleibt wo er ist - das Holen gleich danach bringt den Server-Stand.
+  if [ -n "$(git ls-files --unmerged)" ]; then
+    echo ""
+    echo "  Hier liegt ein halbfertiges Zusammenfuehren. Betroffen:"
+    git diff --name-only --diff-filter=U | sed 's/^/      /'
+    echo ""
+    echo "  Soll ich das wegraeumen? Aenderungen an diesen Dateien"
+    echo "  gehen dabei verloren - der Stand vom Server kommt gleich."
+    read -r -p "  j = ja, alles andere = nein: " ANTWORT
+    if [ "$ANTWORT" = "j" ] || [ "$ANTWORT" = "J" ]; then
+      git merge --abort 2>/dev/null
+      if git reset --hard --quiet HEAD 2>/dev/null; then
+        echo "  Aufgeraeumt."
+      else
+        echo "  Hat nicht geklappt - sag Lilly Bescheid."
+      fi
+    else
+      echo "  Gut, bleibt liegen. Lilly kann sich darum kuemmern."
+    fi
+    echo ""
+  fi
+
   # Unfertige Aenderungen zur Seite legen, damit der Abgleich nicht scheitert
   STASHED=0
   if [ -n "$(git status --porcelain)" ]; then
@@ -56,11 +82,21 @@ else
   if git pull --quiet --ff-only origin "$BRANCH" 2>/dev/null; then
     echo "  Stand ist aktuell."
   else
-    echo "  Der Abgleich ging nicht glatt durch - Lilly klaert das gleich."
+    # Haeufigster Grund: eigene Festschreibungen, die der Server nicht
+    # kennt. Hier nur melden - Lilly sitzt gleich davor und kann es
+    # sich ansehen, statt dass das Skript etwas verwirft.
+    EIGENE=$(git log --oneline "origin/$BRANCH..HEAD" 2>/dev/null)
+    if [ -n "$EIGENE" ]; then
+      echo "  Hier liegen Festschreibungen, die der Server nicht hat:"
+      echo "$EIGENE" | sed 's/^/      /'
+      echo "  Lilly sieht sich das gleich an."
+    else
+      echo "  Der Abgleich ging nicht glatt durch - Lilly klaert das gleich."
+    fi
   fi
 
   if [ "$STASHED" = "1" ]; then
-    git stash pop --quiet 2>/dev/null \
+    git stash pop --quiet >/dev/null 2>&1 \
       && echo "  Deine Aenderungen sind wieder da." \
       || echo "  Deine Aenderungen liegen in 'git stash' - sag Lilly Bescheid."
   fi
@@ -77,6 +113,31 @@ echo "  Zum Beenden: Strg+C, oder dieses Fenster schliessen."
 echo ""
 
 claude remote-control
+
+# Die Fernsteuerung gibt es nur mit angemeldetem claude.ai-Konto. Fehlt
+# die Anmeldung, bricht sie mit einer englischen Meldung ab - statt
+# Mathias damit sitzen zu lassen, melden wir ihn an und versuchen es
+# nochmal.
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "  Die Fernsteuerung ging nicht. Meist fehlt nur die Anmeldung."
+  echo "  Ich mache jetzt das Anmeldefenster auf."
+  echo ""
+  read -r -p "  Eingabetaste druecken, dann im Browser anmelden."
+  claude auth login
+
+  echo ""
+  echo "  Nochmal mit Fernsteuerung ..."
+  claude remote-control
+
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "  Weiterhin keine Fernsteuerung - dann eben oertlich."
+    echo "  Lilly laeuft dann nur hier im Fenster, nicht in der iPad-App."
+    echo ""
+    claude
+  fi
+fi
 
 # Falls Lilly sich beendet, Fenster offen lassen statt wortlos zuzuklappen
 echo ""
