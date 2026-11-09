@@ -83,6 +83,16 @@ der Glanz gegenrotiert, sonst wandert das Licht mit.
 - **Krumme Pixelmaße** lassen den Blattkranz driften, weil jede der zwölf
   Drehungen anders rundet. Maße auf ganze Punkte legen.
 
+## Wo das Projekt liegt
+
+Mathias sammelt seine Projekte in iCloud unter
+`dm_code_reader/projekte/hippominder/` — **nicht** im Home-Ordner. Neue
+Kopien gehören dorthin; `Projekt umziehen.command` erledigt das.
+
+Nebenwirkung, die man kennen muss: iCloud lädt Dateien bei Platzmangel
+aus und gleicht laufend ab. Bei merkwürdigen Git-Fehlern (beschädigter
+Index, fehlende Objekte) ist das die erste Vermutung, nicht der Code.
+
 ## Arbeitsweise
 
 Mathias arbeitet aus dem Bett am iPad und schaut selten in Xcode. Was
