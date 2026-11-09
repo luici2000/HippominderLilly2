@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		C78557432D734C0300840FAF /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C78557422D734C0300840FAF /* EventKit.framework */; };
-		C7LOCA00200000000840FAF0 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C7LOCA00100000000840FAF0 /* Localizable.xcstrings */; };
-		C7LOCA00400000000840FAF0 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C7LOCA00300000000840FAF0 /* InfoPlist.xcstrings */; };
 		C7WATCH0010000000840FAF00 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C7LOCA00100000000840FAF0 /* Localizable.xcstrings */; };
 		C7WATCH0020000000840FAF00 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C7LOCA00300000000840FAF0 /* InfoPlist.xcstrings */; };
 /* End PBXBuildFile section */
@@ -44,6 +42,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C78557002D71AB7500840FAF /* . */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C7EXCEPT010000000840FAF0 /* Exceptions for "." folder in "HippominderLilly2" target */,
+			);
 			path = .;
 			sourceTree = "<group>";
 		};
@@ -70,6 +71,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C7EXCEPT010000000840FAF0 /* Exceptions for "." folder in "HippominderLilly2" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C78556FD2D71AB7500840FAF /* HippominderLilly2 */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -288,8 +296,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C7LOCA00200000000840FAF0 /* Localizable.xcstrings in Resources */,
-				C7LOCA00400000000840FAF0 /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -371,7 +377,6 @@
 				CODE_SIGN_ENTITLEMENTS = HippominderLilly2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
 				EXCLUDED_SOURCE_FILE_NAMES = (
 					"archiv/*",
 					"neu/*",
@@ -423,7 +428,6 @@
 				CODE_SIGN_ENTITLEMENTS = HippominderLilly2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_ASSET_PATHS = "\"Preview Content\"";
 				EXCLUDED_SOURCE_FILE_NAMES = (
 					"archiv/*",
 					"neu/*",
