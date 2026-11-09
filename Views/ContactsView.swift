@@ -42,6 +42,17 @@ struct ContactsView: View {
                         }
                     )
                 }
+                #if os(iOS)
+                Section {
+                    NavigationLink {
+                        DatensicherungView()
+                    } label: {
+                        Label("Daten sichern", systemImage: "externaldrive")
+                    }
+                } footer: {
+                    Text("Pferde als Datei sichern oder eine Sicherung einlesen.")
+                }
+                #endif
             }
             .navigationTitle("Kontakte")
             #if os(iOS)
