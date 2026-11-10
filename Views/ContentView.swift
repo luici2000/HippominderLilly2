@@ -12,9 +12,10 @@
 
 import SwiftUI
 import SwiftData
-import UIKit
 
 #if os(iOS)
+import UIKit
+
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var horses: [Horse]

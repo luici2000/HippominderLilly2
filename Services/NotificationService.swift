@@ -159,7 +159,9 @@ class NotificationService {
         let descriptor = FetchDescriptor<Horse>()
         guard let horses = try? context.fetch(descriptor) else { return }
         updateBadge(for: horses)
+        #if os(iOS)
         AppIconService.aktualisiere(for: horses)
+        #endif
     }
 
     /// Schedule notifications for all event types of a horse
