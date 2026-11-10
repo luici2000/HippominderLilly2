@@ -11,6 +11,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 #if os(iOS)
 import PhotosUI

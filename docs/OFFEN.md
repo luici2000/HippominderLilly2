@@ -11,8 +11,10 @@ wurde.
 
 ## Zuerst: ist überhaupt baubar?
 
-- [ ] **[Build]** Baut das Projekt für iPhone 16e? Die letzten Änderungen
-      entstanden ohne Compiler — geprüft wurde nur Syntax, nicht Typen.
+- [x] **[Build]** Baut das Projekt? Ja — am 10.11.2026 mit Xcode 27.1 für
+      das echte iPhone (blackiPhone_14, iOS 27.2) gebaut, 0 Fehler,
+      0 Warnungen, und als 3.1.0 (2) installiert. Simulator iPhone 16e
+      noch nicht geprüft.
 - [ ] **[Build]** Läuft `⌘U`? Das Unit-Test-Target hatte vorher gar keine
       Quellen. `HippominderLilly2Tests` wurde in `project.pbxproj` neu
       verdrahtet, nach dem Muster der UI-Tests, aber **nie gebaut**.
@@ -74,12 +76,12 @@ wurde.
 - [ ] **[Build, wichtig]** iCloud-Abgleich in Betrieb nehmen. Die Pferde
       liegen jetzt in iCloud statt nur auf dem Gerät. **Vor dem ersten
       Start mit den echten Daten:**
-      1. In Xcode unter *Signing & Capabilities* **iCloud** hinzufügen und
-         **CloudKit** ankreuzen, Container
-         `iCloud.com.roboterwerk.HippominderLilly2`. Ohne das greifen die
-         Entitlements nicht und die App fällt auf lokal zurück.
-      2. Ebenfalls dort **Background Modes → Remote notifications**, sonst
-         kommen Änderungen erst beim nächsten Start an.
+      1. ~~In Xcode unter *Signing & Capabilities* **iCloud** hinzufügen~~
+         Erledigt 10.11.2026: das automatische Profil enthält den
+         Container `iCloud.com.roboterwerk.HippominderLilly2`, CloudKit
+         und `aps-environment`; die signierte App trägt alle drei.
+      2. ~~**Background Modes → Remote notifications**~~ — steckt in
+         denselben Entitlements, siehe 1.
       3. Erst auf einem Testgerät prüfen, dass vorhandene Pferde die
          Umstellung überstehen — das Datenmodell hat Standardwerte
          bekommen, was eine leichte Migration auslöst.
@@ -105,6 +107,24 @@ wurde.
       `docs/testflight-checklist.md`.
 
 ---
+
+## Wenn `xcodebuild` einfach hängt
+
+Am 10.11.2026 blieb jedes `xcodebuild -list` und jeder Build im
+Projektordner ohne CPU-Last stehen. Ursache war ein seit acht Tagen
+laufendes, eingefrorenes Xcode, das eine Dateikoordinations-Sperre
+(`NSFileCoordinator`) auf dem Projektpfad hielt — nicht das Projekt.
+Erkennbar: `sample <pid>` zeigt `_blockOnAccessClaim`, und AppleScript
+`tell application "Xcode" to quit` läuft in den Timeout.
+
+Ausweg, wenn Xcode nicht beendet werden kann: Projekt ohne `.git` in
+einen anderen Ordner kopieren und dort bauen — die Sperre gilt nur für
+den Originalpfad. Sauberer ist, das hängende Xcode zu beenden.
+
+Am selben Tag stand außerdem ein **Verweis des Projekts auf sich selbst**
+(`projectReferences` → `HippominderLilly2.xcodeproj`) in der
+`project.pbxproj`; wahrscheinlich in Xcode versehentlich hineingezogen.
+Entfernt — so etwas gehört nie hinein.
 
 ## Wenn zwei Sitzungen gleichzeitig arbeiten
 

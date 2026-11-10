@@ -30,7 +30,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		C78556FE2D71AB7500840FAF /* HippominderLilly2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HippominderLilly2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C78556FE2D71AB7500840FAF /* Hippominder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hippominder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C78557122D71AB7700840FAF /* HippominderLilly2Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HippominderLilly2Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C785571C2D71AB7700840FAF /* HippominderLilly2UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HippominderLilly2UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C78557422D734C0300840FAF /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
@@ -38,6 +38,16 @@
 		C7LOCA00300000000840FAF0 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		C7WATCH0030000000840FAF00 /* HippominderWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HippominderWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C7EXCEPT010000000840FAF0 /* Exceptions for "." folder in "HippominderLilly2" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C78556FD2D71AB7500840FAF /* HippominderLilly2 */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C78557002D71AB7500840FAF /* . */ = {
@@ -69,16 +79,6 @@
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
-
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		C7EXCEPT010000000840FAF0 /* Exceptions for "." folder in "HippominderLilly2" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = C78556FD2D71AB7500840FAF /* HippominderLilly2 */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		C78556FB2D71AB7500840FAF /* Frameworks */ = {
@@ -131,7 +131,7 @@
 		C78556FF2D71AB7500840FAF /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C78556FE2D71AB7500840FAF /* HippominderLilly2.app */,
+				C78556FE2D71AB7500840FAF /* Hippominder.app */,
 				C78557122D71AB7700840FAF /* HippominderLilly2Tests.xctest */,
 				C785571C2D71AB7700840FAF /* HippominderLilly2UITests.xctest */,
 				C7WATCH0030000000840FAF00 /* HippominderWatch.app */,
@@ -169,7 +169,7 @@
 			packageProductDependencies = (
 			);
 			productName = HippominderLilly2;
-			productReference = C78556FE2D71AB7500840FAF /* HippominderLilly2.app */;
+			productReference = C78556FE2D71AB7500840FAF /* Hippominder.app */;
 			productType = "com.apple.product-type.application";
 		};
 		C78557112D71AB7700840FAF /* HippominderLilly2Tests */ = {
@@ -377,6 +377,8 @@
 				CODE_SIGN_ENTITLEMENTS = HippominderLilly2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = H5FBB5BQB6;
+				ENABLE_PREVIEWS = YES;
 				EXCLUDED_SOURCE_FILE_NAMES = (
 					"archiv/*",
 					"neu/*",
@@ -393,11 +395,13 @@
 					.gitignore,
 					Info.plist,
 				);
-				DEVELOPMENT_TEAM = H5FBB5BQB6;
-				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Hippominder;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Hippominder möchte Termine in deinen Kalender eintragen.";
+				INFOPLIST_KEY_NSContactsUsageDescription = "Hippominder möchte auf deine Kontakte zugreifen, um Benachrichtigungsempfänger auszuwählen.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Hippominder möchte auf deine Fotos zugreifen, um ein Pferdebild auszuwählen.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -428,6 +432,8 @@
 				CODE_SIGN_ENTITLEMENTS = HippominderLilly2.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = H5FBB5BQB6;
+				ENABLE_PREVIEWS = YES;
 				EXCLUDED_SOURCE_FILE_NAMES = (
 					"archiv/*",
 					"neu/*",
@@ -444,11 +450,13 @@
 					.gitignore,
 					Info.plist,
 				);
-				DEVELOPMENT_TEAM = H5FBB5BQB6;
-				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Hippominder;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Hippominder möchte Termine in deinen Kalender eintragen.";
+				INFOPLIST_KEY_NSContactsUsageDescription = "Hippominder möchte auf deine Kontakte zugreifen, um Benachrichtigungsempfänger auszuwählen.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Hippominder möchte auf deine Fotos zugreifen, um ein Pferdebild auszuwählen.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
