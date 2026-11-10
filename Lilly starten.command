@@ -112,7 +112,21 @@ echo ""
 echo "  Zum Beenden: Strg+C, oder dieses Fenster schliessen."
 echo ""
 
-claude remote-control
+# Solange Lilly verbunden ist, darf der Mac nicht einschlafen - sonst
+# reisst die Fernsteuerung ab und Mathias steht vor "Remote Control
+# getrennt". caffeinate gilt nur fuer die Dauer dieses Befehls, danach
+# schlaeft der Mac wieder wie gewohnt.
+#   -i  kein Leerlauf-Schlaf
+#   -s  kein System-Schlaf am Netzteil
+WACH=""
+if command -v caffeinate >/dev/null 2>&1; then
+  WACH="caffeinate -i -s"
+  echo "  Der Mac bleibt wach, solange dieses Fenster offen ist."
+  echo "  (Zugeklappter Deckel schlaeft trotzdem - dann Deckel auf lassen.)"
+  echo ""
+fi
+
+$WACH claude remote-control
 
 # Die Fernsteuerung gibt es nur mit angemeldetem claude.ai-Konto. Fehlt
 # die Anmeldung, bricht sie mit einer englischen Meldung ab - statt
@@ -128,7 +142,7 @@ if [ $? -ne 0 ]; then
 
   echo ""
   echo "  Nochmal mit Fernsteuerung ..."
-  claude remote-control
+  $WACH claude remote-control
 
   if [ $? -ne 0 ]; then
     echo ""
