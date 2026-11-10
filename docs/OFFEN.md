@@ -15,12 +15,16 @@ wurde.
       das echte iPhone (blackiPhone_14, iOS 27.2) gebaut, 0 Fehler,
       0 Warnungen, und als 3.1.0 (2) installiert. Simulator iPhone 16e
       noch nicht geprüft.
-- [ ] **[Build]** Läuft `⌘U`? Das Unit-Test-Target hatte vorher gar keine
-      Quellen. `HippominderLilly2Tests` wurde in `project.pbxproj` neu
-      verdrahtet, nach dem Muster der UI-Tests, aber **nie gebaut**.
-      Wenn Xcode meckert: Das ist die wahrscheinlichste Fehlerquelle.
-- [ ] **[Build]** Baut auch das Watch-Target? `Models/FlowerGeometry.swift`
-      ist neu und wird von Uhr und App gemeinsam genutzt.
+- [x] **[Build]** Läuft `⌘U`? Ja, seit 10.11.2026: 12 Tests in
+      `FlowerGeometryTests`, 0 Fehler, auf dem Simulator iPhone 16e. Drei
+      Dinge waren falsch verdrahtet: `TEST_HOST` zeigte noch auf
+      `HippominderLilly2.app` (das Produkt heißt `Hippominder.app`), der
+      Test importierte das Modul `HippominderLilly2` (heißt jetzt
+      `Hippominder`), und es gab kein geteiltes Schema mit den Tests —
+      liegt jetzt in `xcshareddata/xcschemes/HippominderLilly2.xcscheme`.
+- [x] **[Build]** Baut auch das Watch-Target? Ja, 10.11.2026 für
+      `generic/platform=watchOS`, 0 Fehler. Auf einer echten Uhr noch nicht
+      installiert.
 
 ## Dann: sieht es richtig aus?
 
@@ -59,8 +63,9 @@ wurde.
       2. Termin eintragen → wird es wieder orange?
       3. App mehrmals starten, ohne dass sich etwas ändert → darf **kein**
          Hinweis erscheinen. Sonst greift die Zustandsprüfung nicht.
-      4. Liegen `AppIcon-Ueberfaellig@2x/@3x.png` wirklich flach im Bundle?
-         In einem Unterordner findet iOS sie nicht.
+      4. ~~Liegen `AppIcon-Ueberfaellig@2x/@3x.png` wirklich flach im Bundle?~~
+         Ja, 10.11.2026 im gebauten `Hippominder.app` nachgesehen: alle drei
+         liegen direkt im Bundle.
 
 - [ ] **[Build]** iPad-Layout prüfen. Auf dem iPad läuft jetzt eine
       zweispaltige Ansicht (Liste links, Pferd rechts), auf dem iPhone
@@ -82,9 +87,11 @@ wurde.
          und `aps-environment`; die signierte App trägt alle drei.
       2. ~~**Background Modes → Remote notifications**~~ — steckt in
          denselben Entitlements, siehe 1.
-      3. Erst auf einem Testgerät prüfen, dass vorhandene Pferde die
-         Umstellung überstehen — das Datenmodell hat Standardwerte
-         bekommen, was eine leichte Migration auslöst.
+      3. ~~Erst auf einem Testgerät prüfen, dass vorhandene Pferde die
+         Umstellung überstehen~~ — 10.11.2026 auf blackiPhone_14: Bina hat
+         die Migration von 3.0.0 (1) auf 3.1.0 (2) überstanden, mit Foto und
+         Intervallen. CloudKit-Einrichtung, Import und Export liefen beim
+         ersten Start fehlerfrei, Bina hat einen iCloud-Datensatz.
       4. Dann auf zwei Geräten: Pferd auf dem Mac anlegen → erscheint es
          auf dem iPhone?
       5. iCloud testweise abschalten → läuft die App weiter (lokal)?

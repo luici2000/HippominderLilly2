@@ -11,7 +11,7 @@
 //
 
 import XCTest
-@testable import HippominderLilly2
+@testable import Hippominder
 
 final class FlowerGeometryTests: XCTestCase {
 
