@@ -37,6 +37,14 @@ wurde.
 - [ ] **[Build]** Uhr ansehen. Dort ist die Blume neu, vorher waren es
       Ampelpunkte und ein Balken. Layout wurde bei 162–205 pt gerendert
       geprüft und passt, auch auf der 40 mm.
+      **Stand 10.11.2026:** Die Watch-App wird jetzt in die iPhone-App
+      eingebettet („Embed Watch Content", nur iOS) — vorher wurde sie
+      gebaut, kam aber nie auf eine Uhr. Haken: das automatische
+      Signaturprofil kennt nur iPhone und iPad, nicht die Ultra 2. Die
+      Uhr muss einmal von Xcode gesehen werden (Entwicklermodus auf der
+      Uhr, iPhone daneben entsperrt), dann registriert ein Build mit
+      `-allowProvisioningDeviceRegistration` sie. Bis dahin verweigert
+      watchOS die Installation.
 - [ ] **[Build, wichtig]** „War heute da" auf der Uhr testen. Der Rückkanal
       Uhr → iPhone ist **neu und noch nie gelaufen**. Zu prüfen:
       1. Termin auf der Uhr abhaken, während das iPhone in der Nähe ist →
@@ -98,6 +106,10 @@ wurde.
 
 ## Bekannte Schwachstellen
 
+- [x] ~~Plus/Minus-Tasten in Glas und Classic kaum unterscheidbar~~ —
+      10.11.2026 neu: Classic = erhabene Gehäusetasten mit Schattenkante
+      und olivgrauem Ziffernfeld (Farben aus dem Gerätefoto), Glas =
+      Milchglas in der Glasfarbe. Im Simulator gerendert geprüft.
 - [ ] Die Symbole im Classic-Modus sind für ein Segment-LCD fein
       gezeichnet, besonders die Spritze; auf dem Original wirken sie
       gröber. **Bewusst nicht geändert** — Mathias' Ansage war, seine
