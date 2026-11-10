@@ -10,6 +10,7 @@
 		C78557432D734C0300840FAF /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C78557422D734C0300840FAF /* EventKit.framework */; };
 		C7WATCH0010000000840FAF00 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C7LOCA00100000000840FAF0 /* Localizable.xcstrings */; };
 		C7WATCH0020000000840FAF00 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C7LOCA00300000000840FAF0 /* InfoPlist.xcstrings */; };
+		C7WATCHEMBED00000840FAF0 /* HippominderWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C7WATCH0030000000840FAF00 /* HippominderWatch.app */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,6 +27,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = C78556FD2D71AB7500840FAF;
 			remoteInfo = HippominderLilly2;
+		};
+		C7WATCHEMBED20000840FAF0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C78556F62D71AB7500840FAF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C7WATCH0050000000840FAF00;
+			remoteInfo = HippominderWatch;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -79,6 +87,20 @@
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C7WATCHEMBED10000840FAF0 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				C7WATCHEMBED00000840FAF0 /* HippominderWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		C78556FB2D71AB7500840FAF /* Frameworks */ = {
@@ -157,10 +179,12 @@
 				C78556FA2D71AB7500840FAF /* Sources */,
 				C78556FB2D71AB7500840FAF /* Frameworks */,
 				C78556FC2D71AB7500840FAF /* Resources */,
+				C7WATCHEMBED10000840FAF0 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				C7WATCHEMBED30000840FAF0 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				C78557002D71AB7500840FAF /* . */,
@@ -365,6 +389,12 @@
 			isa = PBXTargetDependency;
 			target = C78556FD2D71AB7500840FAF /* HippominderLilly2 */;
 			targetProxy = C785571D2D71AB7700840FAF /* PBXContainerItemProxy */;
+		};
+		C7WATCHEMBED30000840FAF0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = C7WATCH0050000000840FAF00 /* HippominderWatch */;
+			targetProxy = C7WATCHEMBED20000840FAF0 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

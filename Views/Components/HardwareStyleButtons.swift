@@ -2,18 +2,24 @@
 //  HardwareStyleButtons.swift
 //  Hippominder
 //
-//  Autor: Mathias Hubrich & Claude (Anthropic)
-//  Erstellt: 12. Februar 2026
-//  Version: 1.0.0
+//  Plus/Minus-Tasten unter der Blumenbuehne, in zwei Fassungen:
 //
-//  Beschreibung: Hardware-Stil +/- Stepper Buttons mit Glass Design
+//  Classic - Gehaeusetasten wie am Geraet: fast weisse, erhabene Taster
+//  mit Schattenkante, dazwischen ein kleines olivgraues Display mit
+//  dunkler Ziffer (Farben aus Detail_Display.jpg gemessen, LCDPalette).
+//
+//  Glas - dieselbe Form aus getoentem Milchglas in der gewaehlten
+//  Glasfarbe (GlobalSettings.glassTint); das Pferdefoto dahinter wird
+//  gebrochen sichtbar, wie bei den Bluetenblaettern. Blume nutzt Glas.
+//
+//  Licht kommt wie ueberall von oben links (-45 Grad): Kante oben links
+//  hell, unten rechts dunkel, Schatten nach unten rechts.
 //
 
 import SwiftUI
 
 struct HardwareStyleButtons: View {
     @Binding var value: Int
-    /// Optionaler Praefix fuer Accessibility-Identifier (UI-Tests): "<id>_minus", "<id>_value", "<id>_plus"
     var identifier: String? = nil
     @State private var showingInput = false
     @State private var inputText = ""
@@ -23,46 +29,39 @@ struct HardwareStyleButtons: View {
     /// Am Foto des Geraets gemessen: Tastenflaeche #E6ECEE,
     /// Symbolkreis #1E3436 - fast weisser Taster, sehr dunkler Kreis
     private static let tasteHell = Color(red: 0.90, green: 0.925, blue: 0.933)
-    private static let tasteKante = Color(red: 0.78, green: 0.81, blue: 0.82)
+    private static let tasteKante = Color(red: 0.66, green: 0.70, blue: 0.72)
     private static let symbolKreis = Color(red: 0.118, green: 0.203, blue: 0.212)
 
+    private let tastenGroesse: CGFloat = 44
+    private let feldBreite: CGFloat = 54
+
     private var istClassic: Bool { globalSettings.designMode == .classic }
+    private var tint: Color { globalSettings.glassTint }
 
     var body: some View {
         HStack(spacing: 6) {
-            // Minus Button
-            glassButton(symbol: "minus") {
+            taste(symbol: "minus") {
                 if value > 1 { value -= 1 }
             }
             .accessibilityIdentifier(identifier.map { "\($0)_minus" } ?? "")
 
-            // Tappable value display
             Button(action: {
                 inputText = "\(value)"
                 showingInput = true
             }) {
                 Text("\(value)")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.primary)
-                    .frame(width: 54, height: 44)
-                    .background(
-                        // Classic: vertieftes Anzeigefenster wie auf dem
-                        // Geraet, Glas: durchscheinend
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(istClassic
-                                  ? AnyShapeStyle(Self.tasteHell.opacity(0.75))
-                                  : AnyShapeStyle(.ultraThinMaterial))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(.white.opacity(0.3), lineWidth: 0.5)
-                            )
-                    )
+                    .font(.system(size: 18, weight: istClassic ? .semibold : .medium))
+                    .monospacedDigit()
+                    .foregroundStyle(istClassic ? LCDPalette.on : Color.primary)
+                    .frame(width: feldBreite, height: tastenGroesse)
+                    .background {
+                        if istClassic { lcdFeld } else { glasFeld }
+                    }
             }
             .buttonStyle(.plain)
             .accessibilityIdentifier(identifier.map { "\($0)_value" } ?? "")
 
-            // Plus Button
-            glassButton(symbol: "plus") {
+            taste(symbol: "plus") {
                 value += 1
             }
             .accessibilityIdentifier(identifier.map { "\($0)_plus" } ?? "")
@@ -81,22 +80,21 @@ struct HardwareStyleButtons: View {
         }
     }
 
-    /// Knopf im Stil der jeweiligen Darstellung
+    // MARK: - Taster
+
     @ViewBuilder
-    private func glassButton(symbol: String, action: @escaping () -> Void) -> some View {
+    private func taste(symbol: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             ZStack {
                 if istClassic { tastenKoerper } else { glasKoerper }
 
-                // Dunkler Kreis mit weissem Symbol - auf dem Geraet sitzt
-                // in jeder Taste so einer
                 Circle()
-                    .fill(istClassic ? Self.symbolKreis : Color(white: 0.3))
+                    .fill(istClassic ? Self.symbolKreis : Color.white.opacity(0.88))
                     .frame(width: 26, height: 26)
                     .overlay {
                         Circle().fill(
                             LinearGradient(
-                                colors: [.white.opacity(0.22), .clear],
+                                colors: [.white.opacity(istClassic ? 0.22 : 0.5), .clear],
                                 startPoint: .topLeading,
                                 endPoint: .bottom
                             )
@@ -105,45 +103,85 @@ struct HardwareStyleButtons: View {
                     .overlay {
                         Image(systemName: symbol)
                             .font(.system(size: 13, weight: .bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(istClassic ? Color.white : tint)
                     }
-                    .shadow(color: .black.opacity(0.25), radius: 1.5, x: 0, y: 1)
+                    .shadow(color: .black.opacity(0.25), radius: 1.5, x: 1, y: 1)
             }
         }
         .buttonStyle(.plain)
     }
 
-    /// Classic: Kunststofftaster wie auf dem Geraet - heller Koerper,
-    /// Lichtkante oben, feine Fuge zum Gehaeuse
+    /// Classic: erhabene Gehaeusetaste. Verlauf von oben links nach unten
+    /// rechts, Kante oben links weiss und unten rechts dunkel, kraeftiger
+    /// Schatten nach unten rechts - so hebt sie sich vom Gehaeuse ab.
     private var tastenKoerper: some View {
         RoundedRectangle(cornerRadius: 9, style: .continuous)
             .fill(
                 LinearGradient(
                     colors: [.white, Self.tasteHell],
-                    startPoint: .top,
-                    endPoint: .bottom
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
                 )
             )
-            .frame(width: 44, height: 44)
+            .frame(width: tastenGroesse, height: tastenGroesse)
             .overlay {
                 RoundedRectangle(cornerRadius: 9, style: .continuous)
-                    .strokeBorder(Self.tasteKante, lineWidth: 0.8)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [.white, Self.tasteKante],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.2
+                    )
             }
-            .shadow(color: .black.opacity(0.18), radius: 1.5, x: 0, y: 1.5)
+            .shadow(color: .black.opacity(0.30), radius: 2.5, x: 1.5, y: 2.5)
+            .shadow(color: .black.opacity(0.10), radius: 0.5, x: 0, y: 0.5)
     }
 
-    /// Glas: durchscheinendes Material mit Glanzkante bei -45 Grad
+    /// Classic: kleines olivgraues Display fuer die Ziffer, leicht ins
+    /// Gehaeuse eingelassen (innerer Schatten oben links).
+    private var lcdFeld: some View {
+        RoundedRectangle(cornerRadius: 6, style: .continuous)
+            .fill(
+                LinearGradient(
+                    colors: [LCDPalette.base, LCDPalette.baseEdge],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [.black.opacity(0.22), .clear],
+                            startPoint: .topLeading,
+                            endPoint: UnitPoint(x: 0.5, y: 0.7)
+                        )
+                    )
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .strokeBorder(LCDPalette.bezel.opacity(0.7), lineWidth: 1)
+            }
+    }
+
+    /// Glas: Milchglas in der Glasfarbe, wie die Bluetenblaetter.
     private var glasKoerper: some View {
         RoundedRectangle(cornerRadius: 11, style: .continuous)
             .fill(.ultraThinMaterial)
-            .frame(width: 44, height: 44)
+            .frame(width: tastenGroesse, height: tastenGroesse)
+            .overlay {
+                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    .fill(tint.opacity(0.62))
+            }
             .overlay {
                 RoundedRectangle(cornerRadius: 11, style: .continuous)
                     .fill(
                         LinearGradient(
-                            colors: [.white.opacity(0.3), .clear, .black.opacity(0.06)],
-                            startPoint: UnitPoint(x: 0.15, y: 0),
-                            endPoint: UnitPoint(x: 0.85, y: 1)
+                            colors: [.white.opacity(0.55), .clear, .black.opacity(0.10)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
                         )
                     )
             }
@@ -151,13 +189,27 @@ struct HardwareStyleButtons: View {
                 RoundedRectangle(cornerRadius: 11, style: .continuous)
                     .strokeBorder(
                         LinearGradient(
-                            colors: [.white.opacity(0.65), .white.opacity(0.15)],
+                            colors: [.white.opacity(0.85), .white.opacity(0.2)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
                         lineWidth: 1
                     )
             }
-            .shadow(color: .black.opacity(0.12), radius: 3, x: 1, y: 2)
+            .shadow(color: tint.opacity(0.35), radius: 4, x: 1, y: 2)
+    }
+
+    /// Glas: das Zahlenfeld, schwaecher getoent als die Taster.
+    private var glasFeld: some View {
+        RoundedRectangle(cornerRadius: 6, style: .continuous)
+            .fill(.ultraThinMaterial)
+            .overlay {
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(tint.opacity(0.22))
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .strokeBorder(.white.opacity(0.5), lineWidth: 0.8)
+            }
     }
 }
