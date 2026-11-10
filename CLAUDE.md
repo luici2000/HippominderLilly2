@@ -116,6 +116,12 @@ die nächste Sitzung nicht, was auf dem Gerät liegt.
 
 ## Arbeitsweise
 
+**Immer den ganzen Pfad nennen.** Nie „die Datei im Projektordner",
+nie nur den Dateinamen — sondern
+`/Users/mathias/Developer/HippominderLilly2/Lilly starten.command`.
+Auch bei Befehlen zum Kopieren. Wer den Pfad abkürzt, schickt Mathias
+auf die Suche, und das ist schon mehrfach schiefgegangen.
+
 Mathias arbeitet aus dem Bett am iPad und schaut selten in Xcode. Was
 ihm gezeigt wird, muss ohne Build beurteilbar sein — HTML-Vorschauen als
 Artifact haben sich bewährt.
