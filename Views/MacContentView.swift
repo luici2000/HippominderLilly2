@@ -38,8 +38,11 @@ struct MacContentView: View {
         NavigationSplitView {
             // Sidebar: Pferdeliste
             VStack(spacing: 0) {
-                // Header
-                HStack {
+                // Kopf wie auf dem iPhone: Logo links, rechts das Farbschema.
+                // Glas: drei Schemata + freie Farbe, Blume: nur die drei,
+                // Classic ist monochrom. Die Darstellung selbst wird wie am
+                // iPhone auf der Detailseite umgeschaltet.
+                HStack(alignment: .top) {
                     Image("hippominder_logo")
                         .resizable()
                         .scaledToFit()
@@ -57,39 +60,30 @@ struct MacContentView: View {
 
                     Spacer()
 
-                    // Darstellung. Die Einstellung liegt je Geraet in den
-                    // Benutzervorgaben - ohne eigenen Umschalter bliebe der
-                    // Mac fuer immer auf Glas, egal was am iPhone gewaehlt ist.
-                    Picker("", selection: Binding(
-                        get: { globalSettings.designMode },
-                        set: { globalSettings.designMode = $0 }
-                    )) {
-                        ForEach(DesignMode.allCases) { modus in
-                            Text(modus.localizedName).tag(modus)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .frame(maxWidth: 220)
-
-                    Spacer()
-
-                    // Farbschema
-                    HStack(spacing: 6) {
-                        ForEach(FlowerColorScheme.allCases) { scheme in
-                            Button(action: {
-                                withAnimation(.easeInOut(duration: 0.2)) {
-                                    globalSettings.flowerColorScheme = scheme
+                    if globalSettings.designMode != .classic {
+                        GlobalColorPicker(
+                            selectedScheme: Binding(
+                                get: {
+                                    globalSettings.designMode == .glass
+                                        ? globalSettings.matchingColorScheme
+                                        : globalSettings.flowerColorScheme
+                                },
+                                set: { scheme in
+                                    guard let scheme else { return }
+                                    if globalSettings.designMode == .glass {
+                                        globalSettings.flowerColorScheme = scheme
+                                    } else {
+                                        globalSettings.flowerColorSchemeIndex =
+                                            FlowerColorScheme.allCases.firstIndex(of: scheme) ?? 0
+                                    }
                                 }
-                            }) {
-                                Circle()
-                                    .fill(scheme.strongColor)
-                                    .frame(width: globalSettings.flowerColorScheme == scheme ? 14 : 10,
-                                           height: globalSettings.flowerColorScheme == scheme ? 14 : 10)
-                                    .opacity(globalSettings.flowerColorScheme == scheme ? 1.0 : 0.4)
-                            }
-                            .buttonStyle(.plain)
-                        }
+                            ),
+                            customTint: Binding(
+                                get: { globalSettings.glassTint },
+                                set: { globalSettings.glassTint = $0 }
+                            ),
+                            showsCustomTint: globalSettings.designMode == .glass
+                        )
                     }
                 }
                 .padding(.horizontal, 12)
@@ -148,7 +142,7 @@ struct MacContentView: View {
 
                 versionsFuss
             }
-            .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 320)
+            .navigationSplitViewColumnWidth(min: 280, ideal: 320, max: 380)
             .toolbar {
                 ToolbarItem(placement: .automatic) {
                     Button(action: { showingContacts = true }) {
@@ -218,8 +212,10 @@ struct MacContentView: View {
     }
 }
 
-// MARK: - Pferde-Zeile (Mac)
+// MARK: - Pferde-Zeile (Mac) - wie HorseRowView auf dem iPhone
 
+/// Dieselbe Zeile wie in der iPhone-Liste: Bild, Name, der naechste Termin
+/// in Worten und rechts die drei Mini-Blumen statt Ampelpunkten.
 struct MacHorseRow: View {
     let horse: Horse
 
@@ -234,69 +230,97 @@ struct MacHorseRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            // Pferdebild
             if let image = horse.image {
                 image
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 36, height: 36)
+                    .frame(width: 40, height: 40)
                     .clipShape(Circle())
             } else {
                 Circle()
-                    .fill(Color.gray.opacity(0.15))
-                    .frame(width: 36, height: 36)
+                    .fill(Color.gray.opacity(0.2))
+                    .frame(width: 40, height: 40)
                     .overlay(
                         Image("horse_silhouette")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 20, height: 20)
-                            .opacity(0.4)
+                            .frame(width: 22, height: 22)
+                            .opacity(0.3)
                     )
             }
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(horse.name)
-                    .font(.body.bold())
+                    .font(.headline)
+                    .lineLimit(1)
 
-                HStack(spacing: 3) {
-                    Image(systemName: nextEvent.type.systemSymbol)
-                        .font(.system(size: 9))
-                    Text(nextEvent.days <= 0 ? "\(-nextEvent.days)d ueber" : "in \(nextEvent.days)d")
+                HStack(spacing: 4) {
+                    // Template-Asset: ohne Farbe waere das Symbol in Akzentfarbe
+                    Image(nextEvent.type.symbol)
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundStyle(.primary)
+                        .frame(width: 12, height: 12)
+                    // Zwei Zeilen erlaubt: in der schmalen Seitenleiste passt
+                    // "Hufschmied in 41 Tagen" sonst nicht neben die Blumen
+                    Text(wortlaut)
                         .font(.caption)
+                        .foregroundColor(farbe)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .foregroundColor(colorForDays(nextEvent.days))
             }
 
-            Spacer()
+            Spacer(minLength: 4)
 
-            // Status-Punkte
-            HStack(spacing: 4) {
+            HStack(spacing: 6) {
                 ForEach(Horse.EventType.allCases, id: \.self) { eventType in
-                    Circle()
-                        .fill(colorForDays(horse.tageBis(fuer: eventType)))
-                        .frame(width: 7, height: 7)
+                    TimerIndicator(
+                        eventType: eventType,
+                        days: horse.tageBis(fuer: eventType),
+                        interval: horse.holeIntervall(fuer: eventType)
+                    )
                 }
             }
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 3)
     }
 
-    private func colorForDays(_ days: Int) -> Color {
-        if days <= 0 { return .red }
-        if days <= 7 { return .red }
-        if days <= 14 { return .orange }
-        return .green
+    /// Wortlaut wie am iPhone: "Hufschmied in 41 Tagen", "heute faellig!",
+    /// "seit 3 Tagen ueberfaellig"
+    private var wortlaut: String {
+        let name = nextEvent.type.localizedName
+        if nextEvent.days < 0 {
+            return "\(name) \(String(localized: "seit")) \(-nextEvent.days) \(String(localized: "Tagen überfällig"))"
+        }
+        if nextEvent.days == 0 {
+            return "\(name) \(String(localized: "heute fällig!"))"
+        }
+        return "\(name) \(String(localized: "in")) \(nextEvent.days) \(String(localized: "Tagen"))"
+    }
+
+    private var farbe: Color {
+        if nextEvent.days <= 7 { return .red }
+        if nextEvent.days <= 14 { return .orange }
+        return .gray
     }
 }
 
-// MARK: - Detail-Ansicht (Mac) - Voller Feature-Umfang wie iOS
+// MARK: - Detail-Ansicht (Mac) - Aufbau wie HorseDetailView auf dem iPhone
 
+/// Dieselbe Seite wie am iPhone: Logo, Name, rundes Bild, Umschalter der
+/// Darstellung, dann die drei Blumen (Glasbuehne / LCD / PNG-Blumen),
+/// darunter Erinnerung und Intervalle mit den Geraetetasten und die drei
+/// Aktionsknoepfe. Nur die Fotoquellen sind Mac-eigen (Finder, Mediathek,
+/// Drag & Drop) und das Zuschneiden laeuft ueber den Mac-Zuschnitt.
 struct MacHorseDetailView: View {
     @Bindable var horse: Horse
+    @Environment(\.modelContext) private var modelContext
     @ObservedObject var globalSettings = GlobalSettings.shared
     @ObservedObject var debugSettings = DebugSettings.shared
 
     @State private var selectedEventType: Horse.EventType?
+    @State private var showingActionSheet = false
     @State private var showingDatePicker = false
     @State private var showingImageCropper = false
     @State private var rawNSImage: NSImage?
@@ -306,120 +330,23 @@ struct MacHorseDetailView: View {
     @State private var showingCalendarAlert = false
     @State private var calendarAlertMessage = ""
     @State private var showingNotificationSettings = false
+    /// true: das gewaehlte Foto wird Hintergrund der Glasbuehne,
+    /// false: es wird das runde Profilbild
+    @State private var waehltHintergrund = false
+
+    /// Breite wie auf dem iPad: Buehne, Blumen und Tasten bleiben in
+    /// iPhone-Proportion und stehen mittig im Fenster.
+    private let seitenBreite: CGFloat = 440
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                // Pferdename + Bild mit Foto-Picker
-                HStack(spacing: 16) {
-                    ZStack(alignment: .bottomTrailing) {
-                        if let image = horse.image {
-                            image
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 80, height: 80)
-                                .clipShape(Circle())
-                        } else {
-                            Circle()
-                                .fill(Color.gray.opacity(0.1))
-                                .frame(width: 80, height: 80)
-                                .overlay(
-                                    Image("horse_silhouette")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 40, height: 40)
-                                        .opacity(0.3)
-                                )
-                        }
+            VStack(spacing: 16) {
+                Image("hippominder_logo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 44)
+                    .padding(.top, 4)
 
-                        // Drop highlight
-                        if isDropTargeted {
-                            Circle()
-                                .stroke(Color.accentColor, lineWidth: 3)
-                                .frame(width: 80, height: 80)
-                        }
-
-                        if isLoadingPhoto {
-                            Circle()
-                                .fill(Color.black.opacity(0.3))
-                                .frame(width: 80, height: 80)
-                                .overlay(
-                                    ProgressView()
-                                        .scaleEffect(0.8)
-                                        .tint(.white)
-                                )
-                        }
-
-                        // Dropdown menu for photo sources
-                        Menu {
-                            Button {
-                                openImageFromFinder()
-                            } label: {
-                                Label("Bild wählen…", systemImage: "folder")
-                            }
-
-                            Button {
-                                showingPhotoPicker = true
-                            } label: {
-                                Label("Fotos-Mediathek", systemImage: "photo.on.rectangle")
-                            }
-
-                            if horse.imageData != nil {
-                                Divider()
-                                Button(role: .destructive) {
-                                    horse.imageData = nil
-                                } label: {
-                                    Label("Foto entfernen", systemImage: "trash")
-                                }
-                            }
-                        } label: {
-                            ZStack {
-                                Circle()
-                                    .fill(Color(nsColor: .controlBackgroundColor))
-                                    .frame(width: 28, height: 28)
-                                Image(systemName: "camera.fill")
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .foregroundColor(.secondary)
-                            }
-                            .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
-                        }
-                        .menuStyle(.borderlessButton)
-                        .menuIndicator(.hidden)
-                        .frame(width: 28, height: 28)
-                        .offset(x: 2, y: 2)
-                        .disabled(isLoadingPhoto)
-                    }
-                    // Drag & Drop support
-                    .onDrop(of: [.image, .fileURL], isTargeted: $isDropTargeted) { providers in
-                        handleImageDrop(providers: providers)
-                        return true
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(horse.name)
-                            .font(.largeTitle.bold())
-
-                        HStack(spacing: 4) {
-                            Image(systemName: "bell.fill")
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                            Text("Erinnerung \(horse.benachrichtigungTageVorher) Tage vorher")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-
-                            Stepper("", value: Binding(
-                                get: { horse.benachrichtigungTageVorher },
-                                set: { horse.benachrichtigungTageVorher = max(1, $0) }
-                            ), in: 1...30)
-                            .labelsHidden()
-                        }
-                    }
-
-                    Spacer()
-                }
-                .padding(.horizontal, 24)
-
-                // Debug-Anzeige
                 #if DEBUG
                 if debugSettings.timeOffsetDays != 0 {
                     Text("DEBUG: \(debugSettings.simulatedDateString)")
@@ -432,135 +359,52 @@ struct MacHorseDetailView: View {
                 }
                 #endif
 
-                Divider()
+                Text(horse.name)
+                    .font(.largeTitle)
+                    .bold()
 
-                // Timer-Karten
-                HStack(alignment: .top, spacing: 16) {
-                    ForEach(Horse.EventType.allCases, id: \.self) { eventType in
-                        MacTimerCard(
-                            horse: horse,
-                            eventType: eventType,
-                            colorScheme: globalSettings.flowerColorScheme,
-                            onWarHeuteDa: {
-                                horse.setzeTermin(debugSettings.simulatedDate, fuer: eventType)
-                                NotificationService.shared.scheduleAllNotifications(for: horse)
-                            },
-                            onDatumWaehlen: {
-                                selectedEventType = eventType
-                                showingDatePicker = true
-                            }
-                        )
-                    }
-                }
-                .padding(globalSettings.designMode == .glass ? 12 : 0)
-                .background { fotoBuehne }
-                .padding(.horizontal, 24)
+                profilbild
 
-                Divider()
+                DesignModePicker(mode: Binding(
+                    get: { globalSettings.designMode },
+                    set: { globalSettings.designMode = $0 }
+                ))
+                .padding(.horizontal)
 
-                // Intervall-Einstellungen
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Intervalle")
-                        .font(.headline)
+                blumen
 
-                    ForEach(Horse.EventType.allCases, id: \.self) { eventType in
-                        HStack {
-                            Image(systemName: eventType.systemSymbol)
-                                .frame(width: 20)
-                                .foregroundColor(.secondary)
-                            Text(eventType.localizedName)
-                                .frame(width: 100, alignment: .leading)
+                einstellungen
 
-                            Stepper(
-                                "\(horse.holeIntervall(fuer: eventType)) Tage",
-                                value: Binding(
-                                    get: { horse.holeIntervall(fuer: eventType) },
-                                    set: { horse.setzeIntervall(max(1, $0), fuer: eventType) }
-                                ),
-                                in: 1...365
-                            )
-                        }
-                    }
-                }
-                .padding(.horizontal, 24)
-
-                Divider()
-
-                // Action Buttons
-                VStack(spacing: 10) {
-                    // Benachrichtigungen verwalten
-                    Button(action: { showingNotificationSettings = true }) {
-                        HStack(spacing: 10) {
-                            Image(systemName: "bell.badge.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text("Benachrichtigungen verwalten")
-                                    .font(.subheadline.weight(.semibold))
-                                let activeCount = activeNotifyCount
-                                if activeCount > 0 {
-                                    Text("\(activeCount) Kontakt\(activeCount == 1 ? "" : "e") aktiv")
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
-                                } else {
-                                    Text("Keine Kontakte aktiviert")
-                                        .font(.caption2)
-                                        .foregroundColor(.orange)
-                                }
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(.secondary)
-                        }
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 16)
-                        .background(Color.purple.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-                    }
-                    .buttonStyle(.plain)
-
-                    // Kalender
-                    Button(action: { saveToCalendar() }) {
-                        HStack(spacing: 10) {
-                            Image(systemName: "calendar.badge.plus")
-                                .font(.system(size: 14, weight: .semibold))
-                            Text("Termine im Kalender speichern")
-                                .font(.subheadline.weight(.semibold))
-                            Spacer()
-                        }
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 16)
-                        .background(Color.blue.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-                    }
-                    .buttonStyle(.plain)
-
-                    // E-Mail
-                    Button(action: { sendEmail() }) {
-                        HStack(spacing: 10) {
-                            Image(systemName: "envelope.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                            Text("Erinnerung per E-Mail senden")
-                                .font(.subheadline.weight(.semibold))
-                            Spacer()
-                        }
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 16)
-                        .background(Color.green.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.horizontal, 24)
-
-                Spacer(minLength: 20)
+                aktionen
+                    .padding(.horizontal)
+                    .padding(.bottom, 32)
             }
-            .padding(.top, 16)
+            .frame(maxWidth: seitenBreite)
+            .frame(maxWidth: .infinity)
         }
         .frame(minWidth: 400)
+        // Erinnerungs-Vorlauf oder Intervalle geaendert -> Benachrichtigungen neu planen
+        .onChange(of: horse.benachrichtigungTageVorher) { _, _ in rescheduleNotifications() }
+        .onChange(of: horse.hufschmiedIntervall) { _, _ in rescheduleNotifications() }
+        .onChange(of: horse.impfungIntervall) { _, _ in rescheduleNotifications() }
+        .onChange(of: horse.wurmkurIntervall) { _, _ in rescheduleNotifications() }
+        .confirmationDialog(
+            selectedEventType?.localizedName ?? "Termin",
+            isPresented: $showingActionSheet,
+            titleVisibility: .visible
+        ) {
+            if let eventType = selectedEventType {
+                Button("War heute da") {
+                    horse.setzeTermin(debugSettings.simulatedDate, fuer: eventType)
+                    NotificationService.shared.scheduleAllNotifications(for: horse)
+                    NotificationService.shared.updateBadge(using: modelContext)
+                }
+                Button("Datum manuell wählen") {
+                    showingDatePicker = true
+                }
+                Button("Abbrechen", role: .cancel) { }
+            }
+        }
         .sheet(isPresented: $showingDatePicker) {
             if let eventType = selectedEventType {
                 MacDatePickerSheet(
@@ -570,6 +414,7 @@ struct MacHorseDetailView: View {
                         set: {
                             horse.setzeTermin($0, fuer: eventType)
                             NotificationService.shared.scheduleAllNotifications(for: horse)
+                            NotificationService.shared.updateBadge(using: modelContext)
                         }
                     ),
                     isPresented: $showingDatePicker
@@ -583,22 +428,36 @@ struct MacHorseDetailView: View {
         }
         .sheet(isPresented: $showingImageCropper) {
             if let nsImage = rawNSImage {
-                MacImageCropperView(image: nsImage) { croppedImage in
+                // Profilbild rund, Hintergrund rechteckig im Format der
+                // Buehne - sonst wird der gewaehlte Ausschnitt nochmal
+                // beschnitten (siehe CLAUDE.md, Profilbild != Hintergrundfoto)
+                let hintergrund = waehltHintergrund
+                MacImageCropperView(
+                    image: nsImage,
+                    shape: hintergrund ? .rect(aspect: GlassFlowerStageMasse.format) : .circle
+                ) { croppedImage in
                     // JPEG encoding on background thread to avoid UI freeze
                     Task.detached(priority: .userInitiated) {
                         let tiffData = croppedImage.tiffRepresentation
                         let jpegData: Data? = tiffData.flatMap { data in
-                            NSBitmapImageRep(data: data)?.representation(using: .jpeg, properties: [.compressionFactor: 0.8])
+                            NSBitmapImageRep(data: data)?.representation(
+                                using: .jpeg,
+                                properties: [.compressionFactor: hintergrund ? 0.85 : 0.8]
+                            )
                         }
                         await MainActor.run {
-                            if let jpegData = jpegData {
-                                horse.imageData = jpegData
+                            if let jpegData {
+                                if hintergrund {
+                                    horse.backgroundImageData = jpegData
+                                } else {
+                                    horse.imageData = jpegData
+                                }
                             }
                             showingImageCropper = false
                         }
                     }
                 }
-                .frame(width: 400, height: 450)
+                .frame(width: 440, height: 480)
             }
         }
         .sheet(isPresented: $showingPhotoPicker, onDismiss: {
@@ -621,57 +480,288 @@ struct MacHorseDetailView: View {
         }
     }
 
-    // MARK: - Fotobuehne hinter den Glasblumen
+    // MARK: - Bausteine
 
-    /// Das Pferdefoto hinter den drei Blumen, wie auf dem iPhone.
-    ///
-    /// Ohne das stand das Glas auf einer grauen Karte und hatte nichts zu
-    /// brechen - der ganze Sinn der Glasdarstellung fiel damit weg. Nur im
-    /// Glasmodus: Classic und Blume brauchen ihren ruhigen Grund.
-    /// Dieselbe Behandlung wie auf dem iPhone (`GlassFlowerStage`): unscharf,
-    /// damit das Glas etwas zu brechen hat und helle Fotos die Blätter nicht
-    /// schlucken, und deutlich abgedunkelt, damit die weiße Schrift auch auf
-    /// einem hellen Foto lesbar bleibt. Ohne Foto derselbe graublaue Verlauf.
-    @ViewBuilder
-    private var fotoBuehne: some View {
-        if globalSettings.designMode == .glass {
-            ZStack {
-                Group {
-                    if let foto = horse.backgroundImage {
-                        foto
+    /// Rundes Profilbild wie am iPhone (120 pt), Kamera-Knopf unten rechts.
+    /// Am Mac oeffnet der Knopf ein Menue mit Finder und Mediathek; ein
+    /// Bild laesst sich auch direkt auf das Foto ziehen.
+    private var profilbild: some View {
+        ZStack(alignment: .bottomTrailing) {
+            if let image = horse.image {
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 120, height: 120)
+                    .clipShape(Circle())
+            } else {
+                Circle()
+                    .fill(Color.gray.opacity(0.15))
+                    .frame(width: 120, height: 120)
+                    .overlay(
+                        Image("horse_silhouette")
                             .resizable()
-                            .scaledToFill()
-                            // Ohne clipped() bleibt das ueberstehende Bild
-                            // layoutwirksam und sprengt die Karte
-                            .clipped()
-                            // opaque, sonst zieht der Blur an den Kanten
-                            // Transparenz herein und es entsteht ein Saum
-                            .blur(radius: 7, opaque: true)
-                    } else {
-                        LinearGradient(
-                            colors: [
-                                Color(red: 0.44, green: 0.48, blue: 0.54),
-                                Color(red: 0.22, green: 0.25, blue: 0.30)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    }
-                }
-                .overlay(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.07, green: 0.08, blue: 0.11).opacity(0.42),
-                            Color(red: 0.07, green: 0.08, blue: 0.11).opacity(0.55)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
+                            .scaledToFit()
+                            .frame(width: 60, height: 60)
+                            .opacity(0.2)
                     )
-                )
             }
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+            if isDropTargeted {
+                Circle()
+                    .stroke(Color.accentColor, lineWidth: 3)
+                    .frame(width: 120, height: 120)
+            }
+
+            if isLoadingPhoto {
+                Circle()
+                    .fill(Color.black.opacity(0.3))
+                    .frame(width: 120, height: 120)
+                    .overlay(ProgressView().scaleEffect(0.8).tint(.white))
+            }
+
+            fotoMenue(hintergrund: false, entfernbar: horse.imageData != nil) {
+                ZStack {
+                    Circle()
+                        .fill(.ultraThinMaterial)
+                        .frame(width: 32, height: 32)
+                    Image(systemName: "camera.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.secondary)
+                }
+                .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
+            }
+            .frame(width: 32, height: 32)
+            .offset(x: 2, y: 2)
+            .disabled(isLoadingPhoto)
+        }
+        .onDrop(of: [.image, .fileURL], isTargeted: $isDropTargeted) { providers in
+            waehltHintergrund = false
+            handleImageDrop(providers: providers)
+            return true
         }
     }
+
+    /// Menue der Fotoquellen. `hintergrund` entscheidet, wohin das Bild geht.
+    private func fotoMenue<Inhalt: View>(
+        hintergrund: Bool,
+        entfernbar: Bool,
+        @ViewBuilder label: () -> Inhalt
+    ) -> some View {
+        Menu {
+            Button {
+                waehltHintergrund = hintergrund
+                openImageFromFinder()
+            } label: {
+                Label("Bild wählen…", systemImage: "folder")
+            }
+
+            Button {
+                waehltHintergrund = hintergrund
+                showingPhotoPicker = true
+            } label: {
+                Label("Fotos-Mediathek", systemImage: "photo.on.rectangle")
+            }
+
+            if entfernbar {
+                Divider()
+                Button(role: .destructive) {
+                    if hintergrund {
+                        horse.backgroundImageData = nil
+                    } else {
+                        horse.imageData = nil
+                    }
+                } label: {
+                    Label("Foto entfernen", systemImage: "trash")
+                }
+            }
+        } label: {
+            label()
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+    }
+
+    /// Die drei Blumen - je nach Darstellung, Aufbau wie am iPhone
+    @ViewBuilder
+    private var blumen: some View {
+        switch globalSettings.designMode {
+        case .glass:
+            ZStack(alignment: .bottomTrailing) {
+                GlassFlowerStage(backgroundImage: horse.backgroundImage) { blumengroesse in
+                    HStack(alignment: .top, spacing: 4) {
+                        ForEach(Horse.EventType.allCases, id: \.self) { eventType in
+                            Button(action: { terminWaehlen(eventType) }) {
+                                GlassFlowerTimerView(
+                                    eventType: eventType,
+                                    remainingDays: horse.tageBis(fuer: eventType),
+                                    interval: horse.holeIntervall(fuer: eventType),
+                                    nextDate: horse.naechsterTermin(fuer: eventType),
+                                    tint: globalSettings.glassTint,
+                                    flowerSize: blumengroesse
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("flower_\(eventType.rawValue)")
+                        }
+                    }
+                }
+
+                // Hintergrundfoto der Buehne - nur das Symbol, wie am iPhone
+                fotoMenue(hintergrund: true, entfernbar: horse.backgroundImageData != nil) {
+                    Image(systemName: "photo.on.rectangle.angled")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 30, height: 30)
+                        .background {
+                            Circle().fill(.ultraThinMaterial)
+                                .overlay { Circle().fill(.black.opacity(0.25)) }
+                                .overlay { Circle().strokeBorder(.white.opacity(0.45), lineWidth: 0.5) }
+                        }
+                }
+                .frame(width: 30, height: 30)
+                .padding(8)
+                .accessibilityLabel("Hintergrundfoto wählen")
+            }
+            .padding(.horizontal, 12)
+
+        case .classic:
+            LCDPanel(alarmActive: hasDueEvent) {
+                HStack(alignment: .top, spacing: 8) {
+                    ForEach(Horse.EventType.allCases, id: \.self) { eventType in
+                        Button(action: { terminWaehlen(eventType) }) {
+                            LCDFlowerTimerView(
+                                eventType: eventType,
+                                remainingDays: horse.tageBis(fuer: eventType),
+                                interval: horse.holeIntervall(fuer: eventType),
+                                nextDate: horse.naechsterTermin(fuer: eventType)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("flower_\(eventType.rawValue)")
+                    }
+                }
+            }
+            .padding(.horizontal, 12)
+
+        case .blume:
+            HStack(alignment: .top, spacing: 20) {
+                ForEach(Horse.EventType.allCases, id: \.self) { eventType in
+                    Button(action: { terminWaehlen(eventType) }) {
+                        FlowerTimerView(
+                            eventType: eventType,
+                            remainingDays: horse.tageBis(fuer: eventType),
+                            interval: horse.holeIntervall(fuer: eventType),
+                            nextDate: horse.naechsterTermin(fuer: eventType),
+                            colorScheme: globalSettings.flowerColorScheme
+                        )
+                        .frame(width: 100)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("flower_\(eventType.rawValue)")
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+        }
+    }
+
+    /// Erinnerung und Intervalle mit den Geraetetasten (Plus / Minus)
+    private var einstellungen: some View {
+        VStack(spacing: 14) {
+            HStack {
+                Image(systemName: "bell.fill")
+                    .foregroundColor(.secondary)
+                    .frame(width: 20)
+
+                Text("Erinnerung \(horse.benachrichtigungTageVorher) Tage vor Termin")
+                    .font(.callout)
+
+                Spacer()
+
+                HardwareStyleButtons(value: Binding(
+                    get: { horse.benachrichtigungTageVorher },
+                    set: { horse.benachrichtigungTageVorher = max(1, $0) }
+                ), identifier: "reminder")
+            }
+            .padding(.horizontal)
+
+            ForEach(Horse.EventType.allCases, id: \.self) { eventType in
+                HStack {
+                    // Template-Assets: ohne Farbe waere das Symbol blau
+                    Image(eventType.symbol)
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundStyle(.primary)
+                        .frame(width: 20, height: 20)
+                        .opacity(0.7)
+
+                    Text("\(eventType.localizedName)-\(String(localized: "Intervall"))")
+                        .font(.callout)
+
+                    Spacer()
+
+                    HardwareStyleButtons(value: Binding(
+                        get: { horse.holeIntervall(fuer: eventType) },
+                        set: { horse.setzeIntervall(max(1, $0), fuer: eventType) }
+                    ), identifier: "interval_\(eventType.rawValue)")
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+
+    /// Die drei Aktionsknoepfe, passend zur Darstellung
+    private var aktionen: some View {
+        VStack(spacing: 10) {
+            DesignedActionButton(
+                title: "Benachrichtigungen verwalten",
+                systemImage: "bell.badge.fill",
+                mode: globalSettings.designMode,
+                subtitle: notifySubtitle,
+                trailingChevron: true,
+                action: { showingNotificationSettings = true }
+            )
+            .accessibilityIdentifier("manageNotifications")
+
+            DesignedActionButton(
+                title: "Termine im Kalender speichern",
+                systemImage: "calendar.badge.plus",
+                mode: globalSettings.designMode,
+                action: { saveToCalendar() }
+            )
+            .accessibilityIdentifier("saveCalendar")
+
+            DesignedActionButton(
+                title: "Erinnerung per E-Mail senden",
+                systemImage: "envelope.fill",
+                mode: globalSettings.designMode,
+                action: { sendEmail() }
+            )
+            .accessibilityIdentifier("sendEmail")
+        }
+    }
+
+    private func terminWaehlen(_ eventType: Horse.EventType) {
+        selectedEventType = eventType
+        showingActionSheet = true
+    }
+
+    private func rescheduleNotifications() {
+        NotificationService.shared.scheduleAllNotifications(for: horse)
+    }
+
+    /// Mindestens ein Termin faellig - im Original blinkt dann die Glocke
+    private var hasDueEvent: Bool {
+        Horse.EventType.allCases.contains { horse.tageBis(fuer: $0) <= 0 }
+    }
+
+    private var notifySubtitle: String {
+        let count = activeNotifyCount
+        if count == 0 { return String(localized: "Keine Kontakte aktiviert") }
+        if count == 1 { return String(localized: "1 Kontakt aktiv") }
+        return String(localized: "\(count) Kontakte aktiv")
+    }
+
 
     // MARK: - Aktive Benachrichtigungen zaehlen
 
@@ -901,150 +991,6 @@ struct MacHorseDetailView: View {
 
         if let url = URL(string: "mailto:\(recipientStr)?subject=\(encodedSubject)&body=\(encodedBody)") {
             NSWorkspace.shared.open(url)
-        }
-    }
-}
-
-// MARK: - Timer-Karte (Mac) - mit "War heute da" und "Datum wählen"
-
-struct MacTimerCard: View {
-    let horse: Horse
-    let eventType: Horse.EventType
-    let colorScheme: FlowerColorScheme
-    /// Beobachtet, nicht nur gelesen: sonst zeichnet die Karte nicht neu,
-    /// wenn die Darstellung gewechselt wird
-    @ObservedObject private var globalSettings = GlobalSettings.shared
-    var onWarHeuteDa: () -> Void
-    var onDatumWaehlen: () -> Void
-
-    private var days: Int { horse.tageBis(fuer: eventType) }
-    private var interval: Int { horse.holeIntervall(fuer: eventType) }
-
-    private var progress: Double {
-        if days <= 0 { return 1.0 }
-        // interval 0 ergaebe -.infinity und damit eine NaN-Balkenbreite
-        guard interval > 0 else { return 0 }
-        return 1.0 - (Double(days) / Double(interval))
-    }
-
-    private var statusColor: Color {
-        if days <= 0 { return .red }
-        if days <= 7 { return .red }
-        if days <= 14 { return .orange }
-        return .green
-    }
-
-    /// Im Glasmodus steht die Karte auf dem abgedunkelten Pferdefoto - dort
-    /// waere die uebliche schwarze Schrift kaum zu lesen. Wie auf dem iPhone
-    /// also weiss.
-    private var aufFoto: Bool { globalSettings.designMode == .glass }
-
-    private static let dateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "dd.MM.yyyy"
-        return f
-    }()
-
-    var body: some View {
-        VStack(spacing: 10) {
-            blume
-
-            Image(systemName: eventType.systemSymbol)
-                .font(.title3)
-                .foregroundColor(statusColor)
-
-            Text(eventType.localizedName)
-                .font(.caption.bold())
-                .foregroundStyle(aufFoto ? .white : .primary)
-
-            Text(days <= 0 ? "\(-days) Tage überfällig" : "in \(days) Tagen")
-                .font(.caption)
-                .foregroundColor(statusColor)
-
-            Text(Self.dateFormatter.string(from: horse.naechsterTermin(fuer: eventType)))
-                .font(.caption2)
-                .foregroundStyle(aufFoto ? .white.opacity(0.75) : .secondary)
-
-            // Termin-Buttons
-            VStack(spacing: 4) {
-                Button("War heute da") {
-                    onWarHeuteDa()
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-
-                Button("Datum wählen") {
-                    onDatumWaehlen()
-                }
-                .buttonStyle(.plain)
-                .font(.caption2)
-                .foregroundColor(.blue)
-            }
-        }
-        .padding(12)
-        .frame(maxWidth: .infinity)
-        .background {
-            // Im Glasmodus liegt das Pferdefoto dahinter - eine deckende
-            // Karte wuerde genau das zudecken, was das Glas brechen soll
-            if globalSettings.designMode == .glass {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(.ultraThinMaterial)
-            } else {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.gray.opacity(0.06))
-            }
-        }
-    }
-
-    /// Dieselbe Blume wie auf iPhone und Uhr.
-    ///
-    /// Vorher zeigte der Mac immer die vorgerenderte PNG-Blume, egal was
-    /// in der Darstellung eingestellt war: wer am iPhone auf Glas stellte,
-    /// sah am Mac trotzdem die alte. Die drei Ansichten sind plattformfrei,
-    /// der Mac kann sie also genauso benutzen.
-    @ViewBuilder
-    private var blume: some View {
-        switch globalSettings.designMode {
-        case .glass:
-            GlassFlower(
-                filledPetals: horse.gefuellteBlätter(fuer: eventType),
-                tint: days <= 0 ? .red : globalSettings.glassTint,
-                symbol: eventType.symbol,
-                size: 80
-            )
-        case .classic:
-            // Die Rose braucht ihre Displayflaeche unter sich, sonst
-            // verschwinden die feinen Konturen der dunklen Segmente
-            LCDRose(
-                filledPetals: horse.gefuellteBlätter(fuer: eventType),
-                isExpired: days <= 0,
-                size: 72
-            )
-            .padding(6)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(LCDPalette.base)
-            )
-        case .blume:
-            Image(flowerImageName())
-                .resizable()
-                .scaledToFit()
-                .frame(width: 80, height: 80)
-        }
-    }
-
-    private func flowerImageName() -> String {
-        let filledPetals = horse.gefuellteBlätter(fuer: eventType)
-        let base: String
-        if filledPetals >= 12 {
-            base = "12d"
-        } else {
-            base = "\(filledPetals)"
-        }
-        switch colorScheme {
-        case .grau: return "flower_\(base)"
-        case .hellblau: return "flower_\(base)_hellblau"
-        case .orange: return "flower_\(base)_orange"
         }
     }
 }
@@ -1413,8 +1359,19 @@ struct MacPHPickerView: NSViewControllerRepresentable {
 
 // MARK: - Bild-Zuschnitt (Mac) - mit Zoom und Drag
 
+/// Ausschnitt waehlen: rund fuer das Profilbild, rechteckig im Format der
+/// Glasbuehne fuer das Hintergrundfoto. Das Ergebnis wird dreifach so gross
+/// wie der Rahmen auf dem Bildschirm gerendert, damit es auf dem
+/// Retina-Display scharf bleibt.
 struct MacImageCropperView: View {
+    enum Shape {
+        case circle
+        /// Breite zu Hoehe
+        case rect(aspect: CGFloat)
+    }
+
     let image: NSImage
+    var shape: Shape = .circle
     let onCrop: (NSImage) -> Void
     @Environment(\.dismiss) private var dismiss
 
@@ -1423,7 +1380,35 @@ struct MacImageCropperView: View {
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
 
-    private let cropSize: CGFloat = 250
+    /// Rahmen auf dem Bildschirm
+    private var cropWidth: CGFloat {
+        switch shape {
+        case .circle: return 250
+        case .rect: return 360
+        }
+    }
+    private var cropHeight: CGFloat {
+        switch shape {
+        case .circle: return 250
+        case .rect(let aspect): return (360 / aspect).rounded()
+        }
+    }
+    /// Ausgabe in Pixeln je Punkt des Rahmens
+    private let ausgabeFaktor: CGFloat = 3
+
+    private var istRund: Bool {
+        if case .circle = shape { return true }
+        return false
+    }
+
+    /// Das Bild fuellt den Rahmen in der laengeren Richtung (scaledToFill
+    /// bei Faktor 1), so bleibt bei jedem Format etwas zu sehen.
+    private var bildGroesse: CGSize {
+        let aspect = image.size.width / max(1, image.size.height)
+        var w = cropWidth, h = cropWidth / aspect
+        if h < cropHeight { h = cropHeight; w = cropHeight * aspect }
+        return CGSize(width: w * scale, height: h * scale)
+    }
 
     var body: some View {
         VStack(spacing: 16) {
@@ -1435,12 +1420,10 @@ struct MacImageCropperView: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
 
-            // Crop area
             ZStack {
                 Image(nsImage: image)
                     .resizable()
-                    .scaledToFit()
-                    .frame(width: cropSize * scale, height: cropSize * scale)
+                    .frame(width: bildGroesse.width, height: bildGroesse.height)
                     .offset(offset)
                     .gesture(
                         DragGesture()
@@ -1450,49 +1433,43 @@ struct MacImageCropperView: View {
                                     height: lastOffset.height + value.translation.height
                                 )
                             }
-                            .onEnded { _ in
-                                lastOffset = offset
-                            }
+                            .onEnded { _ in lastOffset = offset }
                     )
                     .gesture(
                         MagnificationGesture()
                             .onChanged { value in
                                 scale = max(0.5, min(5.0, lastScale * value))
                             }
-                            .onEnded { _ in
-                                lastScale = scale
-                            }
+                            .onEnded { _ in lastScale = scale }
                     )
 
-                Circle()
-                    .stroke(Color.white, lineWidth: 2)
-                    .frame(width: cropSize, height: cropSize)
-
+                // Abdunkeln ausserhalb des Ausschnitts
                 Rectangle()
                     .fill(Color.black.opacity(0.4))
-                    .frame(width: cropSize + 40, height: cropSize + 40)
+                    .frame(width: cropWidth + 40, height: cropHeight + 40)
                     .mask(
                         ZStack {
                             Rectangle()
-                            Circle()
-                                .frame(width: cropSize, height: cropSize)
+                            maske
+                                .frame(width: cropWidth, height: cropHeight)
                                 .blendMode(.destinationOut)
                         }
                         .compositingGroup()
                     )
                     .allowsHitTesting(false)
+
+                rahmen
+                    .frame(width: cropWidth, height: cropHeight)
+                    .allowsHitTesting(false)
             }
-            .frame(width: cropSize, height: cropSize)
+            .frame(width: cropWidth, height: cropHeight)
             .clipShape(RoundedRectangle(cornerRadius: 12))
 
-            // Zoom-Slider
             HStack {
                 Image(systemName: "minus.magnifyingglass")
                     .foregroundColor(.secondary)
                 Slider(value: $scale, in: 0.5...5.0)
-                    .onChange(of: scale) { _, _ in
-                        lastScale = scale
-                    }
+                    .onChange(of: scale) { _, _ in lastScale = scale }
                 Image(systemName: "plus.magnifyingglass")
                     .foregroundColor(.secondary)
             }
@@ -1512,41 +1489,43 @@ struct MacImageCropperView: View {
         }
     }
 
+    @ViewBuilder private var maske: some View {
+        if istRund { Circle() } else { RoundedRectangle(cornerRadius: 16, style: .continuous) }
+    }
+
+    @ViewBuilder private var rahmen: some View {
+        if istRund {
+            Circle().stroke(Color.white, lineWidth: 2)
+        } else {
+            RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.white, lineWidth: 2)
+        }
+    }
+
     private func cropAndSave() {
-        let size = NSSize(width: cropSize, height: cropSize)
+        let k = ausgabeFaktor
+        let size = NSSize(width: cropWidth * k, height: cropHeight * k)
         let croppedImage = NSImage(size: size)
 
         croppedImage.lockFocus()
 
-        // Circular clip
-        let clipPath = NSBezierPath(ovalIn: NSRect(origin: .zero, size: size))
-        clipPath.addClip()
-
-        // Draw the image with scale and offset (scaledToFit logic)
-        let imageSize = image.size
-        let aspectRatio = imageSize.width / imageSize.height
-        let drawWidth: CGFloat
-        let drawHeight: CGFloat
-        if aspectRatio > 1 {
-            // Landscape: width fills, height is smaller
-            drawWidth = cropSize * scale
-            drawHeight = drawWidth / aspectRatio
-        } else {
-            // Portrait: height fills, width is smaller
-            drawHeight = cropSize * scale
-            drawWidth = drawHeight * aspectRatio
+        if istRund {
+            NSBezierPath(ovalIn: NSRect(origin: .zero, size: size)).addClip()
         }
 
-        let drawX = (cropSize - drawWidth) / 2 + offset.width
-        let drawY = (cropSize - drawHeight) / 2 - offset.height // Y is flipped on macOS
+        // Dieselbe Rechnung wie auf dem Bildschirm, nur k-fach:
+        // Bild mittig im Rahmen, dann um den Versatz verschoben.
+        let b = bildGroesse
+        let drawX = (cropWidth - b.width) / 2 + offset.width
+        let drawY = (cropHeight - b.height) / 2 - offset.height // Y ist am Mac gespiegelt
 
-        image.draw(in: NSRect(x: drawX, y: drawY, width: drawWidth, height: drawHeight))
+        image.draw(in: NSRect(x: drawX * k, y: drawY * k, width: b.width * k, height: b.height * k))
 
         croppedImage.unlockFocus()
 
         onCrop(croppedImage)
     }
 }
+
 
 // MARK: - Shared Helper: Downscale NSImage
 

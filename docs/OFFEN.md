@@ -35,6 +35,19 @@ wurde.
       aus dem Datensatz, Start mit `-demoHorsePhoto`): das Glas bricht das
       Foto wie gedacht, die Blätter bleiben lesbar, die Tasten passen dazu.
       Classic und Blume daneben ebenfalls angesehen, nichts auffällig.
+- [x] **[Build]** Mac-App nach dem iPhone-Vorbild umgebaut, 11.11.2026.
+      Vorher hatte der Mac ein eigenes, älteres Design (Ampelpunkte in der
+      Liste, drei Karten mit Steppern, keine Glasbühne). Jetzt zeigt er
+      dieselbe Detailseite wie das iPhone — Logo, Name, rundes Bild,
+      Umschalter Glas/Classic/Blume, Glasbühne mit Hintergrundfoto bzw.
+      LCD bzw. PNG-Blumen, Gerätetasten für Erinnerung und Intervalle,
+      die drei Aktionsknöpfe — auf 440 pt Breite mittig wie auf dem iPad.
+      Die Seitenleiste zeigt die drei Mini-Blumen statt Punkten und das
+      Farbschema wie oben auf dem iPhone. Dafür wurden `DesignModePicker`,
+      `DesignedActionButton`, `MiniRose`/`TimerIndicator` und
+      `GlobalColorPicker` aus den iOS-Blöcken nach `Views/Components/`
+      gezogen; der Mac-Zuschnitt kann jetzt auch rechteckig (Hintergrund
+      im Format der Bühne). Alle drei Darstellungen am Mac angesehen.
 - [ ] **[Build]** Mini-Blumen in der Pferdeliste: sind die zwölf Blätter
       auf dem Gerät noch zählbar? Am Rechner war 30 pt die Untergrenze.
 - [ ] **[Build]** Uhr ansehen. Dort ist die Blume neu, vorher waren es
