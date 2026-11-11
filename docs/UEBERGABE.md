@@ -54,6 +54,24 @@ Unten in der App steht jetzt eine kleine Zeile mit Version und
 die eigentliche Frage: ist mein Stand wirklich drauf? Siehe
 `/Users/mathias/Developer/HippominderLilly2/docs/VERSION.md`.
 
+## Neu: frisches Xcode auf dem MacBook
+
+Mathias hat am 11.11.2026 die neueste Xcode-Version installiert. Der
+letzte grüne Build (3.1.0 (2), 0 Fehler, 0 Warnungen) entstand noch mit
+Xcode 27.1 — **der zählt damit nicht mehr als Beweis.** Erster Schritt
+jeder Sitzung auf dem MacBook: einmal neu bauen und nachsehen, was das
+neue SDK meckert.
+
+Womit zu rechnen ist:
+
+- Beim ersten Start installiert Xcode Komponenten nach und will die
+  Lizenz bestätigt haben (`sudo xcodebuild -license accept`).
+- **„Update to recommended settings"** kommt wieder. Nicht blind
+  annehmen — erst ansehen, was es an `project.pbxproj` ändern will, und
+  den Diff in den Commit schreiben.
+- Neue Warnungen sind bei einem SDK-Sprung normal. Erst sammeln, dann
+  bewerten, nicht hektisch wegpatchen.
+
 ## Was als Nächstes dran ist
 
 Alles in `docs/OFFEN.md`, das Wichtigste zuerst:
