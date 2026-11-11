@@ -452,6 +452,8 @@ struct MacHorseDetailView: View {
                         )
                     }
                 }
+                .padding(globalSettings.designMode == .glass ? 12 : 0)
+                .background { fotoBuehne }
                 .padding(.horizontal, 24)
 
                 Divider()
@@ -616,6 +618,58 @@ struct MacHorseDetailView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(calendarAlertMessage)
+        }
+    }
+
+    // MARK: - Fotobuehne hinter den Glasblumen
+
+    /// Das Pferdefoto hinter den drei Blumen, wie auf dem iPhone.
+    ///
+    /// Ohne das stand das Glas auf einer grauen Karte und hatte nichts zu
+    /// brechen - der ganze Sinn der Glasdarstellung fiel damit weg. Nur im
+    /// Glasmodus: Classic und Blume brauchen ihren ruhigen Grund.
+    /// Dieselbe Behandlung wie auf dem iPhone (`GlassFlowerStage`): unscharf,
+    /// damit das Glas etwas zu brechen hat und helle Fotos die Blätter nicht
+    /// schlucken, und deutlich abgedunkelt, damit die weiße Schrift auch auf
+    /// einem hellen Foto lesbar bleibt. Ohne Foto derselbe graublaue Verlauf.
+    @ViewBuilder
+    private var fotoBuehne: some View {
+        if globalSettings.designMode == .glass {
+            ZStack {
+                Group {
+                    if let foto = horse.backgroundImage {
+                        foto
+                            .resizable()
+                            .scaledToFill()
+                            // Ohne clipped() bleibt das ueberstehende Bild
+                            // layoutwirksam und sprengt die Karte
+                            .clipped()
+                            // opaque, sonst zieht der Blur an den Kanten
+                            // Transparenz herein und es entsteht ein Saum
+                            .blur(radius: 7, opaque: true)
+                    } else {
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.44, green: 0.48, blue: 0.54),
+                                Color(red: 0.22, green: 0.25, blue: 0.30)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    }
+                }
+                .overlay(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.07, green: 0.08, blue: 0.11).opacity(0.42),
+                            Color(red: 0.07, green: 0.08, blue: 0.11).opacity(0.55)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
     }
 
@@ -880,6 +934,11 @@ struct MacTimerCard: View {
         return .green
     }
 
+    /// Im Glasmodus steht die Karte auf dem abgedunkelten Pferdefoto - dort
+    /// waere die uebliche schwarze Schrift kaum zu lesen. Wie auf dem iPhone
+    /// also weiss.
+    private var aufFoto: Bool { globalSettings.designMode == .glass }
+
     private static let dateFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "dd.MM.yyyy"
@@ -896,6 +955,7 @@ struct MacTimerCard: View {
 
             Text(eventType.localizedName)
                 .font(.caption.bold())
+                .foregroundStyle(aufFoto ? .white : .primary)
 
             Text(days <= 0 ? "\(-days) Tage überfällig" : "in \(days) Tagen")
                 .font(.caption)
@@ -903,7 +963,7 @@ struct MacTimerCard: View {
 
             Text(Self.dateFormatter.string(from: horse.naechsterTermin(fuer: eventType)))
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundStyle(aufFoto ? .white.opacity(0.75) : .secondary)
 
             // Termin-Buttons
             VStack(spacing: 4) {
@@ -923,10 +983,17 @@ struct MacTimerCard: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.gray.opacity(0.06))
-        )
+        .background {
+            // Im Glasmodus liegt das Pferdefoto dahinter - eine deckende
+            // Karte wuerde genau das zudecken, was das Glas brechen soll
+            if globalSettings.designMode == .glass {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.ultraThinMaterial)
+            } else {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.gray.opacity(0.06))
+            }
+        }
     }
 
     /// Dieselbe Blume wie auf iPhone und Uhr.
