@@ -109,6 +109,17 @@ wurde.
          auf dem iPhone?
       5. iCloud testweise abschalten → läuft die App weiter (lokal)?
 
+## Neu seit 11.11.2026 (Mathias, nach dem ersten Blick auf die Uhr)
+
+- [ ] **Optik der Watch-App überarbeiten.** Mathias: „mit der Optik müssen
+      wir was machen". Was genau stört, ist noch nicht benannt — erst
+      Screenshots aus dem Simulator und von der Uhr nebeneinanderlegen,
+      dann entscheiden.
+- [ ] **Nebenprojekt: Zifferblatt im Classic-LCD-Stil.** Eigene Zifferblätter
+      lässt Apple nicht zu, aber eine Watch-App mit Uhrzeit im Stil des
+      graugrünen Gerätedisplays (plus Komplikation) geht. Idee notiert,
+      nicht begonnen.
+
 ## Bekannte Schwachstellen
 
 - [x] ~~Plus/Minus-Tasten in Glas und Classic kaum unterscheidbar~~ —
