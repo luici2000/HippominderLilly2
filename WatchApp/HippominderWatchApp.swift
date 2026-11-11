@@ -33,6 +33,8 @@ struct HippominderWatchApp: App {
         }
     }()
 
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some Scene {
         WindowGroup {
             WatchContentView()
@@ -41,6 +43,13 @@ struct HippominderWatchApp: App {
                 }
         }
         .modelContainer(sharedModelContainer)
+        // Beim Handgelenk-Senken geht ein noch wartendes Intervall sofort
+        // raus. Im Stall faellt der Arm schneller als 1,2 Sekunden.
+        .onChange(of: scenePhase) { _, neu in
+            if neu != .active {
+                WatchSyncReceiver.shared.meldeOffenesIntervall()
+            }
+        }
     }
 
 }

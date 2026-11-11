@@ -327,6 +327,9 @@ struct WatchEventView: View {
             }
             #endif
         }
+        // Ein Intervall, das noch in der Wartezeit steckt, geht beim
+        // Verlassen sofort raus - sonst ueberschriebe das iPhone es wieder
+        .onDisappear { WatchSyncReceiver.shared.meldeOffenesIntervall() }
         }
     }
 

@@ -63,10 +63,51 @@ class WatchSyncReceiver: NSObject, ObservableObject {
     static let actionTerminErledigt = "terminErledigt"
     static let actionIntervallGeaendert = "intervallGeaendert"
 
+    /// Wartet nach dem letzten Tastendruck, bevor gefunkt wird
+    private var intervallMelder: Task<Void, Never>?
+    /// Der noch nicht gemeldete Stand, damit er beim Verlassen der Seite
+    /// nicht in der Wartezeit verlorengeht
+    private var offenesIntervall: (horseID: UUID, eventType: Horse.EventType, intervall: Int)?
+    private static let intervallRuhezeit: Duration = .milliseconds(1200)
+
     /// Meldet dem iPhone ein auf der Uhr geaendertes Intervall - gleicher
     /// Weg wie beim Abhaken: nachreichen, und sofort, wenn erreichbar.
+    ///
+    /// Aber **nicht bei jedem Tastendruck.** Das Intervall wird mit Plus und
+    /// Minus eingestellt; von 42 auf 56 sind das vierzehn Druecker. Jeder
+    /// schickte bisher zwei Funksprueche los, und das iPhone antwortete auf
+    /// jeden mit dem vollen Datensatz - rund sechzig Funkvorgaenge fuer eine
+    /// einzige Einstellung. Der Funk ist auf der Uhr der groesste
+    /// Stromfresser, groesser als alles Zeichnen.
+    ///
+    /// Darum: oertlich sofort speichern (die Anzeige bleibt flink), aber erst
+    /// melden, wenn Mathias mit dem Tippen fertig ist. Nur der letzte Wert
+    /// zaehlt - die Zwischenstufen interessieren das iPhone nicht.
     func meldeIntervall(horseID: UUID, eventType: Horse.EventType, intervall: Int) {
         guard WCSession.default.activationState == .activated else { return }
+
+        intervallMelder?.cancel()
+        offenesIntervall = (horseID, eventType, intervall)
+        intervallMelder = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: Self.intervallRuhezeit)
+            guard !Task.isCancelled else { return }
+            self?.meldeOffenesIntervall()
+        }
+    }
+
+    /// Schickt einen noch wartenden Wert sofort los. Gehoert ans Verlassen
+    /// der Seite und ins Verschwinden der App - sonst ginge eine Einstellung
+    /// verloren, die noch in der Wartezeit steckt, und das iPhone wuerde den
+    /// alten Wert beim naechsten Abgleich wieder darueberschreiben.
+    func meldeOffenesIntervall() {
+        intervallMelder?.cancel()
+        intervallMelder = nil
+        guard let offen = offenesIntervall else { return }
+        offenesIntervall = nil
+        sendeIntervall(horseID: offen.horseID, eventType: offen.eventType, intervall: offen.intervall)
+    }
+
+    private func sendeIntervall(horseID: UUID, eventType: Horse.EventType, intervall: Int) {
         let payload: [String: Any] = [
             Self.actionKey: Self.actionIntervallGeaendert,
             "horseID": horseID.uuidString,

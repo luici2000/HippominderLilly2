@@ -120,6 +120,31 @@ wurde.
       graugrünen Gerätedisplays (plus Komplikation) geht. Idee notiert,
       nicht begonnen.
 
+## Akku der Uhr
+
+Mathias meldete am 11.11.2026 starken Akkuverbrauch. Zwei Ursachen
+gefunden und abgestellt, eine bleibt zu messen:
+
+- [x] **Milchglas auf der Uhr.** Jedes der zwölf Blätter lag auf
+      `.ultraThinMaterial`. Ein Material verwischt bei jedem Bild, was
+      dahinterliegt — auf der Uhr liegt dahinter aber nur Schwarz.
+      Ersetzt durch eine ruhige Fläche; über Schwarz ergibt das
+      denselben Farbwert auf 0,006 pro Kanal. Dazu die zwölf
+      Einzelschatten raus.
+- [x] **Funk bei jedem Tastendruck.** Plus und Minus schickten pro
+      Druck `transferUserInfo` **und** `sendMessage`, und das iPhone
+      antwortete auf jeden mit dem vollen Datensatz. Von 42 auf 56 sind
+      das rund sechzig Funkvorgänge. Jetzt wird 1,2 s nach dem letzten
+      Druck gemeldet, und nur der Endwert. Beim Verlassen der Seite und
+      beim Handgelenk-Senken geht ein wartender Wert sofort raus.
+- [ ] **[Build] Nachmessen**, ob es gereicht hat: App auf der Uhr offen
+      liegen lassen und den Verbrauch ansehen.
+- [ ] Falls nicht: `WatchSyncService.syncToWatch` schickt denselben
+      Datensatz **zweimal** — `updateApplicationContext` *und*
+      `sendMessage`. Das wäre der nächste Kandidat. Vorher prüfen, ob
+      der Datensatz ohne `sendMessage` schnell genug ankommt, wenn die
+      Uhr gerade geweckt wird.
+
 ## Bekannte Schwachstellen
 
 - [x] ~~Plus/Minus-Tasten in Glas und Classic kaum unterscheidbar~~ —
