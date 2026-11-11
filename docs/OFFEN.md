@@ -37,19 +37,19 @@ wurde.
 - [ ] **[Build]** Uhr ansehen. Dort ist die Blume neu, vorher waren es
       Ampelpunkte und ein Balken. Layout wurde bei 162–205 pt gerendert
       geprüft und passt, auch auf der 40 mm.
-      **Stand 10.11.2026:** Die Watch-App wird jetzt in die iPhone-App
-      eingebettet („Embed Watch Content", nur iOS) — vorher wurde sie
-      gebaut, kam aber nie auf eine Uhr. Haken: das automatische
-      Signaturprofil kennt nur iPhone und iPad, nicht die Ultra 2. Die
-      Uhr muss einmal von Xcode gesehen werden (Entwicklermodus auf der
-      Uhr, iPhone daneben entsperrt), dann registriert ein Build mit
-      `-allowProvisioningDeviceRegistration` sie. Bis dahin verweigert
-      watchOS die Installation.
-      **Stand 11.11.2026: die Uhr ist gekoppelt.** Damit ist der Weg
-      frei. Als Nächstes: sieht Xcode sie unter *Window → Devices and
-      Simulators*? Ist der Entwicklermodus auf der Uhr an? Dann einmal
-      mit `-allowProvisioningDeviceRegistration` bauen. Erst danach
-      lassen sich die Punkte darunter überhaupt prüfen.
+      **Stand 11.11.2026:** Erledigt — die Ultra 2 („Apple Watch von
+      Mathias", watchOS 27.2) ist mit Xcode gekoppelt, im Profil
+      registriert, und die Watch-App 3.1.0 (2) läuft darauf. Die
+      Watch-App ist zudem in die iPhone-App eingebettet („Embed Watch
+      Content", nur iOS).
+      Was die Kopplung am Ende brauchte: **Xcode 27.2** (mit 27.1 sah die
+      Uhr den Mac, baute aber nie eine Verbindung auf), Device Hub →
+      „Pair Nearby Device…", Bluetooth am iPhone aus (sonst nutzt die Uhr
+      ihr WLAN nicht), dann auf der Uhr Entwicklermodus → „Andere Geräte"
+      → Mathias-MacBook, Code vom Mac eingeben. Fritz!Box, Firewall,
+      Mac-Hotspot: alles geprüft, alles unschuldig.
+      Installation: `xcrun devicectl device install app --device
+      00008310-00143CE02E10E01E …/HippominderWatch.app`.
 - [ ] **[Build, wichtig]** „War heute da" auf der Uhr testen. Der Rückkanal
       Uhr → iPhone ist **neu und noch nie gelaufen**. Zu prüfen:
       1. Termin auf der Uhr abhaken, während das iPhone in der Nähe ist →
