@@ -61,9 +61,33 @@ class WatchSyncReceiver: NSObject, ObservableObject {
     /// stattdessen "horses" - so lassen sich beide Richtungen unterscheiden.
     static let actionKey = "action"
     static let actionTerminErledigt = "terminErledigt"
+    static let actionIntervallGeaendert = "intervallGeaendert"
+
+    /// Meldet dem iPhone ein auf der Uhr geaendertes Intervall - gleicher
+    /// Weg wie beim Abhaken: nachreichen, und sofort, wenn erreichbar.
+    func meldeIntervall(horseID: UUID, eventType: Horse.EventType, intervall: Int) {
+        guard WCSession.default.activationState == .activated else { return }
+        let payload: [String: Any] = [
+            Self.actionKey: Self.actionIntervallGeaendert,
+            "horseID": horseID.uuidString,
+            "eventType": eventType.rawValue,
+            "intervall": intervall
+        ]
+        WCSession.default.transferUserInfo(payload)
+        if WCSession.default.isReachable {
+            WCSession.default.sendMessage(payload, replyHandler: nil)
+        }
+    }
 
     private func processPayload(_ payload: [String: Any]) {
         guard let container = modelContainer else { return }
+        // Glasfarbe des iPhones uebernehmen, damit die Uhr dieselbe Blume zeigt
+        if let tint = payload["glassTint"] as? [Double], tint.count == 3 {
+            UserDefaults.standard.set(tint, forKey: WatchGlas.tintKey)
+        }
+        if let mode = payload["designMode"] as? String {
+            UserDefaults.standard.set(mode, forKey: WatchGlas.designModeKey)
+        }
         guard let horseDataArray = payload["horses"] as? [[String: Any]] else { return }
 
         Task { @MainActor in

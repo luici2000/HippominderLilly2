@@ -53,8 +53,13 @@ class WatchSyncService: NSObject, ObservableObject {
             ]
         }
 
+        // Glasfarbe und Darstellung mitschicken, damit die Uhr dieselbe
+        // Glasblume zeigt wie das iPhone
+        let settings = GlobalSettings.shared
         let payload: [String: Any] = [
             "horses": horseData,
+            "glassTint": [settings.glassTintRed, settings.glassTintGreen, settings.glassTintBlue],
+            "designMode": settings.designModeRaw,
             "timestamp": Date().timeIntervalSince1970
         ]
 
@@ -72,24 +77,34 @@ class WatchSyncService: NSObject, ObservableObject {
     /// Kennzeichnet Rueckmeldungen der Uhr (siehe WatchSyncReceiver)
     private static let actionKey = "action"
     private static let actionTerminErledigt = "terminErledigt"
+    private static let actionIntervallGeaendert = "intervallGeaendert"
 
-    /// Traegt einen auf der Uhr abgehakten Termin ein und spiegelt den
-    /// neuen Stand zurueck, damit beide Geraete uebereinstimmen.
+    /// Traegt einen auf der Uhr abgehakten Termin oder ein dort geaendertes
+    /// Intervall ein und spiegelt den neuen Stand zurueck, damit beide
+    /// Geraete uebereinstimmen.
     fileprivate func verarbeiteUhrMeldung(_ payload: [String: Any]) {
-        guard payload[Self.actionKey] as? String == Self.actionTerminErledigt,
+        guard let action = payload[Self.actionKey] as? String,
               let container = modelContainer,
               let idString = payload["horseID"] as? String,
               let uuid = UUID(uuidString: idString),
               let typRaw = payload["eventType"] as? String,
-              let eventType = Horse.EventType(rawValue: typRaw),
-              let stamp = payload["datum"] as? TimeInterval
+              let eventType = Horse.EventType(rawValue: typRaw)
         else { return }
 
         let context = container.mainContext
         let descriptor = FetchDescriptor<Horse>(predicate: #Predicate { $0.id == uuid })
         guard let horse = try? context.fetch(descriptor).first else { return }
 
-        horse.setzeTermin(Date(timeIntervalSince1970: stamp), fuer: eventType)
+        switch action {
+        case Self.actionTerminErledigt:
+            guard let stamp = payload["datum"] as? TimeInterval else { return }
+            horse.setzeTermin(Date(timeIntervalSince1970: stamp), fuer: eventType)
+        case Self.actionIntervallGeaendert:
+            guard let intervall = payload["intervall"] as? Int else { return }
+            horse.setzeIntervall(max(1, intervall), fuer: eventType)
+        default:
+            return
+        }
         try? context.save()
 
         NotificationService.shared.scheduleAllNotifications(for: horse)

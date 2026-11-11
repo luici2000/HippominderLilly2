@@ -16,11 +16,12 @@ struct WatchContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var horses: [Horse]
     @ObservedObject var syncReceiver = WatchSyncReceiver.shared
-    /// Debug: Start mit "-demoDetail" springt direkt in die Detailansicht
-    @State private var demoDetail = false
+    /// Navigationspfad; Debug: Start mit "-demoDetail" springt direkt zur
+    /// ersten Terminseite des ersten Pferdes
+    @State private var pfad = NavigationPath()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $pfad) {
             if horses.isEmpty {
                 VStack(spacing: 8) {
                     if syncReceiver.isSyncing {
@@ -51,9 +52,7 @@ struct WatchContentView: View {
             } else {
                 List {
                     ForEach(horses) { horse in
-                        NavigationLink(destination: WatchHorseDetailView(horse: horse)) {
-                            WatchHorseRow(horse: horse)
-                        }
+                        WatchHorseRow(horse: horse)
                     }
 
                     // Letzter Sync und Version. Die Version steht da, damit
@@ -74,15 +73,17 @@ struct WatchContentView: View {
                     .listRowBackground(Color.clear)
                 }
                 .navigationTitle("Hippominder")
-                .navigationDestination(isPresented: $demoDetail) {
-                    if let horse = horses.first {
-                        WatchHorseDetailView(horse: horse)
+                .navigationDestination(for: WatchEventTarget.self) { ziel in
+                    if let horse = horses.first(where: { $0.id == ziel.horseID }) {
+                        WatchHorseDetailView(horse: horse, start: ziel.eventType)
                     }
                 }
                 .onAppear {
                     #if DEBUG
-                    if ProcessInfo.processInfo.arguments.contains("-demoDetail") {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { demoDetail = true }
+                    if ProcessInfo.processInfo.arguments.contains("-demoDetail"), let horse = horses.first, pfad.isEmpty {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                            pfad.append(WatchEventTarget(horseID: horse.id, eventType: .hufschmied))
+                        }
                     }
                     #endif
                 }
@@ -138,45 +139,55 @@ struct WatchHorseRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(horse.name)
-                .font(.headline)
+            // Name und naechster Termin fuehren zum dringendsten Termin
+            NavigationLink(value: WatchEventTarget(horseID: horse.id, eventType: nextEvent.type)) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(horse.name)
+                        .font(.headline)
 
-            HStack(spacing: 5) {
-                // Eigene Symbole wie auf dem iPhone; Template-Assets brauchen
-                // eine ausdrueckliche Farbe, sonst erscheinen sie in Akzentfarbe
-                Image(nextEvent.type.symbol)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 13, height: 13)
-                    .foregroundStyle(colorForDays(nextEvent.days))
+                    HStack(spacing: 5) {
+                        // Eigene Symbole wie auf dem iPhone; Template-Assets brauchen
+                        // eine ausdrueckliche Farbe, sonst erscheinen sie in Akzentfarbe
+                        Image(nextEvent.type.symbol)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 13, height: 13)
+                            .foregroundStyle(colorForDays(nextEvent.days))
 
-                Text(WatchWortlaut.naechster(nextEvent.type, tage: nextEvent.days))
-                    .font(.caption2)
-                    .foregroundColor(colorForDays(nextEvent.days))
+                        Text(WatchWortlaut.naechster(nextEvent.type, tage: nextEvent.days))
+                            .font(.caption2)
+                            .foregroundColor(colorForDays(nextEvent.days))
+                    }
+                }
             }
+            .buttonStyle(.plain)
 
             // Mini-Blumen statt Ampelpunkten: zeigen auch, wie weit das
             // Intervall schon gelaufen ist. 30 pt ist die Untergrenze, ab
             // der sich die zwoelf Blaetter noch zaehlen lassen (CLAUDE.md).
+            // Jede Blume fuehrt direkt zu ihrem Termin.
             HStack(spacing: 10) {
                 ForEach(Horse.EventType.allCases, id: \.self) { eventType in
                     let days = horse.tageBis(fuer: eventType)
-                    VStack(spacing: 2) {
-                        Image(eventType.symbol)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 9, height: 9)
-                            .foregroundStyle(.secondary)
-                        WatchFlower(
-                            filledPetals: FlowerGeometry.filledPetals(
-                                remainingDays: days,
-                                interval: horse.holeIntervall(fuer: eventType)
-                            ),
-                            isExpired: days <= 0,
-                            color: colorForDays(days),
-                            size: 30
-                        )
+                    NavigationLink(value: WatchEventTarget(horseID: horse.id, eventType: eventType)) {
+                        VStack(spacing: 2) {
+                            Image(eventType.symbol)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 9, height: 9)
+                                .foregroundStyle(.secondary)
+                            WatchFlower(
+                                filledPetals: FlowerGeometry.filledPetals(
+                                    remainingDays: days,
+                                    interval: horse.holeIntervall(fuer: eventType)
+                                ),
+                                isExpired: days <= 0,
+                                color: colorForDays(days),
+                                size: 30
+                            )
+                        }
                     }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(.top, 2)
@@ -194,123 +205,144 @@ struct WatchHorseRow: View {
 
 // MARK: - Detail-Ansicht (Watch)
 
+/// Ziel eines Tipps in der Liste: dieses Pferd, dieser Termin
+struct WatchEventTarget: Hashable {
+    let horseID: UUID
+    let eventType: Horse.EventType
+}
+
+/// Die drei Termine eines Pferdes als Seiten untereinander - Krone oder
+/// Wischen wechselt von Hufschmied zu Impfung zu Wurmkur. Ein Tipp auf eine
+/// Blume in der Liste landet direkt auf der passenden Seite.
 struct WatchHorseDetailView: View {
     let horse: Horse
+    let start: Horse.EventType
+    @State private var seite: Horse.EventType
+
+    init(horse: Horse, start: Horse.EventType) {
+        self.horse = horse
+        self.start = start
+        _seite = State(initialValue: start)
+    }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 10) {
-                // Der Name steht schon in der Titelzeile, darum hier nicht
-                // noch einmal.
-
-                // Timer fuer jeden Typ
-                ForEach(Horse.EventType.allCases, id: \.self) { eventType in
-                    WatchTimerCard(
-                        eventType: eventType,
-                        days: horse.tageBis(fuer: eventType),
-                        interval: horse.holeIntervall(fuer: eventType),
-                        horse: horse
-                    )
-                }
+        TabView(selection: $seite) {
+            ForEach(Horse.EventType.allCases, id: \.self) { eventType in
+                WatchEventView(horse: horse, eventType: eventType)
+                    .tag(eventType)
             }
-            .padding(.horizontal, 4)
         }
+        .tabViewStyle(.verticalPage)
         .navigationTitle(horse.name)
     }
 }
 
-// MARK: - Timer-Karte (Watch)
+// MARK: - Terminseite (Watch)
 
-struct WatchTimerCard: View {
+/// Eine Seite fuer einen Termin: Glasblume, Resttage, "War heute da",
+/// Intervall mit Glastasten. Das ist die Seite, auf der man im Stall landet.
+struct WatchEventView: View {
+    let horse: Horse
     let eventType: Horse.EventType
-    let days: Int
-    let interval: Int
-    /// Fehlt in der Vorschau, dann wird nur angezeigt
-    var horse: Horse? = nil
 
     @State private var gemeldet = false
 
-    private var filledPetals: Int {
-        FlowerGeometry.filledPetals(remainingDays: days, interval: interval)
-    }
+    private var days: Int { horse.tageBis(fuer: eventType) }
+    private var interval: Int { horse.holeIntervall(fuer: eventType) }
 
     private var statusColor: Color {
-        if days <= 0 { return .red }
         if days <= 7 { return .red }
         if days <= 14 { return .orange }
         return .green
     }
 
-    /// Traegt den Termin sofort lokal ein, damit die Uhr nicht auf das
-    /// iPhone warten muss, und meldet ihn dorthin. Der naechste Sync vom
-    /// iPhone bestaetigt denselben Stand.
-    private func erledigt(_ horse: Horse) {
-        let jetzt = Date()
-        horse.setzeTermin(jetzt, fuer: eventType)
-        WatchSyncReceiver.shared.meldeTerminErledigt(
-            horseID: horse.id,
-            eventType: eventType,
-            datum: jetzt
-        )
-        withAnimation { gemeldet = true }
-    }
-
     var body: some View {
-        VStack(spacing: 6) {
-            // Name oben, Blume in der Mitte, Resttage gross darunter - so
-            // bricht auf der 41-mm-Uhr nichts um, und das Wichtigste steht
-            // unter dem Bild, wie auf dem Geraet.
-            HStack(spacing: 5) {
-                Image(eventType.symbol)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 15, height: 15)
-                    .foregroundStyle(statusColor)
-                Text(eventType.localizedName)
-                    .font(.caption.bold())
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                Spacer(minLength: 0)
-            }
+        ScrollViewReader { proxy in
+        ScrollView {
+            VStack(spacing: 6) {
+                HStack(spacing: 5) {
+                    Image(eventType.symbol)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 14, height: 14)
+                        .foregroundStyle(.secondary)
+                    Text(eventType.localizedName)
+                        .font(.caption.bold())
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
 
-            WatchFlower(
-                filledPetals: filledPetals,
-                isExpired: days <= 0,
-                color: statusColor,
-                size: 48
-            )
-            .padding(.vertical, 2)
+                WatchGlassFlower(
+                    filledPetals: FlowerGeometry.filledPetals(remainingDays: days, interval: interval),
+                    isExpired: days <= 0,
+                    symbol: eventType.symbol,
+                    size: 104
+                )
+                .padding(.vertical, 2)
 
-            Text(WatchWortlaut.rest(tage: days))
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(statusColor)
+                Text(WatchWortlaut.rest(tage: days))
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(statusColor)
 
-            Text("Intervall \(interval) Tage")
-                .font(.system(size: 9))
-                .foregroundColor(.secondary)
-
-            // Im Stall hat man die Uhr am Arm und das iPhone in der Tasche -
-            // darum laesst sich der Termin hier direkt abhaken.
-            if let horse {
+                // Im Stall hat man die Uhr am Arm und das iPhone in der Tasche -
+                // darum laesst sich der Termin hier direkt abhaken.
                 Button {
-                    erledigt(horse)
+                    erledigt()
                 } label: {
                     Label(gemeldet ? "Eingetragen" : "War heute da",
                           systemImage: gemeldet ? "checkmark.circle.fill" : "checkmark")
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.system(size: 12, weight: .semibold))
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
-                .tint(gemeldet ? .green : .accentColor)
+                .tint(gemeldet ? .green : WatchGlas.tint)
                 .disabled(gemeldet)
-                .padding(.top, 2)
+                .padding(.top, 4)
+
+                // Intervall mit Minus und Plus, wie die Tasten am iPhone
+                HStack(spacing: 8) {
+                    WatchGlassKey(symbol: "minus") { setzeIntervall(interval - 1) }
+                    VStack(spacing: 0) {
+                        Text("\(interval)")
+                            .font(.system(size: 17, weight: .semibold))
+                            .monospacedDigit()
+                        Text("Tage")
+                            .font(.system(size: 9))
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(minWidth: 44)
+                    WatchGlassKey(symbol: "plus") { setzeIntervall(interval + 1) }
+                }
+                .padding(.top, 6)
+                .id("unten")
             }
+            .padding(.horizontal, 4)
+            .padding(.bottom, 8)
         }
-        .padding(8)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color.gray.opacity(0.15))
-        )
+        .onAppear {
+            #if DEBUG
+            // "-demoScroll": zum Pruefen des unteren Teils im Simulator
+            if ProcessInfo.processInfo.arguments.contains("-demoScroll") {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { proxy.scrollTo("unten", anchor: .bottom) }
+            }
+            #endif
+        }
+        }
+    }
+
+    /// Traegt den Termin sofort lokal ein, damit die Uhr nicht auf das
+    /// iPhone warten muss, und meldet ihn dorthin.
+    private func erledigt() {
+        let jetzt = Date()
+        horse.setzeTermin(jetzt, fuer: eventType)
+        WatchSyncReceiver.shared.meldeTerminErledigt(horseID: horse.id, eventType: eventType, datum: jetzt)
+        withAnimation { gemeldet = true }
+    }
+
+    private func setzeIntervall(_ neu: Int) {
+        let wert = max(1, neu)
+        horse.setzeIntervall(wert, fuer: eventType)
+        WatchSyncReceiver.shared.meldeIntervall(horseID: horse.id, eventType: eventType, intervall: wert)
     }
 }
 
