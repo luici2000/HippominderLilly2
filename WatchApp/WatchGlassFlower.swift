@@ -14,6 +14,16 @@ enum WatchGlas {
     static let tintKey = "glassTint"
     static let designModeKey = "designMode"
 
+    /// Die Milchglasscheibe, aber als ruhige Fuellung statt als `Material`.
+    ///
+    /// Warum nicht `.ultraThinMaterial` wie am iPhone: ein Material rechnet
+    /// bei jedem Bild aus, was dahinterliegt, und verwischt es. Auf der Uhr
+    /// liegt dahinter aber nichts als Schwarz — kein Pferdefoto, kein
+    /// Hintergrund. Es verwischt also Schwarz, zwoelfmal pro Blume, bei
+    /// jedem Dreh an der Krone neu. Das kostete merklich Akku und sah
+    /// dabei aus wie diese Flaeche hier.
+    static let scheibe = Color.white.opacity(0.17)
+
     /// Glasfarbe des iPhones; bis zum ersten Abgleich das Hellblau
     static var tint: Color {
         if let a = UserDefaults.standard.array(forKey: tintKey) as? [Double], a.count == 3 {
@@ -31,7 +41,7 @@ struct WatchGlassPetal: View {
     var body: some View {
         if isFilled {
             Capsule()
-                .fill(.ultraThinMaterial)
+                .fill(WatchGlas.scheibe)
                 .overlay { Capsule().fill(tint.opacity(0.85)) }
                 .overlay { specular(strength: 0.6) }
                 .overlay {
@@ -44,7 +54,9 @@ struct WatchGlassPetal: View {
                         lineWidth: 1
                     )
                 }
-                .shadow(color: .black.opacity(0.5), radius: 2, x: 0, y: 1)
+                // Kein Schatten je Blatt: zwoelf Schatten sind zwoelf eigene
+                // Zeichendurchgaenge. Der helle Rand oben links setzt das
+                // Blatt auch so ab.
         } else {
             Capsule()
                 .fill(.white.opacity(0.06))
@@ -81,7 +93,7 @@ struct WatchGlassStamp: View {
 
     var body: some View {
         ZStack {
-            Circle().fill(.ultraThinMaterial)
+            Circle().fill(WatchGlas.scheibe)
             Circle().fill(tint.opacity(0.58))
             Circle().fill(
                 LinearGradient(
@@ -157,7 +169,7 @@ struct WatchGlassKey: View {
         Button(action: action) {
             ZStack {
                 RoundedRectangle(cornerRadius: 9, style: .continuous)
-                    .fill(.ultraThinMaterial)
+                    .fill(WatchGlas.scheibe)
                     .overlay { RoundedRectangle(cornerRadius: 9, style: .continuous).fill(tint.opacity(0.62)) }
                     .overlay {
                         RoundedRectangle(cornerRadius: 9, style: .continuous).fill(
