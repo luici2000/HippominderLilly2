@@ -57,6 +57,23 @@ struct MacContentView: View {
 
                     Spacer()
 
+                    // Darstellung. Die Einstellung liegt je Geraet in den
+                    // Benutzervorgaben - ohne eigenen Umschalter bliebe der
+                    // Mac fuer immer auf Glas, egal was am iPhone gewaehlt ist.
+                    Picker("", selection: Binding(
+                        get: { globalSettings.designMode },
+                        set: { globalSettings.designMode = $0 }
+                    )) {
+                        ForEach(DesignMode.allCases) { modus in
+                            Text(modus.localizedName).tag(modus)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(maxWidth: 220)
+
+                    Spacer()
+
                     // Farbschema
                     HStack(spacing: 6) {
                         ForEach(FlowerColorScheme.allCases) { scheme in
@@ -840,6 +857,9 @@ struct MacTimerCard: View {
     let horse: Horse
     let eventType: Horse.EventType
     let colorScheme: FlowerColorScheme
+    /// Beobachtet, nicht nur gelesen: sonst zeichnet die Karte nicht neu,
+    /// wenn die Darstellung gewechselt wird
+    @ObservedObject private var globalSettings = GlobalSettings.shared
     var onWarHeuteDa: () -> Void
     var onDatumWaehlen: () -> Void
 
@@ -868,11 +888,7 @@ struct MacTimerCard: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            // Blumen-Bild (aus Assets)
-            Image(flowerImageName())
-                .resizable()
-                .scaledToFit()
-                .frame(width: 80, height: 80)
+            blume
 
             Image(systemName: eventType.systemSymbol)
                 .font(.title3)
@@ -881,7 +897,7 @@ struct MacTimerCard: View {
             Text(eventType.localizedName)
                 .font(.caption.bold())
 
-            Text(days <= 0 ? "\(-days) Tage ueberfaellig" : "in \(days) Tagen")
+            Text(days <= 0 ? "\(-days) Tage überfällig" : "in \(days) Tagen")
                 .font(.caption)
                 .foregroundColor(statusColor)
 
@@ -911,6 +927,43 @@ struct MacTimerCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color.gray.opacity(0.06))
         )
+    }
+
+    /// Dieselbe Blume wie auf iPhone und Uhr.
+    ///
+    /// Vorher zeigte der Mac immer die vorgerenderte PNG-Blume, egal was
+    /// in der Darstellung eingestellt war: wer am iPhone auf Glas stellte,
+    /// sah am Mac trotzdem die alte. Die drei Ansichten sind plattformfrei,
+    /// der Mac kann sie also genauso benutzen.
+    @ViewBuilder
+    private var blume: some View {
+        switch globalSettings.designMode {
+        case .glass:
+            GlassFlower(
+                filledPetals: horse.gefuellteBlätter(fuer: eventType),
+                tint: days <= 0 ? .red : globalSettings.glassTint,
+                symbol: eventType.symbol,
+                size: 80
+            )
+        case .classic:
+            // Die Rose braucht ihre Displayflaeche unter sich, sonst
+            // verschwinden die feinen Konturen der dunklen Segmente
+            LCDRose(
+                filledPetals: horse.gefuellteBlätter(fuer: eventType),
+                isExpired: days <= 0,
+                size: 72
+            )
+            .padding(6)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(LCDPalette.base)
+            )
+        case .blume:
+            Image(flowerImageName())
+                .resizable()
+                .scaledToFit()
+                .frame(width: 80, height: 80)
+        }
     }
 
     private func flowerImageName() -> String {
