@@ -13,8 +13,11 @@ import SwiftUI
 import SwiftData
 
 struct WatchContentView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query private var horses: [Horse]
     @ObservedObject var syncReceiver = WatchSyncReceiver.shared
+    /// Debug: Start mit "-demoDetail" springt direkt in die Detailansicht
+    @State private var demoDetail = false
 
     var body: some View {
         NavigationStack {
@@ -33,7 +36,7 @@ struct WatchContentView: View {
                         Text("Keine Pferde")
                             .font(.headline)
                             .foregroundColor(.gray)
-                        Text("Fuege Pferde in der\niPhone-App hinzu")
+                        Text("Füge Pferde in der\niPhone-App hinzu")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -58,19 +61,64 @@ struct WatchContentView: View {
                     // wirklich liegt - die Uhr bekommt ihn oft spaeter als
                     // das iPhone.
                     Section {
-                        if let lastSync = syncReceiver.lastSyncDate {
-                            Text("Sync: \(lastSync, style: .relative) her")
-                                .font(.system(size: 9))
-                                .foregroundColor(.secondary)
+                        VStack(spacing: 1) {
+                            if let lastSync = syncReceiver.lastSyncDate {
+                                Text("Sync \(lastSync, style: .relative) her")
+                            }
+                            Text(Versionsinfo.zeileKurz)
                         }
-                        Text(Versionsinfo.zeileKurz)
-                            .font(.system(size: 9))
-                            .foregroundColor(.secondary)
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity)
                     }
+                    .listRowBackground(Color.clear)
                 }
                 .navigationTitle("Hippominder")
+                .navigationDestination(isPresented: $demoDetail) {
+                    if let horse = horses.first {
+                        WatchHorseDetailView(horse: horse)
+                    }
+                }
+                .onAppear {
+                    #if DEBUG
+                    if ProcessInfo.processInfo.arguments.contains("-demoDetail") {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { demoDetail = true }
+                    }
+                    #endif
+                }
             }
         }
+        .task { seedDemoHorseIfRequested() }
+    }
+
+    /// Debug-Hilfe fuer den Simulator, wie auf dem iPhone: Start mit
+    /// "-demoHorse" legt ein Demo-Pferd an, "-demoDaysAgo 30,120,10" setzt
+    /// die Tage seit Hufschmied, Impfung, Wurmkur. Auf der Uhr gibt es
+    /// sonst keinen Weg, Daten ohne iPhone hineinzubekommen. Laeuft ueber
+    /// den Kontext der Ansicht, damit die Abfrage die Aenderung sofort sieht.
+    private func seedDemoHorseIfRequested() {
+        #if DEBUG
+        let args = ProcessInfo.processInfo.arguments
+        guard args.contains("-demoHorse") else { return }
+        var daysAgo = [30, 120, 10]
+        if let spec = UserDefaults.standard.string(forKey: "demoDaysAgo") {
+            let parsed = spec.split(separator: ",").compactMap { Int($0.trimmingCharacters(in: .whitespaces)) }
+            if parsed.count == 3 { daysAgo = parsed }
+        }
+        let today = Date()
+        let dates = daysAgo.map { Calendar.current.date(byAdding: .day, value: -$0, to: today) ?? today }
+        let horse: Horse
+        if let existing = horses.first(where: { $0.name == "Demo" }) {
+            horse = existing
+        } else {
+            horse = Horse(name: "Demo")
+            modelContext.insert(horse)
+        }
+        horse.letzterHufschmiedTermin = dates[0]
+        horse.letzterImpfungTermin = dates[1]
+        horse.letzterWurmkurTermin = dates[2]
+        do { try modelContext.save(); NSLog("Demo-Seed: gespeichert, Pferde jetzt %d", (try? modelContext.fetchCount(FetchDescriptor<Horse>())) ?? -1) } catch { NSLog("Demo-Seed: Fehler %@", "\(error)") }
+        #endif
     }
 }
 
@@ -93,35 +141,32 @@ struct WatchHorseRow: View {
             Text(horse.name)
                 .font(.headline)
 
-            HStack(spacing: 4) {
-                Image(systemName: nextEvent.type.systemSymbol)
+            HStack(spacing: 5) {
+                // Eigene Symbole wie auf dem iPhone; Template-Assets brauchen
+                // eine ausdrueckliche Farbe, sonst erscheinen sie in Akzentfarbe
+                Image(nextEvent.type.symbol)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 13, height: 13)
+                    .foregroundStyle(colorForDays(nextEvent.days))
+
+                Text(WatchWortlaut.naechster(nextEvent.type, tage: nextEvent.days))
                     .font(.caption2)
                     .foregroundColor(colorForDays(nextEvent.days))
-
-                if nextEvent.days < 0 {
-                    Text("\(nextEvent.type.localizedName) \(-nextEvent.days)d ueberfaellig")
-                        .font(.caption2)
-                        .foregroundColor(.red)
-                } else if nextEvent.days == 0 {
-                    Text("\(nextEvent.type.localizedName) heute!")
-                        .font(.caption2)
-                        .foregroundColor(.red)
-                } else {
-                    Text("\(nextEvent.type.localizedName) in \(nextEvent.days)d")
-                        .font(.caption2)
-                        .foregroundColor(colorForDays(nextEvent.days))
-                }
             }
 
-            // Mini-Blumen statt Ampelpunkten: zeigen auch, wie weit
-            // das Intervall schon gelaufen ist
-            HStack(spacing: 7) {
+            // Mini-Blumen statt Ampelpunkten: zeigen auch, wie weit das
+            // Intervall schon gelaufen ist. 30 pt ist die Untergrenze, ab
+            // der sich die zwoelf Blaetter noch zaehlen lassen (CLAUDE.md).
+            HStack(spacing: 10) {
                 ForEach(Horse.EventType.allCases, id: \.self) { eventType in
                     let days = horse.tageBis(fuer: eventType)
-                    VStack(spacing: 1) {
-                        Image(systemName: eventType.systemSymbol)
-                            .font(.system(size: 7))
-                            .foregroundColor(.secondary)
+                    VStack(spacing: 2) {
+                        Image(eventType.symbol)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 9, height: 9)
+                            .foregroundStyle(.secondary)
                         WatchFlower(
                             filledPetals: FlowerGeometry.filledPetals(
                                 remainingDays: days,
@@ -129,11 +174,12 @@ struct WatchHorseRow: View {
                             ),
                             isExpired: days <= 0,
                             color: colorForDays(days),
-                            size: 24
+                            size: 30
                         )
                     }
                 }
             }
+            .padding(.top, 2)
         }
         .padding(.vertical, 2)
     }
@@ -153,10 +199,9 @@ struct WatchHorseDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 12) {
-                // Pferdename
-                Text(horse.name)
-                    .font(.title3.bold())
+            VStack(spacing: 10) {
+                // Der Name steht schon in der Titelzeile, darum hier nicht
+                // noch einmal.
 
                 // Timer fuer jeden Typ
                 ForEach(Horse.EventType.allCases, id: \.self) { eventType in
@@ -212,27 +257,35 @@ struct WatchTimerCard: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            HStack {
-                Image(systemName: eventType.systemSymbol)
-                    .font(.caption)
-                    .foregroundColor(statusColor)
+            // Name oben, Blume in der Mitte, Resttage gross darunter - so
+            // bricht auf der 41-mm-Uhr nichts um, und das Wichtigste steht
+            // unter dem Bild, wie auf dem Geraet.
+            HStack(spacing: 5) {
+                Image(eventType.symbol)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 15, height: 15)
+                    .foregroundStyle(statusColor)
                 Text(eventType.localizedName)
                     .font(.caption.bold())
-                Spacer()
-                Text(days <= 0 ? "\(-days)d ueber" : "\(days)d")
-                    .font(.caption.bold())
-                    .foregroundColor(statusColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Spacer(minLength: 0)
             }
 
             WatchFlower(
                 filledPetals: filledPetals,
                 isExpired: days <= 0,
                 color: statusColor,
-                size: 44
+                size: 48
             )
             .padding(.vertical, 2)
 
-            Text("Intervall: \(interval) Tage")
+            Text(WatchWortlaut.rest(tage: days))
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(statusColor)
+
+            Text("Intervall \(interval) Tage")
                 .font(.system(size: 9))
                 .foregroundColor(.secondary)
 
@@ -258,5 +311,26 @@ struct WatchTimerCard: View {
             RoundedRectangle(cornerRadius: 8)
                 .fill(Color.gray.opacity(0.15))
         )
+    }
+}
+
+// MARK: - Wortlaut
+
+/// Ganze Woerter mit Umlauten statt "12d" und "ueberfaellig" - auf der Uhr
+/// ist Platz dafuer, und so liest es sich wie auf dem iPhone.
+enum WatchWortlaut {
+    static func naechster(_ typ: Horse.EventType, tage: Int) -> String {
+        if tage < 0 { return "\(typ.localizedName) \(-tage) Tage überfällig" }
+        if tage == 0 { return "\(typ.localizedName) heute!" }
+        if tage == 1 { return "\(typ.localizedName) morgen" }
+        return "\(typ.localizedName) in \(tage) Tagen"
+    }
+
+    static func rest(tage: Int) -> String {
+        if tage < -1 { return "\(-tage) Tage überfällig" }
+        if tage == -1 { return "seit gestern fällig" }
+        if tage == 0 { return "heute fällig" }
+        if tage == 1 { return "morgen" }
+        return "in \(tage) Tagen"
     }
 }

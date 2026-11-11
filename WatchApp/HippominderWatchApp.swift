@@ -42,4 +42,5 @@ struct HippominderWatchApp: App {
         }
         .modelContainer(sharedModelContainer)
     }
+
 }
