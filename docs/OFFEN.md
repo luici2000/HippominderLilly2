@@ -28,10 +28,13 @@ wurde.
 
 ## Dann: sieht es richtig aus?
 
-- [ ] **[Build]** Alle drei Darstellungen im Simulator ansehen: Glas,
-      Classic, Blume. Umschalter sitzt in der Pferde-Detailansicht.
-- [ ] **[Build]** Mit einem echten Pferdefoto prüfen, ob das Glas gut
-      aussieht — bisher nur mit einem gemalten Platzhalter getestet.
+- [x] **[Build]** Alle drei Darstellungen im Simulator angesehen (10. und
+      11.11.2026), auch auf dem iPad quer. Umschalter sitzt in der
+      Pferde-Detailansicht.
+- [x] **[Build]** Mit Binas Foto geprüft, 11.11.2026 im Simulator (Foto
+      aus dem Datensatz, Start mit `-demoHorsePhoto`): das Glas bricht das
+      Foto wie gedacht, die Blätter bleiben lesbar, die Tasten passen dazu.
+      Classic und Blume daneben ebenfalls angesehen, nichts auffällig.
 - [ ] **[Build]** Mini-Blumen in der Pferdeliste: sind die zwölf Blätter
       auf dem Gerät noch zählbar? Am Rechner war 30 pt die Untergrenze.
 - [ ] **[Build]** Uhr ansehen. Dort ist die Blume neu, vorher waren es
