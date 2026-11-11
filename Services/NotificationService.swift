@@ -205,16 +205,16 @@ class NotificationService {
     func debugDumpPending() {
         let center = UNUserNotificationCenter.current()
         center.getNotificationSettings { settings in
-            print("NOTIFY_AUTH: \(settings.authorizationStatus.rawValue)")
+            NSLog("NOTIFY_AUTH: %d", settings.authorizationStatus.rawValue)
             center.getPendingNotificationRequests { requests in
-                print("NOTIFY_PENDING_COUNT: \(requests.count)")
+                NSLog("NOTIFY_PENDING_COUNT: %d", requests.count)
                 for request in requests {
                     var when = "-"
                     if let trigger = request.trigger as? UNCalendarNotificationTrigger,
                        let date = trigger.nextTriggerDate() {
                         when = ISO8601DateFormatter().string(from: date)
                     }
-                    print("NOTIFY_PENDING: \(request.identifier) | \(when) | \(request.content.body)")
+                    NSLog("NOTIFY_PENDING: %@ | %@ | %@", request.identifier, when, request.content.body)
                 }
             }
         }

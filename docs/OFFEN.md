@@ -60,22 +60,24 @@ wurde.
       3. Läuft keine Schleife? iPhone antwortet mit `syncToWatch`, die Uhr
          darf darauf nicht erneut melden.
 
-- [ ] **[Build]** Überfällige Erinnerungen prüfen. Bisher verstummte die
-      App genau dann, wenn ein Termin vergessen wurde — jetzt meldet sie
-      sich am nächsten Morgen und danach wöchentlich. Zu prüfen:
-      1. Termin in die Vergangenheit setzen (Debug-Zeitreise), App neu
-         starten → steht eine Meldung für den nächsten 9-Uhr-Zeitpunkt an?
-      2. Termin dann eintragen → ist die wöchentliche Wiederholung weg?
-         Sonst mahnt sie ewig. Mit dem Debug-Dump der geplanten
-         Benachrichtigungen kontrollierbar.
+- [x] **[Build]** Überfällige Erinnerungen geprüft, 11.11.2026 im
+      Simulator iPhone 16e mit `-demoDaysAgo 50,200,100 -dumpNotifications`:
+      1. Drei Termine überfällig → genau drei geplante Meldungen
+         `…-ueberfaellig`, alle für den nächsten Morgen 09:00 (wöchentlich
+         wiederholend, keine doppelte Einmalmeldung).
+      2. Termine eingetragen (`-demoDaysAgo 0,0,0`) → die drei
+         Überfällig-Meldungen sind weg, stattdessen drei reguläre
+         „in 3 Tagen fällig" am 20.12.2026, 06.02.2027 und 07.05.2027,
+         jeweils 09:00 Ortszeit. Nachgerechnet, stimmt.
+      Der Debug-Dump schreibt jetzt per `NSLog` ins Systemprotokoll
+      (`log show --predicate 'process == "Hippominder"'`), `print` kam dort
+      nicht an.
 
-- [ ] **[Build]** Wechselndes App-Symbol prüfen. Bei überfälligen Terminen
-      soll das Symbol rot werden, sonst orange. Zu prüfen:
-      1. Termin überfällig machen → wird das Symbol rot? iOS zeigt dabei
-         einen Systemhinweis, das ist normal und nicht zu vermeiden.
-      2. Termin eintragen → wird es wieder orange?
-      3. App mehrmals starten, ohne dass sich etwas ändert → darf **kein**
-         Hinweis erscheinen. Sonst greift die Zustandsprüfung nicht.
+- [x] **[Build]** Wechselndes App-Symbol geprüft, 11.11.2026 im Simulator:
+      überfällig → Symbol rot (Protokoll: „Setting preferredIconName to
+      Ueberfaellig"), Termine eingetragen → wieder orange („preferredIconName
+      to (null)"). Beides im Home-Bildschirm gesehen. Punkt 3 (kein Hinweis
+      bei unverändertem Zustand) am echten iPhone noch offen.
       4. ~~Liegen `AppIcon-Ueberfaellig@2x/@3x.png` wirklich flach im Bundle?~~
          Ja, 10.11.2026 im gebauten `Hippominder.app` nachgesehen: alle drei
          liegen direkt im Bundle.
@@ -83,8 +85,10 @@ wurde.
 - [ ] **[Build]** iPad-Layout prüfen. Auf dem iPad läuft jetzt eine
       zweispaltige Ansicht (Liste links, Pferd rechts), auf dem iPhone
       unverändert der bisherige Stapel. Zu prüfen:
-      1. iPad: Pferd antippen → erscheint es rechts? Vorher steht dort
-         „Pferd auswählen".
+      1. ~~iPad: Pferd antippen → erscheint es rechts?~~ Ja, 11.11.2026 im
+         iPad-Simulator (A16) quer gesehen: Liste links, Pferd rechts, die
+         Blume in allen drei Spalten vollständig. Hochkant zeigt iPadOS
+         nur die rechte Spalte mit Seitenleisten-Knopf, das ist Systemverhalten.
       2. iPad: Pferd löschen, das gerade rechts steht → leert sich die
          rechte Spalte, oder zeigt sie ein gelöschtes Tier?
       3. iPhone: Navigation muss **genau wie vorher** funktionieren —
