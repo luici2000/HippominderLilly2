@@ -127,6 +127,14 @@ wurde.
          ersten Start fehlerfrei, Bina hat einen iCloud-Datensatz.
       4. Dann auf zwei Geräten: Pferd auf dem Mac anlegen → erscheint es
          auf dem iPhone?
+         Versuch 11.11.2026, 20:45: am Mac öffnet „+" bei zwei Pferden
+         die Paywall (1 Pferd kostenlos), und das iPhone war gesperrt.
+         Indirekter Beleg: der Mac zeigt Bina und „Binas tegabuch" aus
+         iCloud, ohne dass dort je ein Pferd angelegt wurde. Der echte
+         Test braucht Pro (oder eine Debug-Freischaltung) und ein
+         entsperrtes iPhone; der Datenbestand lässt sich dann per
+         `devicectl device copy from --domain-type appDataContainer`
+         prüfen, das geht sogar bei gesperrtem Gerät.
       5. iCloud testweise abschalten → läuft die App weiter (lokal)?
 
 ## Neu seit 11.11.2026 (Mathias, nach dem ersten Blick auf die Uhr)
