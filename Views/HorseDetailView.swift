@@ -307,6 +307,11 @@ struct HorseDetailView: View {
                 .padding(.horizontal)
                 .padding(.bottom, 32)
             }
+            // Auf dem iPad nicht ueber die ganze Breite strecken: Display,
+            // Blumen und Tasten bleiben in iPhone-Proportion und stehen
+            // mittig. Auf dem iPhone ist die Breite ohnehin kleiner.
+            .frame(maxWidth: 440)
+            .frame(maxWidth: .infinity)
         }
         .navigationBarTitleDisplayMode(.inline)
         // Erinnerungs-Vorlauf oder Intervalle geaendert -> Benachrichtigungen neu planen
