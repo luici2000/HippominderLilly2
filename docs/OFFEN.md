@@ -45,6 +45,11 @@ wurde.
       Uhr, iPhone daneben entsperrt), dann registriert ein Build mit
       `-allowProvisioningDeviceRegistration` sie. Bis dahin verweigert
       watchOS die Installation.
+      **Stand 11.11.2026: die Uhr ist gekoppelt.** Damit ist der Weg
+      frei. Als Nächstes: sieht Xcode sie unter *Window → Devices and
+      Simulators*? Ist der Entwicklermodus auf der Uhr an? Dann einmal
+      mit `-allowProvisioningDeviceRegistration` bauen. Erst danach
+      lassen sich die Punkte darunter überhaupt prüfen.
 - [ ] **[Build, wichtig]** „War heute da" auf der Uhr testen. Der Rückkanal
       Uhr → iPhone ist **neu und noch nie gelaufen**. Zu prüfen:
       1. Termin auf der Uhr abhaken, während das iPhone in der Nähe ist →
