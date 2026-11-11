@@ -138,7 +138,9 @@ struct DatensicherungView: View {
                     NotificationService.shared.scheduleAllNotifications(for: pferd)
                 }
                 NotificationService.shared.updateBadge(using: modelContext)
+                #if os(iOS)
                 WatchSyncService.shared.syncToWatch()
+                #endif
 
                 meldung = Meldung(
                     titel: "Eingelesen",
