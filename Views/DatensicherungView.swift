@@ -4,23 +4,32 @@
 //
 //  Autor: Mathias Hubrich & Claude (Anthropic)
 //  Erstellt: 9. November 2026
+//  Geaendert: 11. November 2026 - laeuft jetzt auch auf dem Mac
 //
 //  Beschreibung: Pferde als Datei sichern und zurueckholen.
 //  Das Netz unter dem iCloud-Abgleich - auch fuer alle, die iCloud
 //  abgeschaltet haben.
+//
+//  Der Weg zur Datei ist das Einzige, was sich je Geraet unterscheidet:
+//  auf dem iPhone das Teilen-Menue, auf dem Mac das Sichern-Fenster.
+//  Gerechnet wird beidesmal in HorseBackupService.
 //
 
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 
-#if os(iOS)
-
 struct DatensicherungView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var horses: [Horse]
 
+    #if os(iOS)
     @State private var exportDatei: SicherungsDatei?
+    #else
+    @State private var exportInhalt: SicherungsDokument?
+    @State private var zeigeSichernFenster = false
+    #endif
+
     @State private var zeigeDateiwahl = false
     @State private var meldung: Meldung?
 
@@ -54,10 +63,23 @@ struct DatensicherungView: View {
             }
         }
         .navigationTitle("Daten sichern")
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $exportDatei) { datei in
             TeilenBlatt(datei: datei)
         }
+        #else
+        .fileExporter(
+            isPresented: $zeigeSichernFenster,
+            document: exportInhalt,
+            contentType: .json,
+            defaultFilename: HorseBackupService.dateiname()
+        ) { ergebnis in
+            if case .failure(let fehler) = ergebnis {
+                meldung = Meldung(titel: "Sichern fehlgeschlagen", text: fehler.localizedDescription)
+            }
+        }
+        #endif
         .fileImporter(
             isPresented: $zeigeDateiwahl,
             allowedContentTypes: [.json],
@@ -75,10 +97,19 @@ struct DatensicherungView: View {
     private func sichern() {
         do {
             let daten = try HorseBackupService.exportieren(from: modelContext)
+            #if os(iOS)
+            // Auf dem iPhone geht die Datei ins Teilen-Menue, von dort nach
+            // iCloud Drive, in eine Mail oder wohin auch immer
             let ziel = FileManager.default.temporaryDirectory
                 .appendingPathComponent(HorseBackupService.dateiname())
             try daten.write(to: ziel)
             exportDatei = SicherungsDatei(url: ziel)
+            #else
+            // Auf dem Mac das gewohnte Sichern-Fenster, kein Umweg ueber
+            // eine Zwischendatei
+            exportInhalt = SicherungsDokument(daten: daten)
+            zeigeSichernFenster = true
+            #endif
         } catch {
             meldung = Meldung(titel: "Sichern fehlgeschlagen", text: error.localizedDescription)
         }
@@ -93,8 +124,8 @@ struct DatensicherungView: View {
 
         case .success(let urls):
             guard let url = urls.first else { return }
-            // Dateien aus der Dateien-App liegen ausserhalb der App und
-            // brauchen eine ausdrueckliche Freigabe
+            // Dateien aus der Dateien-App oder dem Finder liegen ausserhalb
+            // der App und brauchen eine ausdrueckliche Freigabe
             let freigegeben = url.startAccessingSecurityScopedResource()
             defer { if freigegeben { url.stopAccessingSecurityScopedResource() } }
 
@@ -125,15 +156,17 @@ struct DatensicherungView: View {
 
 // MARK: - Hilfstypen
 
-private struct SicherungsDatei: Identifiable {
-    let url: URL
-    var id: String { url.absoluteString }
-}
-
 private struct Meldung: Identifiable {
     let titel: String
     let text: String
     var id: String { titel + text }
+}
+
+#if os(iOS)
+
+private struct SicherungsDatei: Identifiable {
+    let url: URL
+    var id: String { url.absoluteString }
 }
 
 /// Reicht die Datei an das System weiter, damit sie in iCloud Drive,
@@ -146,6 +179,30 @@ private struct TeilenBlatt: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
+}
+
+#else
+
+/// Traegt die fertigen Daten ins Sichern-Fenster des Macs.
+///
+/// Nur zum Schreiben gedacht: Gelesen wird ueber `fileImporter`, weil das
+/// den Zugriff auf eine Datei ausserhalb der App ausdruecklich freigibt.
+private struct SicherungsDokument: FileDocument {
+    static var readableContentTypes: [UTType] { [.json] }
+
+    let daten: Data
+
+    init(daten: Data) {
+        self.daten = daten
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        self.daten = configuration.file.regularFileContents ?? Data()
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: daten)
+    }
 }
 
 #endif

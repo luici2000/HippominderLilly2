@@ -42,7 +42,8 @@ struct ContactsView: View {
                         }
                     )
                 }
-                #if os(iOS)
+                // Auch auf dem Mac: dort ist eine Datei zu sichern sogar
+                // das Naheliegendste, und genau dort fehlte es bisher
                 Section {
                     NavigationLink {
                         DatensicherungView()
@@ -52,7 +53,6 @@ struct ContactsView: View {
                 } footer: {
                     Text("Pferde als Datei sichern oder eine Sicherung einlesen.")
                 }
-                #endif
             }
             .navigationTitle("Kontakte")
             #if os(iOS)
