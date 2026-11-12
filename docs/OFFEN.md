@@ -148,6 +148,29 @@ wurde.
       graugrünen Gerätedisplays (plus Komplikation) geht. Idee notiert,
       nicht begonnen.
 
+## Uhr ohne Pferde (Mathias, 12.11.2026 früh)
+
+- [ ] **Die Uhr zeigte „Keine Pferde".** Ursache nach Code-Lektüre: die Uhr
+      bekommt die Pferde nur als applicationContext vom iPhone. Wird die
+      Watch-App neu installiert (17:50 per Xcode, danach noch einmal
+      automatisch über die eingebettete Watch-App im iPhone-Build von
+      20:27), ist ihr Speicher leer, und der vorher geschickte Stand ist
+      mit der alten Installation weg. Das iPhone schickt erst wieder, wenn
+      seine App läuft.
+      **Abhilfe im Code (12.11., 07:44, gepusht):** die Uhr fragt beim
+      Start und sobald das iPhone in Reichweite kommt selbst nach, wenn
+      ihr Speicher leer ist („bitteDaten"); das iPhone antwortet direkt und
+      schickt außerdem bei `sessionWatchStateDidChange` (Watch-App
+      installiert / Uhr gewechselt) neu. Auf dem leeren Bildschirm der Uhr
+      gibt es den Knopf „Vom iPhone holen".
+      **Stand:** iPhone-Build 07:44 installiert, konnte aber nicht gestartet
+      werden (iPhone gesperrt). Watch-Build 07:44 liegt bereit, die Ultra
+      war seit 11.11. 19:15 nicht mehr erreichbar. Sofort-Abhilfe ohne
+      neuen Build: iPhone entsperren und Hippominder einmal öffnen, dann
+      schickt es den Stand. Offen: welche Uhr trägt Mathias gerade (Ultra
+      oder Ultra 1)? Ist das Bluetooth des iPhones noch aus (fürs Koppeln
+      abgeschaltet)? Ohne Bluetooth läuft der Abgleich nur über WLAN.
+
 ## Akku der Uhr
 
 Mathias meldete am 11.11.2026 starken Akkuverbrauch. Zwei Ursachen
