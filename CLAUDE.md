@@ -42,6 +42,10 @@ Maße als Anteil der Blumenbreite:
 ## Die drei Darstellungen
 
 `GlobalSettings.designMode` schaltet um, Umschalter in `HorseDetailView`.
+Darstellung, Farbschema und Glasfarbe sind **je Gerät** gespeichert
+(Benutzervorgaben), absichtlich nicht über iCloud abgeglichen — Mathias
+will das pro Gerät einstellen (12.11.2026). Nur die Uhr übernimmt
+Glasfarbe und Darstellung vom iPhone.
 
 - **Glas** — `FlowerTimerViewGlass.swift`. Blütenblätter aus
   `.ultraThinMaterial`, das Pferdefoto dahinter wird gebrochen sichtbar.
