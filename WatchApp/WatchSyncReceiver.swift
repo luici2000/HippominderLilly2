@@ -164,6 +164,10 @@ class WatchSyncReceiver: NSObject, ObservableObject {
             UserDefaults.standard.set(mode, forKey: WatchGlas.designModeKey)
         }
         guard let horseDataArray = payload["horses"] as? [[String: Any]] else { return }
+        // Leere Liste nie uebernehmen: sie kommt vom iPhone, bevor iCloud
+        // geladen ist, nicht weil die Pferde weg waeren. Doppelt genaeht -
+        // das iPhone schickt sie seit 12.11.2026 auch nicht mehr.
+        guard !horseDataArray.isEmpty else { isSyncing = false; return }
 
         Task { @MainActor in
             self.isSyncing = true

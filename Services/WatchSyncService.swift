@@ -52,6 +52,12 @@ class WatchSyncService: NSObject, ObservableObject {
         let context = container.mainContext
         let descriptor = FetchDescriptor<Horse>()
         guard let horses = try? context.fetch(descriptor) else { return nil }
+        // Beim Start ist der iCloud-Bestand oft noch nicht geladen, dann
+        // ist die Liste kurz leer. Eine leere Liste darf nicht raus: die Uhr
+        // nahm sie fuer bare Muenze und loeschte alle Pferde (11.11.2026).
+        // Wird das letzte Pferd wirklich geloescht, bleibt es auf der Uhr
+        // stehen, bis das naechste kommt - das ist der kleinere Schaden.
+        guard !horses.isEmpty else { return nil }
 
         let horseData: [[String: Any]] = horses.map { horse in
             [
