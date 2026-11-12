@@ -74,6 +74,16 @@ class GlobalSettings: ObservableObject {
         }
     }
 
+    /// Die Farbe, die zu den Blumen auf dem Bildschirm passt.
+    ///
+    /// Glas: die frei gewaehlte Glasfarbe. Blume: die Farbe des gewaehlten
+    /// Schemas, denn die PNG-Blumen kennen nur Hellblau, Orange und Grau.
+    /// Vorher nahmen die Tasten unter orangen Blumen die lila Glasfarbe -
+    /// das brachte die Farbschemata durcheinander (Mathias, 12.11.2026).
+    var akzentFarbe: Color {
+        designMode == .blume ? flowerColorScheme.glassColor : glassTint
+    }
+
     /// Das Schema, dessen Glasfarbe gerade aktiv ist - nil bei frei gewaehlter Farbe
     var matchingColorScheme: FlowerColorScheme? {
         FlowerColorScheme.allCases.first { scheme in

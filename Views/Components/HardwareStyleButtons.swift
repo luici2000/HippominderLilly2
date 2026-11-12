@@ -10,7 +10,8 @@
 //
 //  Glas - dieselbe Form aus getoentem Milchglas in der gewaehlten
 //  Glasfarbe (GlobalSettings.glassTint); das Pferdefoto dahinter wird
-//  gebrochen sichtbar, wie bei den Bluetenblaettern. Blume nutzt Glas.
+//  gebrochen sichtbar, wie bei den Bluetenblaettern. Blume nutzt dieselbe
+//  Form in der Farbe des Farbschemas (GlobalSettings.akzentFarbe).
 //
 //  Licht kommt wie ueberall von oben links (-45 Grad): Kante oben links
 //  hell, unten rechts dunkel, Schatten nach unten rechts.
@@ -36,7 +37,7 @@ struct HardwareStyleButtons: View {
     private let feldBreite: CGFloat = 54
 
     private var istClassic: Bool { globalSettings.designMode == .classic }
-    private var tint: Color { globalSettings.glassTint }
+    private var tint: Color { globalSettings.akzentFarbe }
 
     var body: some View {
         HStack(spacing: 6) {
