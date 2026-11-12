@@ -62,6 +62,39 @@ class WatchSyncReceiver: NSObject, ObservableObject {
     static let actionKey = "action"
     static let actionTerminErledigt = "terminErledigt"
     static let actionIntervallGeaendert = "intervallGeaendert"
+    /// Bitte um den vollen Stand, wenn hier keine Pferde liegen
+    static let actionBitteDaten = "bitteDaten"
+
+    /// Fragt das iPhone nach den Pferden, wenn der eigene Speicher leer ist.
+    ///
+    /// Nach einer Neuinstallation der Watch-App ist der Speicher leer, und
+    /// der applicationContext, den das iPhone vorher geschickt hat, ist mit
+    /// der alten Installation weg. Das iPhone schickt erst wieder, wenn
+    /// seine App laeuft - im Stall hilft das nicht. Darum fragt die Uhr
+    /// selbst; ist das iPhone in Reichweite, wird seine App dafuer im
+    /// Hintergrund geweckt. Nur wenn noetig, denn Funk kostet Strom.
+    func bitteUmDatenFallsLeer() {
+        guard WCSession.default.activationState == .activated,
+              WCSession.default.isReachable,
+              speicherIstLeer else { return }
+        isSyncing = true
+        WCSession.default.sendMessage(
+            [Self.actionKey: Self.actionBitteDaten],
+            replyHandler: { [weak self] antwort in
+                Task { @MainActor in self?.processPayload(antwort) }
+            },
+            errorHandler: { [weak self] _ in
+                Task { @MainActor in self?.isSyncing = false }
+            }
+        )
+    }
+
+    private var speicherIstLeer: Bool {
+        guard let container = modelContainer else { return false }
+        var descriptor = FetchDescriptor<Horse>()
+        descriptor.fetchLimit = 1
+        return ((try? container.mainContext.fetch(descriptor)) ?? []).isEmpty
+    }
 
     /// Wartet nach dem letzten Tastendruck, bevor gefunkt wird
     private var intervallMelder: Task<Void, Never>?
@@ -122,6 +155,7 @@ class WatchSyncReceiver: NSObject, ObservableObject {
 
     private func processPayload(_ payload: [String: Any]) {
         guard let container = modelContainer else { return }
+        isSyncing = false
         // Glasfarbe des iPhones uebernehmen, damit die Uhr dieselbe Blume zeigt
         if let tint = payload["glassTint"] as? [Double], tint.count == 3 {
             UserDefaults.standard.set(tint, forKey: WatchGlas.tintKey)
@@ -209,10 +243,20 @@ extension WatchSyncReceiver: WCSessionDelegate {
         if activationState == .activated {
             // Check for any pending applicationContext
             let context = session.receivedApplicationContext
-            if !context.isEmpty {
-                Task { @MainActor in
+            Task { @MainActor in
+                if !context.isEmpty {
                     self.processPayload(context)
                 }
+                self.bitteUmDatenFallsLeer()
+            }
+        }
+    }
+
+    /// iPhone kommt in Reichweite: wenn hier noch nichts liegt, jetzt fragen
+    nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
+        if session.isReachable {
+            Task { @MainActor in
+                self.bitteUmDatenFallsLeer()
             }
         }
     }

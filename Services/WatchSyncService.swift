@@ -32,12 +32,26 @@ class WatchSyncService: NSObject, ObservableObject {
     }
 
     func syncToWatch() {
-        guard let container = modelContainer else { return }
         guard WCSession.default.activationState == .activated else { return }
+        guard let payload = aktuellerDatensatz() else { return }
 
+        // applicationContext for guaranteed delivery
+        try? WCSession.default.updateApplicationContext(payload)
+
+        // sendMessage for real-time if reachable
+        if WCSession.default.isReachable {
+            WCSession.default.sendMessage(payload, replyHandler: nil)
+        }
+    }
+
+    /// Alle Pferde samt Glasfarbe und Darstellung, so wie die Uhr sie
+    /// erwartet. Geht als applicationContext raus und als Antwort, wenn die
+    /// Uhr selbst danach fragt.
+    private func aktuellerDatensatz() -> [String: Any]? {
+        guard let container = modelContainer else { return nil }
         let context = container.mainContext
         let descriptor = FetchDescriptor<Horse>()
-        guard let horses = try? context.fetch(descriptor) else { return }
+        guard let horses = try? context.fetch(descriptor) else { return nil }
 
         let horseData: [[String: Any]] = horses.map { horse in
             [
@@ -62,14 +76,7 @@ class WatchSyncService: NSObject, ObservableObject {
             "designMode": settings.designModeRaw,
             "timestamp": Date().timeIntervalSince1970
         ]
-
-        // applicationContext for guaranteed delivery
-        try? WCSession.default.updateApplicationContext(payload)
-
-        // sendMessage for real-time if reachable
-        if WCSession.default.isReachable {
-            WCSession.default.sendMessage(payload, replyHandler: nil)
-        }
+        return payload
     }
 
     // MARK: - Rueckmeldung von der Uhr
@@ -78,6 +85,8 @@ class WatchSyncService: NSObject, ObservableObject {
     private static let actionKey = "action"
     private static let actionTerminErledigt = "terminErledigt"
     private static let actionIntervallGeaendert = "intervallGeaendert"
+    /// Die Uhr hat keine Pferde (frisch installiert) und bittet um den Stand
+    private static let actionBitteDaten = "bitteDaten"
 
     /// Traegt einen auf der Uhr abgehakten Termin oder ein dort geaendertes
     /// Intervall ein und spiegelt den neuen Stand zurueck, damit beide
@@ -127,7 +136,36 @@ extension WatchSyncService: WCSessionDelegate {
     /// Sofortmeldung, wenn die Uhr gerade erreichbar ist
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         Task { @MainActor in
-            self.verarbeiteUhrMeldung(message)
+            if message[Self.actionKey] as? String == Self.actionBitteDaten {
+                self.syncToWatch()
+            } else {
+                self.verarbeiteUhrMeldung(message)
+            }
+        }
+    }
+
+    /// Die Uhr fragt nach den Pferden und wartet auf die Antwort - so kommt
+    /// der Stand auch dann an, wenn der applicationContext vor einer
+    /// Neuinstallation der Watch-App abgeschickt wurde und mit ihr verloren
+    /// ging. Am 11.11.2026 stand die Uhr genau deshalb ohne Pferde da.
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
+        Task { @MainActor in
+            if message[Self.actionKey] as? String == Self.actionBitteDaten {
+                replyHandler(self.aktuellerDatensatz() ?? [:])
+            } else {
+                self.verarbeiteUhrMeldung(message)
+                replyHandler([:])
+            }
+        }
+    }
+
+    /// Uhr gewechselt oder Watch-App (neu) installiert: der zuletzt
+    /// geschickte Stand gehoert zur alten Installation, also nochmal senden.
+    nonisolated func sessionWatchStateDidChange(_ session: WCSession) {
+        if session.isPaired && session.isWatchAppInstalled {
+            Task { @MainActor in
+                self.syncToWatch()
+            }
         }
     }
 

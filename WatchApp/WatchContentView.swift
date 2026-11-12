@@ -41,6 +41,13 @@ struct WatchContentView: View {
                             .font(.caption2)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
+                        // Nach einer Neuinstallation fehlt der Stand, bis das
+                        // iPhone ihn schickt - hier laesst er sich holen
+                        Button("Vom iPhone holen") {
+                            WatchSyncReceiver.shared.bitteUmDatenFallsLeer()
+                        }
+                        .font(.caption2)
+                        .padding(.top, 4)
                         // Auch ohne Pferde soll ablesbar sein, welcher
                         // Stand hier liegt
                         Text(Versionsinfo.zeileKurz)
