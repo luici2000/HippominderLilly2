@@ -55,8 +55,9 @@ wurde.
       (`LCDPanelMasse`, Breite/3,8), Symbol und Restzeit unter der Rose.
       Im Simulator auf iPad (A16) und iPhone 16e angesehen, auch der
       fällige Fall. Auf iPhone und iPad installiert (Build 14:59).
-      **Noch offen:** am Mac ansehen — baut, aber der Bildschirm war
-      gesperrt, darum kein Screenshot.
+      Am Mac angesehen 14.11., 15:34: passt. Dabei fiel auf, dass eine
+      dreistellige Restzeit („171 Tage") kleiner gesetzt wurde als die
+      zweistelligen daneben — Schrift und Ränder nachgestellt, jetzt gleich.
 - [ ] **[Build]** Mini-Blumen in der Pferdeliste: sind die zwölf Blätter
       auf dem Gerät noch zählbar? Am Rechner war 30 pt die Untergrenze.
 - [ ] **[Build]** Uhr ansehen. Dort ist die Blume neu, vorher waren es

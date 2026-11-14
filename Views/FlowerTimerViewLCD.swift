@@ -144,14 +144,15 @@ struct LCDFlowerTimerView: View {
                 Spacer(minLength: roseSize * 0.05)
 
                 Text(formattedDays)
-                    .font(.system(size: roseSize * 0.15, weight: .semibold, design: .rounded))
+                    // 0,145 statt 0,15: sonst passt "171 Tage" nicht neben das
+                    // Symbol und schrumpft sichtbar gegen "38 Tage" daneben
+                    .font(.system(size: roseSize * 0.145, weight: .semibold, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(LCDPalette.on)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
-            .padding(.leading, roseSize * 0.06)
-            .padding(.trailing, roseSize * 0.04)
+            .padding(.horizontal, roseSize * 0.02)
 
             Text(Self.dateFormatter.string(from: nextDate))
                 .font(.system(size: roseSize * 0.115, design: .rounded))
@@ -160,7 +161,7 @@ struct LCDFlowerTimerView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity, alignment: .trailing)
-                .padding(.trailing, roseSize * 0.04)
+                .padding(.trailing, roseSize * 0.02)
         }
         // Die Spalte ist genau so breit wie die Rose, damit Symbol und
         // Zahlen unter ihr stehen und nicht daneben. Der Rest der Breite
