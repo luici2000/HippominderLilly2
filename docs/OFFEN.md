@@ -48,6 +48,15 @@ wurde.
       `GlobalColorPicker` aus den iOS-Blöcken nach `Views/Components/`
       gezogen; der Mac-Zuschnitt kann jetzt auch rechteckig (Hintergrund
       im Format der Bühne). Alle drei Darstellungen am Mac angesehen.
+- [x] **[Build]** Classic: Rosengröße passt zum Display, 14.11.2026.
+      Mathias fiel am iPad auf, dass die Rosen in Classic nicht zur
+      Displaygröße passen (fest 86 pt, Symbole neben statt unter der Rose,
+      winzige Schrift). Jetzt aus der Displaybreite gerechnet
+      (`LCDPanelMasse`, Breite/3,8), Symbol und Restzeit unter der Rose.
+      Im Simulator auf iPad (A16) und iPhone 16e angesehen, auch der
+      fällige Fall. Auf iPhone und iPad installiert (Build 14:59).
+      **Noch offen:** am Mac ansehen — baut, aber der Bildschirm war
+      gesperrt, darum kein Screenshot.
 - [ ] **[Build]** Mini-Blumen in der Pferdeliste: sind die zwölf Blätter
       auf dem Gerät noch zählbar? Am Rechner war 30 pt die Untergrenze.
 - [ ] **[Build]** Uhr ansehen. Dort ist die Blume neu, vorher waren es
