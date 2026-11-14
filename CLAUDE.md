@@ -54,6 +54,9 @@ Glasfarbe und Darstellung vom iPhone.
 - **Classic** — `FlowerTimerViewLCD.swift`. Das graugrüne Gerätedisplay.
   Unbeleuchtete Segmente sind **feine Konturen**, keine grauen Flächen —
   das macht den LCD-Charakter. Grundton olivgrau (#959585), gemessen.
+  Die Rosen richten sich nach der Displaybreite (`LCDPanelMasse`, etwa ein
+  Viertel der Breite wie am Gerätefoto) — fest 86 pt standen auf iPad und
+  Mac verloren in der Fläche. Symbol und Restzeit stehen unter der Rose.
 - **Blume** — `FlowerTimerView.swift`. Mathias' vorgerenderte
   Icon-Composer-PNGs mit den drei Farbschemata.
 

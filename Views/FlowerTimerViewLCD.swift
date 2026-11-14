@@ -120,36 +120,77 @@ struct LCDFlowerTimerView: View {
     }
 
     var body: some View {
-        VStack(spacing: 3) {
+        VStack(spacing: roseSize * 0.04) {
             LCDRose(
                 filledPetals: filledPetals,
                 isExpired: isExpired,
                 size: roseSize
             )
 
-            // Symbol unter der Rose, leicht links - so sitzt es auf dem Geraet.
+            // Symbol unter der Rose, links - so sitzt es auf dem Geraet. Der
+            // Platz rechts daneben ist dort leer; hier steht die Restzeit,
+            // wie eine Ziffernanzeige neben ihrem Symbol.
             // Blinkt bewusst nicht: laut Firmware blinkt bei Alarm nur die Glocke.
-            Image(eventType.symbol)
-                .resizable()
-                .renderingMode(.template)
-                .scaledToFit()
-                .frame(width: roseSize * 0.26, height: roseSize * 0.26)
-                .foregroundStyle(LCDPalette.on)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading, roseSize * 0.14)
+            HStack(alignment: .center, spacing: 0) {
+                Image(eventType.symbol)
+                    .resizable()
+                    .renderingMode(.template)
+                    .scaledToFit()
+                    .frame(width: roseSize * 0.28, height: roseSize * 0.28)
+                    .foregroundStyle(LCDPalette.on)
 
-            Text(formattedDays)
-                .font(.system(size: roseSize * 0.12, weight: .semibold, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(LCDPalette.on)
-                .lineLimit(1)
+                // Der Wurm ist so breit wie sein Rahmen - ohne Mindestabstand
+                // stiess er an die Zahl
+                Spacer(minLength: roseSize * 0.05)
+
+                Text(formattedDays)
+                    .font(.system(size: roseSize * 0.15, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(LCDPalette.on)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .padding(.leading, roseSize * 0.06)
+            .padding(.trailing, roseSize * 0.04)
 
             Text(Self.dateFormatter.string(from: nextDate))
-                .font(.system(size: roseSize * 0.1, design: .rounded))
+                .font(.system(size: roseSize * 0.115, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(LCDPalette.on.opacity(0.65))
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.trailing, roseSize * 0.04)
         }
+        // Die Spalte ist genau so breit wie die Rose, damit Symbol und
+        // Zahlen unter ihr stehen und nicht daneben. Der Rest der Breite
+        // verteilt sich gleichmaessig zwischen den drei Spalten.
+        .frame(width: roseSize)
+        .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Masse des Displays
+
+/// Groesse der Rosen aus der Breite des Displays.
+///
+/// Am Geraetefoto gemessen (Detail_Display.jpg): eine Rose ist rund ein
+/// Viertel der Displaybreite, der Abstand zwischen zwei Rosen knapp ein
+/// Drittel einer Rose. Fest 86 pt passten nur zufaellig auf ein schmales
+/// iPhone; auf iPad und Mac standen drei kleine Rosen verloren in einer
+/// breiten Flaeche (Mathias, 14.11.2026).
+enum LCDPanelMasse {
+    /// Drei Rosen plus Zwischenraeume: Breite / 3,8. Auf ganze Punkte
+    /// gerundet, sonst driftet der Blattkranz (siehe CLAUDE.md).
+    static func rosenGroesse(fuerBreite breite: CGFloat) -> CGFloat {
+        guard breite > 0 else { return 86 }
+        return min(124, max(64, (breite / 3.8).rounded()))
+    }
+
+    /// Hoehe des Schriftzugs oben rechts
+    static func logoHoehe(fuerBreite breite: CGFloat) -> CGFloat {
+        guard breite > 0 else { return 16 }
+        return min(24, max(14, (breite * 0.05).rounded()))
     }
 }
 
@@ -159,9 +200,14 @@ struct LCDFlowerTimerView: View {
 struct LCDPanel<Content: View>: View {
     /// Blinkt, wenn mindestens ein Termin faellig ist
     let alarmActive: Bool
-    @ViewBuilder var content: Content
+    /// Bekommt die Rosengroesse, die zur gemessenen Displaybreite passt
+    @ViewBuilder var content: (CGFloat) -> Content
 
     @State private var bellOn = true
+    /// Breite der Displayflaeche, gemessen
+    @State private var breite: CGFloat = 0
+
+    private var logoHoehe: CGFloat { LCDPanelMasse.logoHoehe(fuerBreite: breite) }
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -178,7 +224,7 @@ struct LCDPanel<Content: View>: View {
             // Kopfzeile: Glocke links, Schriftzug rechts - wie auf dem Geraet
             HStack {
                 Image(systemName: "bell.fill")
-                    .font(.system(size: 11))
+                    .font(.system(size: logoHoehe * 0.7))
                     .foregroundStyle(LCDPalette.on)
                     .opacity(alarmActive ? (bellOn ? 1 : 0) : 0)
 
@@ -189,16 +235,17 @@ struct LCDPanel<Content: View>: View {
                     .resizable()
                     .renderingMode(.template)
                     .scaledToFit()
-                    .frame(height: 16)
+                    .frame(height: logoHoehe)
                     .foregroundStyle(LCDPalette.on.opacity(0.85))
             }
             .padding(.horizontal, 12)
             .padding(.top, 8)
 
-            content
-                .padding(.top, 24)
+            content(LCDPanelMasse.rosenGroesse(fuerBreite: breite))
+                .padding(.top, logoHoehe + 12)
                 .padding(.bottom, 12)
         }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { breite = $0 }
         // Das Display liegt vertieft hinter einer Scheibe: der Rahmen wirft
         // oben links Schatten, unten rechts faellt Licht ein (-45 Grad).
         .overlay {
@@ -263,25 +310,28 @@ struct LCDPanel<Content: View>: View {
 #if DEBUG
 #Preview("Classic LCD") {
     // Werte aus Horse.preview
-    LCDPanel(alarmActive: true) {
-        HStack(alignment: .top, spacing: 10) {
+    LCDPanel(alarmActive: true) { rose in
+        HStack(alignment: .top, spacing: 0) {
             LCDFlowerTimerView(
                 eventType: .hufschmied,
                 remainingDays: 151,
                 interval: 180,
-                nextDate: Date().addingTimeInterval(151 * 86400)
+                nextDate: Date().addingTimeInterval(151 * 86400),
+                roseSize: rose
             )
             LCDFlowerTimerView(
                 eventType: .impfung,
                 remainingDays: 46,
                 interval: 49,
-                nextDate: Date().addingTimeInterval(46 * 86400)
+                nextDate: Date().addingTimeInterval(46 * 86400),
+                roseSize: rose
             )
             LCDFlowerTimerView(
                 eventType: .wurmkur,
                 remainingDays: 0,
                 interval: 101,
-                nextDate: Date()
+                nextDate: Date(),
+                roseSize: rose
             )
         }
     }

@@ -625,15 +625,16 @@ struct MacHorseDetailView: View {
             .padding(.horizontal, 12)
 
         case .classic:
-            LCDPanel(alarmActive: hasDueEvent) {
-                HStack(alignment: .top, spacing: 8) {
+            LCDPanel(alarmActive: hasDueEvent) { rosenGroesse in
+                HStack(alignment: .top, spacing: 0) {
                     ForEach(Horse.EventType.allCases, id: \.self) { eventType in
                         Button(action: { terminWaehlen(eventType) }) {
                             LCDFlowerTimerView(
                                 eventType: eventType,
                                 remainingDays: horse.tageBis(fuer: eventType),
                                 interval: horse.holeIntervall(fuer: eventType),
-                                nextDate: horse.naechsterTermin(fuer: eventType)
+                                nextDate: horse.naechsterTermin(fuer: eventType),
+                                roseSize: rosenGroesse
                             )
                         }
                         .buttonStyle(.plain)

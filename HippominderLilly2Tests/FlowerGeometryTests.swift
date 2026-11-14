@@ -114,4 +114,28 @@ final class FlowerGeometryTests: XCTestCase {
             )
         }
     }
+
+    // MARK: - Classic-Display
+
+    /// Die Rosen richten sich nach der Displaybreite: etwa ein Viertel,
+    /// wie am Geraetefoto. Breiten: iPhone 16e (352), iPad und Mac (402).
+    func testRosenGroesseFolgtDerDisplayBreite() {
+        XCTAssertEqual(LCDPanelMasse.rosenGroesse(fuerBreite: 352), 93)
+        XCTAssertEqual(LCDPanelMasse.rosenGroesse(fuerBreite: 402), 106)
+    }
+
+    /// Ganze Punkte, sonst driftet der Blattkranz; und Grenzen nach unten
+    /// und oben, damit nichts unlesbar klein oder riesig wird.
+    func testRosenGroesseIstGanzzahligUndBegrenzt() {
+        for breite in stride(from: CGFloat(200), through: 900, by: 7.5) {
+            let groesse = LCDPanelMasse.rosenGroesse(fuerBreite: breite)
+            XCTAssertEqual(groesse, groesse.rounded())
+            XCTAssertGreaterThanOrEqual(groesse, 64)
+            XCTAssertLessThanOrEqual(groesse, 124)
+            // Drei Rosen muessen nebeneinander in die Breite passen
+            XCTAssertLessThanOrEqual(groesse * 3, breite)
+        }
+        // Noch nicht gemessen: der alte feste Wert als Startwert
+        XCTAssertEqual(LCDPanelMasse.rosenGroesse(fuerBreite: 0), 86)
+    }
 }

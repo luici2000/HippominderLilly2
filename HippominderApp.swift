@@ -93,6 +93,11 @@ struct HippominderApp: App {
     }
 
     private func requestNotificationPermission() {
+        #if DEBUG
+        // Fuer Screenshots aus dem Simulator: die Systemfrage laesst sich
+        // ohne Bildschirm nicht wegtippen und verdeckt sonst die Ansicht
+        if ProcessInfo.processInfo.arguments.contains("-skipNotificationPrompt") { return }
+        #endif
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
             if granted {
                 print("Notification permission granted")
