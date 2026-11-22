@@ -87,9 +87,19 @@ struct WatchContentView: View {
                 }
                 .onAppear {
                     #if DEBUG
-                    if ProcessInfo.processInfo.arguments.contains("-demoDetail"), let horse = horses.first, pfad.isEmpty {
+                    // "-demoDetail" oeffnet die Uebersicht, "-demoTermin"
+                    // springt direkt auf die Hufschmied-Seite - beide Wege
+                    // lassen sich so im Simulator ansehen, auch ohne iPhone.
+                    let args = ProcessInfo.processInfo.arguments
+                    let demoUebersicht = args.contains("-demoDetail")
+                    let demoTermin = args.contains("-demoTermin")
+                    if demoUebersicht || demoTermin, let horse = horses.first, pfad.isEmpty {
+                        let ziel = WatchEventTarget(
+                            horseID: horse.id,
+                            eventType: demoTermin ? .hufschmied : nil
+                        )
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                            pfad.append(WatchEventTarget(horseID: horse.id, eventType: .hufschmied))
+                            pfad.append(ziel)
                         }
                     }
                     #endif
@@ -147,7 +157,10 @@ struct WatchHorseRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             // Name und naechster Termin fuehren zum dringendsten Termin
-            NavigationLink(value: WatchEventTarget(horseID: horse.id, eventType: nextEvent.type)) {
+            // Der Name fuehrt auf die Uebersicht - von dort blaettert man
+            // nach unten durch die drei Termine. Vorher ging er direkt zum
+            // dringendsten, was einen oft am Ende des Stapels absetzte.
+            NavigationLink(value: WatchEventTarget(horseID: horse.id, eventType: nil)) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(horse.name)
                         .font(.headline)
@@ -202,10 +215,15 @@ struct WatchHorseRow: View {
         .padding(.vertical, 2)
     }
 
-    private func colorForDays(_ days: Int) -> Color {
-        if days <= 0 { return .red }
-        if days <= 7 { return .red }
-        if days <= 14 { return .orange }
+    private func colorForDays(_ days: Int) -> Color { WatchFarbe.fuer(tage: days) }
+}
+
+/// Die Ampelfarbe, einmal. Stand vorher zweimal im selben Blatt, mit einer
+/// ueberfluessigen Zeile Unterschied.
+enum WatchFarbe {
+    static func fuer(tage: Int) -> Color {
+        if tage <= 7 { return .red }
+        if tage <= 14 { return .orange }
         return .green
     }
 }
@@ -215,32 +233,117 @@ struct WatchHorseRow: View {
 /// Ziel eines Tipps in der Liste: dieses Pferd, dieser Termin
 struct WatchEventTarget: Hashable {
     let horseID: UUID
-    let eventType: Horse.EventType
+    /// Welcher Termin gemeint ist - `nil` heisst: die Uebersicht zuerst
+    let eventType: Horse.EventType?
 }
 
-/// Die drei Termine eines Pferdes als Seiten untereinander - Krone oder
-/// Wischen wechselt von Hufschmied zu Impfung zu Wurmkur. Ein Tipp auf eine
-/// Blume in der Liste landet direkt auf der passenden Seite.
+/// Eine Seite im Stapel eines Pferdes
+enum WatchSeite: Hashable {
+    case uebersicht
+    case termin(Horse.EventType)
+}
+
+/// Ein Pferd als Seitenstapel: zuerst die Uebersicht, dann die drei Termine
+/// in fester Folge. Krone oder Wischen blaettert.
+///
+/// Warum die Uebersicht davor: Die drei Termine stehen immer in derselben
+/// Reihenfolge (Hufschmied, Impfung, Wurmkur) - das ist auf einem kleinen
+/// Geraet viel wert, weil man weiss, wo man hingreift. Nur fuehrte der Tipp
+/// auf den Pferdenamen bisher direkt zum dringendsten Termin, und wenn das
+/// die Wurmkur war, stand man auf Seite 3 von 3: ganz unten im Stapel, und
+/// die Krone ging nur noch nach oben zum Unwichtigeren.
+///
+/// Jetzt landet man dort oben, sieht alle drei Blumen auf einmal und
+/// blaettert von da nach unten ab. Der Tipp auf eine einzelne Blume in der
+/// Liste springt weiterhin direkt auf ihre Seite - wer handeln will, soll
+/// nicht erst blaettern muessen.
 struct WatchHorseDetailView: View {
     let horse: Horse
-    let start: Horse.EventType
-    @State private var seite: Horse.EventType
+    @State private var seite: WatchSeite
 
-    init(horse: Horse, start: Horse.EventType) {
+    init(horse: Horse, start: Horse.EventType?) {
         self.horse = horse
-        self.start = start
-        _seite = State(initialValue: start)
+        _seite = State(initialValue: start.map(WatchSeite.termin) ?? .uebersicht)
     }
 
     var body: some View {
         TabView(selection: $seite) {
+            WatchUebersichtView(horse: horse) { gewaehlt in
+                withAnimation { seite = .termin(gewaehlt) }
+            }
+            .tag(WatchSeite.uebersicht)
+
             ForEach(Horse.EventType.allCases, id: \.self) { eventType in
                 WatchEventView(horse: horse, eventType: eventType)
-                    .tag(eventType)
+                    .tag(WatchSeite.termin(eventType))
             }
         }
         .tabViewStyle(.verticalPage)
         .navigationTitle(horse.name)
+    }
+}
+
+// MARK: - Uebersichtsseite (Watch)
+
+/// Alle drei Termine eines Pferdes nebeneinander, so wie in der Liste, nur
+/// groesser. Ein Tipp auf eine Blume blaettert zu ihrer Seite.
+struct WatchUebersichtView: View {
+    let horse: Horse
+    var oeffne: (Horse.EventType) -> Void
+
+    private var dringendster: (type: Horse.EventType, days: Int) {
+        let events = Horse.EventType.allCases.map { ($0, horse.tageBis(fuer: $0)) }
+        return events.min(by: { $0.1 < $1.1 }).map { (type: $0.0, days: $0.1) } ?? (.hufschmied, 0)
+    }
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Text(WatchWortlaut.naechster(dringendster.type, tage: dringendster.days))
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(WatchFarbe.fuer(tage: dringendster.days))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.8)
+
+            HStack(spacing: 6) {
+                ForEach(Horse.EventType.allCases, id: \.self) { eventType in
+                    let tage = horse.tageBis(fuer: eventType)
+                    Button {
+                        oeffne(eventType)
+                    } label: {
+                        VStack(spacing: 2) {
+                            // Template-Asset: ohne ausdrueckliche Farbe
+                            // erschiene es in der Akzentfarbe
+                            Image(eventType.symbol)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 10, height: 10)
+                                .foregroundStyle(.secondary)
+                            WatchFlower(
+                                filledPetals: FlowerGeometry.filledPetals(
+                                    remainingDays: tage,
+                                    interval: horse.holeIntervall(fuer: eventType)
+                                ),
+                                isExpired: tage <= 0,
+                                color: WatchFarbe.fuer(tage: tage),
+                                size: 42
+                            )
+                            Text(WatchWortlaut.kurz(tage: tage))
+                                .font(.system(size: 9))
+                                .foregroundColor(WatchFarbe.fuer(tage: tage))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            Text("Krone: die drei Termine")
+                .font(.system(size: 8))
+                .foregroundColor(.secondary)
+        }
+        .padding(.horizontal, 2)
     }
 }
 
@@ -257,11 +360,7 @@ struct WatchEventView: View {
     private var days: Int { horse.tageBis(fuer: eventType) }
     private var interval: Int { horse.holeIntervall(fuer: eventType) }
 
-    private var statusColor: Color {
-        if days <= 7 { return .red }
-        if days <= 14 { return .orange }
-        return .green
-    }
+    private var statusColor: Color { WatchFarbe.fuer(tage: days) }
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -366,6 +465,13 @@ enum WatchWortlaut {
         if tage == 0 { return "\(typ.localizedName) heute!" }
         if tage == 1 { return "\(typ.localizedName) morgen" }
         return "\(typ.localizedName) in \(tage) Tagen"
+    }
+
+    /// Platzsparend fuer die Uebersicht, wo drei nebeneinander stehen
+    static func kurz(tage: Int) -> String {
+        if tage < 0 { return "\(-tage) T. über" }
+        if tage == 0 { return "heute" }
+        return "\(tage) T."
     }
 
     static func rest(tage: Int) -> String {
