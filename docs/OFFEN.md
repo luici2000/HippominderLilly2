@@ -181,6 +181,26 @@ wurde.
       oder Ultra 1)? Ist das Bluetooth des iPhones noch aus (fürs Koppeln
       abgeschaltet)? Ohne Bluetooth läuft der Abgleich nur über WLAN.
 
+## Uhr: Größen und Farben (Mathias, 22.11.2026)
+
+Nach dem ersten Blick auf die Übersichtsseite an der Ultra 3: „die Größen
+passen nicht und es ist ein großes Farbdurcheinander".
+
+- [x] **Eine Farbregel für die ganze Uhr** (`WatchFarbe` in
+      `WatchApp/WatchContentView.swift`): Blume immer in der Glasfarbe vom
+      iPhone, Schrift weiß, orange ab 14 und rot ab 7 Tagen; rot wird die
+      Blume erst bei Ablauf. Vorher: Ampelblumen in Liste und Übersicht,
+      Glasfarbe auf der Terminseite, grüne Schrift dazu.
+- [x] **Größen folgen der Uhr** (`WatchMass`, Bezug 41 mm = 176 pt): die
+      drei Blumen der Übersicht füllen die Breite, die Listenblumen teilen
+      sich die Zeile, Schrift wächst mit. Die Übersicht zeigt jetzt die
+      Glasblume der Terminseite in klein, Symbol in der Mitte.
+      Gerendert geprüft auf 49 mm (Ultra) und 41 mm, auch mit drei
+      dreistellig überfälligen Terminen.
+- [ ] **[Gerät] Mathias' Urteil an der Ultra 3** — installiert 22.11.,
+      15:44. Antippen einer Blume und Blättern mit der Krone sind im
+      Simulator nicht ausprobiert.
+
 ## Akku der Uhr
 
 Mathias meldete am 11.11.2026 starken Akkuverbrauch. Zwei Ursachen

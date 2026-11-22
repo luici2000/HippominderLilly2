@@ -48,8 +48,8 @@ struct WatchFlower: View {
 #if DEBUG
 #Preview("Blume auf der Uhr") {
     HStack(spacing: 8) {
-        WatchFlower(filledPetals: 2, isExpired: false, color: .green)
-        WatchFlower(filledPetals: 7, isExpired: false, color: .orange)
+        WatchFlower(filledPetals: 2, isExpired: false, color: WatchGlas.tint)
+        WatchFlower(filledPetals: 7, isExpired: false, color: WatchGlas.tint)
         WatchFlower(filledPetals: 12, isExpired: true, color: .red)
     }
     .padding()

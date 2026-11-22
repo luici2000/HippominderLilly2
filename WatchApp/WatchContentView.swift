@@ -11,6 +11,7 @@
 
 import SwiftUI
 import SwiftData
+import WatchKit
 
 struct WatchContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -172,11 +173,11 @@ struct WatchHorseRow: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 13, height: 13)
-                            .foregroundStyle(colorForDays(nextEvent.days))
+                            .foregroundStyle(WatchFarbe.schrift(tage: nextEvent.days))
 
                         Text(WatchWortlaut.naechster(nextEvent.type, tage: nextEvent.days))
                             .font(.caption2)
-                            .foregroundColor(colorForDays(nextEvent.days))
+                            .foregroundColor(WatchFarbe.schrift(tage: nextEvent.days))
                     }
                 }
             }
@@ -185,8 +186,10 @@ struct WatchHorseRow: View {
             // Mini-Blumen statt Ampelpunkten: zeigen auch, wie weit das
             // Intervall schon gelaufen ist. 30 pt ist die Untergrenze, ab
             // der sich die zwoelf Blaetter noch zaehlen lassen (CLAUDE.md).
-            // Jede Blume fuehrt direkt zu ihrem Termin.
-            HStack(spacing: 10) {
+            // Jede Blume fuehrt direkt zu ihrem Termin. Die drei teilen sich
+            // die Zeilenbreite, statt links zu kleben - auf der Ultra blieb
+            // sonst die halbe Zeile leer.
+            HStack(spacing: 0) {
                 ForEach(Horse.EventType.allCases, id: \.self) { eventType in
                     let days = horse.tageBis(fuer: eventType)
                     NavigationLink(value: WatchEventTarget(horseID: horse.id, eventType: eventType)) {
@@ -202,10 +205,11 @@ struct WatchHorseRow: View {
                                     interval: horse.holeIntervall(fuer: eventType)
                                 ),
                                 isExpired: days <= 0,
-                                color: colorForDays(days),
-                                size: 30
+                                color: WatchFarbe.blume(tage: days),
+                                size: WatchMass.listenBlume
                             )
                         }
+                        .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.plain)
                 }
@@ -214,18 +218,48 @@ struct WatchHorseRow: View {
         }
         .padding(.vertical, 2)
     }
-
-    private func colorForDays(_ days: Int) -> Color { WatchFarbe.fuer(tage: days) }
 }
 
-/// Die Ampelfarbe, einmal. Stand vorher zweimal im selben Blatt, mit einer
-/// ueberfluessigen Zeile Unterschied.
+/// Die Farbregel der Uhr, einmal - fuer Liste, Uebersicht und Terminseite.
+///
+/// Vorher trug jede Seite ihre eigene: Ampelblumen (gruen, orange, rot) in
+/// Liste und Uebersicht, die Glasfarbe auf der Terminseite, dazu gruene und
+/// orange Schrift. Mathias am 22.11.2026: "ein grosses Farbdurcheinander".
+///
+/// Jetzt: Die Blume hat immer die Glasfarbe vom iPhone. Schrift ist weiss.
+/// Farbe bekommt nur, was draengt - orange ab 14 Tagen, rot ab 7 - und rot
+/// wird die Blume erst, wenn der Termin wirklich abgelaufen ist (dann
+/// erscheint auch der Punkt in der Mitte, wie am Geraet).
 enum WatchFarbe {
-    static func fuer(tage: Int) -> Color {
+    static func schrift(tage: Int) -> Color {
         if tage <= 7 { return .red }
         if tage <= 14 { return .orange }
-        return .green
+        return .primary
     }
+
+    static func blume(tage: Int) -> Color {
+        tage <= 0 ? .red : WatchGlas.tint
+    }
+}
+
+/// Masse, die der Uhrengroesse folgen. Feste Punktwerte passten auf die
+/// 41 mm und standen auf der Ultra verloren in der Flaeche. Bezug ist die
+/// 41-mm-Uhr mit 176 pt Breite; alles auf ganze Punkte, sonst driftet der
+/// Blattkranz (CLAUDE.md).
+enum WatchMass {
+    static let breite: CGFloat = WKInterfaceDevice.current().screenBounds.width
+    static let faktor: CGFloat = breite / 176
+
+    /// Drei Blumen nebeneinander ueber die Breite der Uebersicht. Der Rand
+    /// bleibt frei, weil rechts die Seitenpunkte des Stapels sitzen.
+    static let uebersichtBlume: CGFloat = ((breite - 34) / 3).rounded(.down)
+    /// Kleine Blume in der Pferdeliste; 30 pt ist die Untergrenze
+    static let listenBlume: CGFloat = (34 * faktor).rounded()
+    /// Grosse Glasblume der Terminseite; gedeckelt, damit die Resttage
+    /// darunter ohne Blaettern sichtbar bleiben
+    static let terminBlume: CGFloat = (104 * min(faktor, 1.1)).rounded()
+
+    static func schrift(_ punkt: CGFloat) -> CGFloat { (punkt * faktor).rounded() }
 }
 
 // MARK: - Detail-Ansicht (Watch)
@@ -297,42 +331,42 @@ struct WatchUebersichtView: View {
     }
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: WatchMass.schrift(8)) {
             Text(WatchWortlaut.naechster(dringendster.type, tage: dringendster.days))
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(WatchFarbe.fuer(tage: dringendster.days))
+                .font(.system(size: WatchMass.schrift(14), weight: .semibold))
+                .foregroundColor(WatchFarbe.schrift(tage: dringendster.days))
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
-                .minimumScaleFactor(0.8)
+                .minimumScaleFactor(0.85)
+                .padding(.horizontal, 8)
 
-            HStack(spacing: 6) {
+            // Dieselbe Glasblume wie auf der Terminseite, nur kleiner: das
+            // Symbol sitzt in der Mitte, die Farbe ist die Glasfarbe.
+            HStack(spacing: 5) {
                 ForEach(Horse.EventType.allCases, id: \.self) { eventType in
                     let tage = horse.tageBis(fuer: eventType)
                     Button {
                         oeffne(eventType)
                     } label: {
-                        VStack(spacing: 2) {
-                            // Template-Asset: ohne ausdrueckliche Farbe
-                            // erschiene es in der Akzentfarbe
-                            Image(eventType.symbol)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 10, height: 10)
-                                .foregroundStyle(.secondary)
-                            WatchFlower(
+                        VStack(spacing: 4) {
+                            WatchGlassFlower(
                                 filledPetals: FlowerGeometry.filledPetals(
                                     remainingDays: tage,
                                     interval: horse.holeIntervall(fuer: eventType)
                                 ),
                                 isExpired: tage <= 0,
-                                color: WatchFarbe.fuer(tage: tage),
-                                size: 42
+                                symbol: eventType.symbol,
+                                size: WatchMass.uebersichtBlume
                             )
                             Text(WatchWortlaut.kurz(tage: tage))
-                                .font(.system(size: 9))
-                                .foregroundColor(WatchFarbe.fuer(tage: tage))
+                                .font(.system(size: WatchMass.schrift(12), weight: .medium))
+                                .foregroundColor(WatchFarbe.schrift(tage: tage))
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.7)
+                                .frame(width: WatchMass.uebersichtBlume)
+                                // sonst schrumpft die Schrift, sobald die
+                                // Ueberschrift zweizeilig wird
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
                     .buttonStyle(.plain)
@@ -340,10 +374,10 @@ struct WatchUebersichtView: View {
             }
 
             Text("Krone: die drei Termine")
-                .font(.system(size: 8))
+                .font(.system(size: WatchMass.schrift(10)))
                 .foregroundColor(.secondary)
         }
-        .padding(.horizontal, 2)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -360,7 +394,7 @@ struct WatchEventView: View {
     private var days: Int { horse.tageBis(fuer: eventType) }
     private var interval: Int { horse.holeIntervall(fuer: eventType) }
 
-    private var statusColor: Color { WatchFarbe.fuer(tage: days) }
+    private var statusColor: Color { WatchFarbe.schrift(tage: days) }
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -382,7 +416,7 @@ struct WatchEventView: View {
                     filledPetals: FlowerGeometry.filledPetals(remainingDays: days, interval: interval),
                     isExpired: days <= 0,
                     symbol: eventType.symbol,
-                    size: 104
+                    size: WatchMass.terminBlume
                 )
                 .padding(.vertical, 2)
 
