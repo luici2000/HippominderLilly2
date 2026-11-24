@@ -121,6 +121,22 @@ Wer `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` anhebt, schreibt eine
 Zeile in **`docs/VERSION.md`**. Beide müssen dasselbe sagen, sonst weiß
 die nächste Sitzung nicht, was auf dem Gerät liegt.
 
+## Mehrere Sitzungen — `docs/UEBERGABE.md` ist das Gedächtnis
+
+Mathias arbeitet mit mehreren Claude-Sitzungen: eine in der Cloud (kann
+lesen, rechnen, schreiben, aber **nicht bauen**) und eine auf dem Mac (kann
+bauen). Sie haben kein gemeinsames Gedächtnis und keinen direkten Draht.
+
+**`docs/UEBERGABE.md` ist dieser Draht.** Jede Sitzung liest sie zuerst und
+schreibt vor dem Ende einen Logbuch-Eintrag hinein: was getan, was offen,
+welche Dateien gerade angefasst werden. Drei Zeilen reichen. Was eine
+Sitzung nicht aufschreibt, ist für die nächste nicht passiert — und
+Mathias muss es dann nochmal erzählen.
+
+Eine Übergabe, die einmal geschrieben wird, veraltet: die erste Fassung war
+nach dreizehn Tagen und einunddreißig Commits unbrauchbar. Darum das
+Logbuch statt eines Standberichts.
+
 ## Arbeitsweise
 
 **Immer den ganzen Pfad nennen.** Nie „die Datei im Projektordner",

@@ -1,113 +1,132 @@
-# Übergabe an die örtliche Sitzung
+# Übergabe — die eine Datei, die jede Sitzung zuerst liest
 
-Ab hier wird **auf Mathias' Mac** gearbeitet, nicht mehr in der Cloud.
-Diese Datei ist das Erste, was eine neue Sitzung auf dem Mac liest.
+Mathias arbeitet mit mehreren Claude-Sitzungen: eine in der Cloud (kann
+lesen, rechnen, schreiben — aber **nicht bauen**), eine auf dem Mac (kann
+bauen). Sie haben kein gemeinsames Gedächtnis. **Diese Datei ist das
+Gedächtnis.**
 
-Stand: 11. November 2026.
+Für Mathias heißt das: Es ist egal, mit welcher Sitzung er redet. Jede
+liest hier und weiß, wo es steht.
 
 ---
 
-## Warum der Umzug
+## Wenn du eine neue Sitzung bist
 
-Die Cloud-Sitzung kann lesen, rechnen und schreiben, aber **nicht
-bauen** — kein Mac, kein Xcode. Jedes Mal, wenn gebaut werden musste,
-landete das bei Mathias in Xcode. Das hat einen ganzen Abend gekostet
-und ihn zu Recht geärgert. Darum: eine Sitzung, die selbst baut.
-
-## Zuerst lesen
-
-1. `/Users/mathias/Developer/HippominderLilly2/CLAUDE.md` — das
-   Projektwissen. Vor allem: **die Blume nicht neu erfinden**, und
-   **Mathias immer den ganzen Pfad nennen**.
-2. `/Users/mathias/Developer/HippominderLilly2/CLAUDE.local.md` — seine
-   persönlichen Regeln. Kurzfassung: alles ohne Rückfrage machen.
+1. Diese Datei ganz lesen, vor allem das **Logbuch** unten.
+2. `/Users/mathias/Developer/HippominderLilly2/CLAUDE.md` — Projektwissen,
+   das nicht nochmal erraten werden soll.
 3. `/Users/mathias/Developer/HippominderLilly2/docs/OFFEN.md` — die
    Arbeitsliste. Abgehaktes steht drin, damit niemand zweimal prüft.
+4. `/Users/mathias/Developer/HippominderLilly2/CLAUDE.local.md` — Mathias'
+   persönliche Regeln. Kurzfassung: alles ohne Rückfrage machen.
 
-## Wo was liegt
+**Bevor du eine Sitzung beendest oder länger pausierst: schreib einen
+Logbuch-Eintrag.** Drei Zeilen reichen. Was eine Sitzung nicht aufschreibt,
+ist für die nächste nicht passiert.
+
+---
+
+## Wo alles liegt
 
 | | |
 |---|---|
 | Arbeitskopie (MacBook) | `/Users/mathias/Developer/HippominderLilly2` |
 | Branch | `claude/ipad-coding-exploration-3Y3F6` |
-| Verknüpfung für Mathias | `dm_code_reader/projekte/hippominder/` in iCloud |
-| Lilly starten | `/Users/mathias/Developer/HippominderLilly2/Lilly starten.command` |
-| Stand holen | `/Users/mathias/Developer/HippominderLilly2/Stand holen.command` |
+| Für Mathias sichtbar | Verknüpfung in iCloud: `dm_code_reader/projekte/hippominder/` |
+| Lilly örtlich starten | `/Users/mathias/Developer/HippominderLilly2/Lilly hier starten.command` |
+| Lilly mit Fernsteuerung | `/Users/mathias/Developer/HippominderLilly2/Lilly starten.command` |
+| Nur Stand holen | `/Users/mathias/Developer/HippominderLilly2/Stand holen.command` |
 
-Das Repository liegt **bewusst nicht** in iCloud — iCloud hatte schon
-neun Asset-Dateien verdoppelt. In `dm_code_reader` steht nur eine
-Verknüpfung.
+Das Repository liegt **bewusst nicht** in iCloud — iCloud hatte schon neun
+Asset-Dateien verdoppelt. In `dm_code_reader` steht nur eine Verknüpfung.
 
-## Wo das Projekt gerade steht
+---
 
-**Version 3.1.0 (2).** Gebaut am 10.11.2026 mit Xcode 27.1, auf dem
-echten iPhone (blackiPhone_14, iOS 27.2) installiert, 0 Fehler,
-0 Warnungen. Unit-Tests laufen (12 in `FlowerGeometryTests`), das
-Watch-Target baut.
+## Wie die Sitzungen sich nicht in die Quere kommen
 
-**Bina hat die Umstellung überstanden** — Migration von 3.0.0 auf 3.1.0
-sauber, mit Foto, iCloud-Datensatz vorhanden. Das war die große offene
-Frage und sie ist beantwortet.
+Das ging schon einmal schief: beide auf demselben Branch, Push abgelehnt,
+Merge von Hand.
 
-Unten in der App steht jetzt eine kleine Zeile mit Version und
-**Bauzeit** (`Models/Versionsinfo.swift`). Die beantwortet beim Bauen
-die eigentliche Frage: ist mein Stand wirklich drauf? Siehe
-`/Users/mathias/Developer/HippominderLilly2/docs/VERSION.md`.
+- **Wer baut, hat Vorrang.** Die Mac-Sitzung führt.
+- Die Cloud-Sitzung fasst die Dateien nicht an, an denen die Mac-Sitzung
+  gerade arbeitet. Welche das sind, steht im Logbuch.
+- **Vor jedem Commit `git pull`**, danach zügig pushen.
+- Was die andere Seite wissen muss, gehört ins Logbuch — es gibt keinen
+  direkten Draht zwischen den Sitzungen.
 
-## Neu: frisches Xcode auf dem MacBook
+---
 
-Mathias hat am 11.11.2026 die neueste Xcode-Version installiert. Der
-letzte grüne Build (3.1.0 (2), 0 Fehler, 0 Warnungen) entstand noch mit
-Xcode 27.1 — **der zählt damit nicht mehr als Beweis.** Erster Schritt
-jeder Sitzung auf dem MacBook: einmal neu bauen und nachsehen, was das
-neue SDK meckert.
+## Logbuch
 
-Womit zu rechnen ist:
+Neueste zuerst. Format: Datum, welche Sitzung, was getan, was offen.
 
-- Beim ersten Start installiert Xcode Komponenten nach und will die
-  Lizenz bestätigt haben (`sudo xcodebuild -license accept`).
-- **„Update to recommended settings"** kommt wieder. Nicht blind
-  annehmen — erst ansehen, was es an `project.pbxproj` ändern will, und
-  den Diff in den Commit schreiben.
-- Neue Warnungen sind bei einem SDK-Sprung normal. Erst sammeln, dann
-  bewerten, nicht hektisch wegpatchen.
+### 22.11.2026 — Cloud
 
-## Was als Nächstes dran ist
+**Getan:** Übersichtsseite vor den drei Terminen auf der Uhr (Tipp auf den
+Pferdenamen führt dorthin, Tipp auf eine Blume weiter direkt auf ihre
+Seite). Acht Tests für `HorseBackupService` — die Datensicherung war nie
+geprüft. Datensicherung läuft jetzt auch auf dem Mac (war komplett
+`#if os(iOS)`). Der Mac kann alle drei Darstellungen und hat einen eigenen
+Umschalter dafür; im Glasmodus liegt das Pferdefoto hinter den Blumen.
+Doku zur Uhr als Artifact: <https://claude.ai/artifact/ELjBLy7M2iN5GBJmWMvzSA>
 
-Alles in `docs/OFFEN.md`, das Wichtigste zuerst:
+**Offen und wichtig:**
+- Die neuen Tests sind **nie gelaufen** (SwiftData gibt es auf Linux
+  nicht). Erster `⌘U` ist ihr erster Lauf. Wahrscheinlichster Stolperstein:
+  die Datei hängt noch nicht im Test-Target.
+- Die Übersichtsseite ist **auf keiner echten Uhr gesehen**. Gerechnet
+  passt sie (142 von 162 pt breit, 117 von 197 pt hoch auf der 41 mm).
+- **Offene Frage an Mathias:** Die Uhr bekommt vom iPhone die Darstellung
+  geschickt, legt sie ab und **liest sie nie** — `WatchGlas.designModeKey`
+  wird im ganzen Uhr-Quelltext nur definiert und geschrieben. Die Uhr zeigt
+  darum immer Glas. Entweder Classic dort wirklich anzeigen (wäre auf
+  Schwarz sogar sparsamer) oder den Wert gar nicht erst schicken. In
+  `CLAUDE.md` steht bis dahin das Gegenteil.
 
-1. **Die Uhr.** Die Watch-App wird jetzt in die iPhone-App eingebettet,
-   kam aber noch nie auf eine echte Uhr. Haken: das Signaturprofil kennt
-   die Ultra 2 nicht. Entwicklermodus auf der Uhr, iPhone daneben
-   entsperrt, dann ein Build mit
-   `-allowProvisioningDeviceRegistration`.
-2. **„War heute da" auf der Uhr.** Der Rückkanal Uhr → iPhone ist nie
-   gelaufen. Besonders der Fall mit iPhone außer Reichweite
-   (`transferUserInfo`) — das ist der eigentliche Stallfall.
-3. **Die drei Darstellungen ansehen** (Glas, Classic, Blume), mit einem
-   echten Pferdefoto, nicht dem Platzhalter.
-4. **Überfällige Erinnerungen** und das **wechselnde App-Symbol** prüfen.
-5. **Widget-Target** in Xcode anlegen. Die Datenbrücke steht
-   (`Models/WidgetBridge.swift`, `Services/WidgetSyncService.swift`),
-   das Target fehlt.
-6. **Mac-Version** — hat von allem die wenigste Aufmerksamkeit bekommen.
+### 22.11.2026 — Mac
 
-## Wie hier gearbeitet wird
+**Getan:** Der Uhr eine einzige Farbregel gegeben und Größen, die sich nach
+dem Bildschirm richten.
 
-- **Selbst bauen, selbst Fehler wegmachen.** Mathias nicht nach Xcode
-  schicken. Das ist der ganze Grund für diese Sitzung.
-- **Vor dem Zeigen selbst ansehen.** Gerendert, nicht nur geschrieben.
-- **Behauptungen nachrechnen**, nicht hinschreiben.
-- **Immer den ganzen Pfad nennen**, auch bei Befehlen zum Kopieren.
-- Erledigtes in `docs/OFFEN.md` abhaken statt löschen.
+### 14.11.2026 — Mac
+
+**Getan:** Classic-Rosen richten sich nach der Displaybreite statt fester
+86 pt (auf iPad und Mac standen sie verloren in der Fläche). Dreistellige
+Tagesangaben sind jetzt so groß wie ihre Nachbarn.
+
+### 12.11.2026 — Mac
+
+**Getan:** Der Uhr-Verlust aufgeklärt und abgestellt — ein einziger leerer
+Datensatz löschte alle Pferde auf der Uhr. Jetzt schickt das iPhone keine
+leere Liste mehr, und die Uhr löscht bei einer leeren Liste nichts. Die Uhr
+kann das iPhone außerdem um die Pferde bitten, wenn sie selbst keine hat.
+
+**Bekannte Kehrseite:** Löscht Mathias sein **letztes** Pferd, bleibt es auf
+der Uhr stehen, bis ein neues kommt. Bewusst in Kauf genommen — der kleinere
+Schaden.
+
+### 10./11.11.2026 — Mac
+
+**Getan:** 3.1.0 (2) auf dem echten iPhone gebaut und installiert, 0 Fehler,
+0 Warnungen. Unit-Tests laufen wieder (`⌘U`, 12 Tests). Watch-Target baut.
+Uhr gekoppelt, Watch-App läuft darauf. Mac bekam die Detailseite und Liste
+des iPhones.
+
+**Wichtig:** **Bina hat die iCloud-Umstellung überstanden** — Migration von
+3.0.0 auf 3.1.0 sauber, mit Foto, iCloud-Datensatz vorhanden.
+
+---
 
 ## Fallen, die schon Zeit gekostet haben
 
-- **Xcode hält eine Dateisperre** auf dem Projektordner. Builds bleiben
-  dann ohne Fehlermeldung hängen. Xcode zwingend beenden (⌥⌘Esc).
+- **Xcode hält eine Dateisperre** auf dem Projektordner. Builds bleiben dann
+  ohne Fehlermeldung hängen. Xcode zwingend beenden (⌥⌘Esc).
 - **iCloud verdoppelt Dateien** (`datei 2.svg`). Bei merkwürdigen
   Git-Fehlern ist das die erste Vermutung, nicht der Code.
-- **Die Fernsteuerung reißt ab**, wenn der Mac einschläft. Das Skript
-  hält ihn mit `caffeinate` wach — aber nur bei offenem Deckel.
+- **Die Fernsteuerung reißt ab**, wenn der Mac einschläft. Das Skript hält
+  ihn mit `caffeinate` wach — aber nur bei offenem Deckel.
 - **Nur eine `.sheet` pro View** rendert zuverlässig. Deshalb
   `.sheet(item:)` mit Enum in `HorseDetailView`.
+- **Eine Cloud-Sitzung kann nicht bauen.** Sie kann Syntax prüfen
+  (`swiftc -parse`), rechnen und rendern — mehr nicht. Alles mit **[Build]**
+  in `docs/OFFEN.md` gehört auf den Mac.
