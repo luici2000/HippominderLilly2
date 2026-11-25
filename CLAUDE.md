@@ -92,6 +92,11 @@ der Glanz gegenrotiert, sonst wandert das Licht mit.
 - **Das App-Target synchronisiert `.`** Jeder neue Ordner landet darin,
   wenn er nicht in `EXCLUDED_SOURCE_FILE_NAMES` steht. Für Testordner
   zwingend, sonst wandert XCTest-Code in die App.
+- **Kalender-Vollzugriff braucht `NSCalendarsFullAccessUsageDescription`**
+  (iOS 17+). Mit nur `NSCalendarsUsageDescription` gibt
+  `requestFullAccessToEvents` keinen Zugriff. Der Abgleich löscht vor jedem
+  neuen Eintrag den alten — die Regel, was gelöscht werden darf, steht in
+  `KalenderMarke` und ist getestet. Nicht lockern ohne neuen Test.
 - **Krumme Pixelmaße** lassen den Blattkranz driften, weil jede der zwölf
   Drehungen anders rundet. Maße auf ganze Punkte legen.
 

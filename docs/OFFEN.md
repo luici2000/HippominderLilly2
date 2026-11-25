@@ -201,6 +201,16 @@ passen nicht und es ist ein großes Farbdurcheinander".
       15:44. Antippen einer Blume und Blättern mit der Krone sind im
       Simulator nicht ausprobiert.
 
+## Kalender (Mathias, 25.11.2026)
+
+- [x] Neu eintragen ersetzt den alten Eintrag im Apple-Kalender, bei jeder
+      Änderung automatisch (`Services/KalenderService.swift`). Gebaut 22:23.
+- [ ] **[Gerät]** Am iPhone „Termine im Kalender speichern“ drücken, Zugriff
+      erlauben, dann „War heute da“ auf der Uhr → steht der Termin im
+      Kalender am neuen Tag, und ist der alte weg?
+- [ ] Kalender-Erinnerung und App-Meldung kommen beide — gewollt? Bisher
+      so gelassen.
+
 ## Uhr: Stil wie beim Zifferblatt (Mathias, 25.11.2026 abends)
 
 - [x] **Lang drücken → Stil und Farbe wählen** — gebaut 25.11.2026,

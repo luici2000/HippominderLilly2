@@ -1,6 +1,34 @@
 {
   "sourceLanguage": "de",
   "strings": {
+    "NSCalendarsFullAccessUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder adds your horses' appointments to your calendar and replaces the old entry when an appointment changes."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder añade las citas de tus caballos a tu calendario y sustituye la entrada anterior cuando cambia una cita."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hippominder ajoute les rendez-vous de vos chevaux à votre calendrier et remplace l’ancienne entrée lorsqu’un rendez-vous change."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Hippominder adiciona os compromissos dos seus cavalos ao calendário e substitui o registro antigo quando um compromisso muda."
+          }
+        }
+      }
+    },
     "NSCalendarsUsageDescription": {
       "localizations": {
         "en": {

@@ -16,7 +16,6 @@
 import SwiftUI
 import SwiftData
 import PhotosUI
-import EventKit
 import AppKit
 import UniformTypeIdentifiers
 
@@ -884,65 +883,13 @@ struct MacHorseDetailView: View {
     // MARK: - Kalender-Funktion
 
     private func saveToCalendar() {
-        let eventStore = EKEventStore()
-
-        eventStore.requestFullAccessToEvents { granted, error in
-            DispatchQueue.main.async {
-                if granted {
-                    do {
-                        var savedCount = 0
-                        var skippedCount = 0
-
-                        for eventType in Horse.EventType.allCases {
-                            let eventTitle = "\(horse.name): \(eventType.localizedName)"
-                            let eventDate = horse.naechsterTermin(fuer: eventType)
-
-                            let startOfDay = Calendar.current.startOfDay(for: eventDate)
-                            let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
-
-                            let predicate = eventStore.predicateForEvents(
-                                withStart: startOfDay,
-                                end: endOfDay,
-                                calendars: nil
-                            )
-                            let existingEvents = eventStore.events(matching: predicate)
-                            let duplicateExists = existingEvents.contains { $0.title == eventTitle }
-
-                            if duplicateExists {
-                                skippedCount += 1
-                                continue
-                            }
-
-                            let event = EKEvent(eventStore: eventStore)
-                            event.title = eventTitle
-                            event.startDate = startOfDay
-                            event.endDate = startOfDay
-                            event.isAllDay = true
-                            event.calendar = eventStore.defaultCalendarForNewEvents
-                            event.notes = "Hippominder Erinnerung für \(horse.name)\nIntervall: \(horse.holeIntervall(fuer: eventType)) Tage"
-
-                            let alarm = EKAlarm(relativeOffset: TimeInterval(-horse.benachrichtigungTageVorher * 24 * 60 * 60))
-                            event.addAlarm(alarm)
-
-                            try eventStore.save(event, span: .thisEvent)
-                            savedCount += 1
-                        }
-
-                        if skippedCount > 0 && savedCount > 0 {
-                            calendarAlertMessage = "\(savedCount) Termine gespeichert, \(skippedCount) bereits vorhanden."
-                        } else if skippedCount > 0 {
-                            calendarAlertMessage = "Alle Termine sind bereits im Kalender vorhanden."
-                        } else {
-                            calendarAlertMessage = "Alle \(savedCount) Termine wurden als Ganztags-Termine gespeichert!"
-                        }
-                    } catch {
-                        calendarAlertMessage = "Fehler beim Speichern: \(error.localizedDescription)"
-                    }
-                } else {
-                    calendarAlertMessage = "Kein Zugriff auf den Kalender. Bitte in den Systemeinstellungen erlauben."
-                }
-                showingCalendarAlert = true
-            }
+        // Schaltet den Abgleich ein und traegt alle Pferde ein; danach haelt
+        // KalenderService den Kalender bei jeder Aenderung selbst aktuell
+        // und ersetzt den alten Eintrag (Mathias, 25.11.2026).
+        Task { @MainActor in
+            let alle = (try? modelContext.fetch(FetchDescriptor<Horse>())) ?? [horse]
+            calendarAlertMessage = await KalenderService.shared.einschalten(alle.isEmpty ? [horse] : alle)
+            showingCalendarAlert = true
         }
     }
 

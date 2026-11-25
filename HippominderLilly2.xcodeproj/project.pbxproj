@@ -433,6 +433,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Hippominder;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Hippominder trägt die Termine deiner Pferde in den Kalender ein und ersetzt den alten Eintrag, wenn sich ein Termin ändert.";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Hippominder möchte Termine in deinen Kalender eintragen.";
 				INFOPLIST_KEY_NSContactsUsageDescription = "Hippominder möchte auf deine Kontakte zugreifen, um Benachrichtigungsempfänger auszuwählen.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Hippominder möchte auf deine Fotos zugreifen, um ein Pferdebild auszuwählen.";
@@ -492,6 +493,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Hippominder;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Hippominder trägt die Termine deiner Pferde in den Kalender ein und ersetzt den alten Eintrag, wenn sich ein Termin ändert.";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Hippominder möchte Termine in deinen Kalender eintragen.";
 				INFOPLIST_KEY_NSContactsUsageDescription = "Hippominder möchte auf deine Kontakte zugreifen, um Benachrichtigungsempfänger auszuwählen.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Hippominder möchte auf deine Fotos zugreifen, um ein Pferdebild auszuwählen.";

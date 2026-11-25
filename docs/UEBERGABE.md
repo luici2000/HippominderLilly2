@@ -105,7 +105,27 @@ iCloud (`cloudKitDatabase: .none`). Nebenbei gefunden: `CLAUDE.md`,
   baut, Mac-Tests 29/29 grün. Langer Druck und Krone nur an der Uhr prüfbar.
   Kleinigkeit: mit der Farbe Grün sieht „War heute da“ fast aus wie
   „Eingetragen“ (das ist auch grün) — unterscheidet sich nur am Text.
-- **Kalender:** nur der Knopf „Termine im Kalender speichern“ (iPhone,
+- **Nachbesserung 22:23 (Mathias' Urteil zu Classic und Terminseite):**
+  Classic zeigt mehrere Rosen jetzt auf **einem** LCD (Liste, Übersicht),
+  nicht in Einzelkästen. Terminseite: Blume wieder groß (104 pt), darunter
+  mit der Krone „War heute da“ und Wiederholung −/+; die eigene
+  Intervallseite ist wieder weg. Seitliches Wischen zwischen den Terminen
+  bleibt. Im Simulator angesehen (auch überfällig), auf der Ultra 3.
+- **Kalender gebaut (22:23 aufs iPhone):** `Services/KalenderService.swift`.
+  Der Knopf schaltet den Abgleich ein; danach hängt er an
+  `NotificationService.scheduleAllNotifications`, wo jede Änderung
+  vorbeikommt (iPhone, Mac, Uhr, Datensicherung). Je Pferd und Termin ein
+  Eintrag im Standardkalender, vor dem neuen wird der alte gelöscht —
+  erkannt an der Marke `hippominder://termin/<id>/<typ>` in der URL, oder
+  (Altbestand vom alten Knopf) an Titel + Notiz „Hippominder…“. Fremde
+  Einträge werden nie angefasst: 8 Tests in `KalenderMarkeTests`, Mac-Tests
+  37/37. Pferd löschen räumt seine Einträge mit weg. **Nebenbei gefunden:**
+  `NSCalendarsFullAccessUsageDescription` fehlte — ohne den Text gibt iOS 17+
+  keinen Vollzugriff, der alte Knopf dürfte nie funktioniert haben.
+  **Ungeprüft:** am echten iPhone nie gedrückt; die Erlaubnis muss Mathias
+  selbst geben. Mathias' drei Fragen im Artifact sind so beantwortet:
+  Standardkalender, Altbestand wird ersetzt, Erinnerung bleibt wie bisher.
+- **Kalender (Stand vorher):** nur der Knopf „Termine im Kalender speichern“ (iPhone,
   Mac); spätere Änderungen erreichen den Kalender nie, erneutes Drücken
   legt Dubletten an. Vorschlag (eigener Kalender, ein Eintrag je Termin,
   der verschoben wird) wartet auf drei Antworten von Mathias — stehen im

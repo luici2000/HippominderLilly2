@@ -189,6 +189,10 @@ class NotificationService {
                 daysBeforeEvent: horse.benachrichtigungTageVorher
             )
         }
+        // Jede Terminaenderung kommt hier vorbei - iPhone, Mac, Uhr und
+        // Datensicherung. Darum haengt auch der Kalender hier (no-op, solange
+        // der Abgleich aus ist).
+        Task { @MainActor in KalenderService.shared.abgleichen(horse) }
     }
 
     /// Remove all notifications for a horse
@@ -199,6 +203,8 @@ class NotificationService {
             return [base, Self.overdueIdentifier(base)]
         }
         center.removePendingNotificationRequests(withIdentifiers: identifiers)
+        // Wird nur beim Loeschen eines Pferdes gerufen: Kalender mit aufraeumen
+        Task { @MainActor in KalenderService.shared.entfernen(horse) }
     }
 
     /// Geplante Benachrichtigungen entfernen, deren Pferd nicht mehr existiert
