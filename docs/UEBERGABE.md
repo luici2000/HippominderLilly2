@@ -125,6 +125,10 @@ iCloud (`cloudKitDatabase: .none`). Nebenbei gefunden: `CLAUDE.md`,
   **Ungeprüft:** am echten iPhone nie gedrückt; die Erlaubnis muss Mathias
   selbst geben. Mathias' drei Fragen im Artifact sind so beantwortet:
   Standardkalender, Altbestand wird ersetzt, Erinnerung bleibt wie bisher.
+- **22:35 Mathias zum Stand aus dem Artifact: „genau so“.** Design der
+  Uhr (Navigation, Wischen, Krone, Stil, ein Classic-Display) und der
+  Kalenderweg sind damit abgenommen. Offen bleibt nur, was am Gerät
+  bedient werden muss (siehe `docs/OFFEN.md`, Punkte mit **[Gerät]**).
 - **Kalender (Stand vorher):** nur der Knopf „Termine im Kalender speichern“ (iPhone,
   Mac); spätere Änderungen erreichen den Kalender nie, erneutes Drücken
   legt Dubletten an. Vorschlag (eigener Kalender, ein Eintrag je Termin,
