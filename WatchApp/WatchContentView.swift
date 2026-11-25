@@ -60,7 +60,9 @@ struct WatchContentView: View {
             } else {
                 List {
                     ForEach(horses) { horse in
-                        WatchHorseRow(horse: horse)
+                        WatchHorseRow(horse: horse) { eventType in
+                            oeffneTermin(eventType, von: horse)
+                        }
                     }
 
                     // Letzter Sync und Version. Die Version steht da, damit
@@ -83,7 +85,13 @@ struct WatchContentView: View {
                 .navigationTitle("Hippominder")
                 .navigationDestination(for: WatchEventTarget.self) { ziel in
                     if let horse = horses.first(where: { $0.id == ziel.horseID }) {
-                        WatchHorseDetailView(horse: horse, start: ziel.eventType)
+                        if let eventType = ziel.eventType {
+                            WatchEventView(horse: horse, eventType: eventType)
+                                .navigationTitle(horse.name)
+                        } else {
+                            WatchUebersichtView(horse: horse)
+                                .navigationTitle(horse.name)
+                        }
                     }
                 }
                 .onAppear {
@@ -95,12 +103,12 @@ struct WatchContentView: View {
                     let demoUebersicht = args.contains("-demoDetail")
                     let demoTermin = args.contains("-demoTermin")
                     if demoUebersicht || demoTermin, let horse = horses.first, pfad.isEmpty {
-                        let ziel = WatchEventTarget(
-                            horseID: horse.id,
-                            eventType: demoTermin ? .hufschmied : nil
-                        )
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                            pfad.append(ziel)
+                            if demoTermin {
+                                oeffneTermin(.hufschmied, von: horse)
+                            } else {
+                                pfad.append(WatchEventTarget(horseID: horse.id, eventType: nil))
+                            }
                         }
                     }
                     #endif
@@ -108,6 +116,14 @@ struct WatchContentView: View {
             }
         }
         .task { seedDemoHorseIfRequested() }
+    }
+
+    /// A flower in the list jumps straight to its date, but puts the horse's
+    /// overview underneath - so "back" always leads to the overview, the same
+    /// as when you come from there.
+    private func oeffneTermin(_ eventType: Horse.EventType, von horse: Horse) {
+        pfad.append(WatchEventTarget(horseID: horse.id, eventType: nil))
+        pfad.append(WatchEventTarget(horseID: horse.id, eventType: eventType))
     }
 
     /// Debug-Hilfe fuer den Simulator, wie auf dem iPhone: Start mit
@@ -145,6 +161,8 @@ struct WatchContentView: View {
 
 struct WatchHorseRow: View {
     let horse: Horse
+    /// Tapping a flower: open that date (with the overview beneath it)
+    var oeffneTermin: (Horse.EventType) -> Void
 
     private var nextEvent: (type: Horse.EventType, days: Int) {
         let events: [(Horse.EventType, Int)] = [
@@ -192,7 +210,9 @@ struct WatchHorseRow: View {
             HStack(spacing: 0) {
                 ForEach(Horse.EventType.allCases, id: \.self) { eventType in
                     let days = horse.tageBis(fuer: eventType)
-                    NavigationLink(value: WatchEventTarget(horseID: horse.id, eventType: eventType)) {
+                    Button {
+                        oeffneTermin(eventType)
+                    } label: {
                         VStack(spacing: 2) {
                             Image(eventType.symbol)
                                 .resizable()
@@ -271,59 +291,23 @@ struct WatchEventTarget: Hashable {
     let eventType: Horse.EventType?
 }
 
-/// Eine Seite im Stapel eines Pferdes
-enum WatchSeite: Hashable {
-    case uebersicht
-    case termin(Horse.EventType)
-}
-
-/// Ein Pferd als Seitenstapel: zuerst die Uebersicht, dann die drei Termine
-/// in fester Folge. Krone oder Wischen blaettert.
+/// Wie ein Pferd auf der Uhr aufgebaut ist, seit 25.11.2026:
 ///
-/// Warum die Uebersicht davor: Die drei Termine stehen immer in derselben
-/// Reihenfolge (Hufschmied, Impfung, Wurmkur) - das ist auf einem kleinen
-/// Geraet viel wert, weil man weiss, wo man hingreift. Nur fuehrte der Tipp
-/// auf den Pferdenamen bisher direkt zum dringendsten Termin, und wenn das
-/// die Wurmkur war, stand man auf Seite 3 von 3: ganz unten im Stapel, und
-/// die Krone ging nur noch nach oben zum Unwichtigeren.
+///     Liste -> Uebersicht -> Terminseite
 ///
-/// Jetzt landet man dort oben, sieht alle drei Blumen auf einmal und
-/// blaettert von da nach unten ab. Der Tipp auf eine einzelne Blume in der
-/// Liste springt weiterhin direkt auf ihre Seite - wer handeln will, soll
-/// nicht erst blaettern muessen.
-struct WatchHorseDetailView: View {
-    let horse: Horse
-    @State private var seite: WatchSeite
-
-    init(horse: Horse, start: Horse.EventType?) {
-        self.horse = horse
-        _seite = State(initialValue: start.map(WatchSeite.termin) ?? .uebersicht)
-    }
-
-    var body: some View {
-        TabView(selection: $seite) {
-            WatchUebersichtView(horse: horse) { gewaehlt in
-                withAnimation { seite = .termin(gewaehlt) }
-            }
-            .tag(WatchSeite.uebersicht)
-
-            ForEach(Horse.EventType.allCases, id: \.self) { eventType in
-                WatchEventView(horse: horse, eventType: eventType)
-                    .tag(WatchSeite.termin(eventType))
-            }
-        }
-        .tabViewStyle(.verticalPage)
-        .navigationTitle(horse.name)
-    }
-}
+/// Jede Stufe ist eine eigene Seite, "zurueck" fuehrt immer eine Stufe
+/// hoch. Vorher lagen Uebersicht und die drei Termine als Stapel uebereinander
+/// (mit der Krone zu blaettern). Mathias kam von einer Terminseite nicht
+/// direkt zurueck, sondern musste durch alle Termine scrollen. Die Blumen in
+/// der Liste springen weiter direkt auf ihren Termin, legen aber die
+/// Uebersicht darunter - zurueck landet man also auch dort.
 
 // MARK: - Uebersichtsseite (Watch)
 
 /// Alle drei Termine eines Pferdes nebeneinander, so wie in der Liste, nur
-/// groesser. Ein Tipp auf eine Blume blaettert zu ihrer Seite.
+/// groesser. Ein Tipp auf eine Blume oeffnet ihre Seite.
 struct WatchUebersichtView: View {
     let horse: Horse
-    var oeffne: (Horse.EventType) -> Void
 
     private var dringendster: (type: Horse.EventType, days: Int) {
         let events = Horse.EventType.allCases.map { ($0, horse.tageBis(fuer: $0)) }
@@ -345,9 +329,7 @@ struct WatchUebersichtView: View {
             HStack(spacing: 5) {
                 ForEach(Horse.EventType.allCases, id: \.self) { eventType in
                     let tage = horse.tageBis(fuer: eventType)
-                    Button {
-                        oeffne(eventType)
-                    } label: {
+                    NavigationLink(value: WatchEventTarget(horseID: horse.id, eventType: eventType)) {
                         VStack(spacing: 4) {
                             WatchGlassFlower(
                                 filledPetals: FlowerGeometry.filledPetals(
@@ -373,7 +355,7 @@ struct WatchUebersichtView: View {
                 }
             }
 
-            Text("Krone: die drei Termine")
+            Text("Blume antippen")
                 .font(.system(size: WatchMass.schrift(10)))
                 .foregroundColor(.secondary)
         }
