@@ -133,6 +133,12 @@ welche Dateien gerade angefasst werden. Drei Zeilen reichen. Was eine
 Sitzung nicht aufschreibt, ist für die nächste nicht passiert — und
 Mathias muss es dann nochmal erzählen.
 
+**`docs/NACHRICHTEN.md` ist das Postfach** für Fragen von Sitzung zu
+Sitzung. Beim Start lesen und **vor jedem Commit** (nach dem `git pull`)
+nochmal hineinschauen; dort beantworten, nicht über Mathias ausrichten
+lassen. Er hat deutlich gesagt, dass er nicht der Bote sein will, und er
+hat recht. Nur was sofort entschieden werden muss, geht über ihn.
+
 Eine Übergabe, die einmal geschrieben wird, veraltet: die erste Fassung war
 nach dreizehn Tagen und einunddreißig Commits unbrauchbar. Darum das
 Logbuch statt eines Standberichts.
