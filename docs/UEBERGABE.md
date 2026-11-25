@@ -82,7 +82,15 @@ iCloud (`cloudKitDatabase: .none`). Nebenbei gefunden: `CLAUDE.md`,
 - **Uhr:** Watch-App baut (0 Fehler, 0 Warnungen). Um 20:11 auf die
   Ultra 3 installiert und gestartet, nachdem Mathias sie entsperrt hatte
   (gesperrt verweigert `devicectl` die Installation). Bauzeit-Zeile auf der
-  Uhr: 25.11., 17:39. **Mathias' Urteil zur Übersichtsseite steht noch aus.**
+  Uhr: 25.11., 17:39.
+- **Uhr-Navigation umgebaut (Mathias' Wunsch, 20 Uhr):** Von einer
+  Terminseite kam er nicht zurück zur Übersicht, sondern musste durch alle
+  drei Termine scrollen. Jetzt Liste → Übersicht → Terminseite, jede Stufe
+  eine eigene Seite, „zurück" eine Stufe hoch; kein Krone-Stapel mehr. Die
+  Blumen in der Liste öffnen den Termin mit der Übersicht darunter.
+  Im Uhr-Simulator (Series 9, watchOS 11.2 — der läuft) angesehen, auf der
+  Ultra 3 installiert, Bauzeit 20:16. Das Zurücktippen selbst ist nur auf
+  der echten Uhr ausprobierbar — Mathias' Urteil steht aus.
 
 ### 22.11.2026 — Cloud
 
