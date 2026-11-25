@@ -104,6 +104,10 @@ struct WatchStilBlume: View {
     let size: CGFloat
     /// Symbol zeigen? In der Liste steht es schon ueber der Blume.
     var mitSymbol = true
+    /// Classic: eigenes LCD-Fenster, oder sitzt die Rose in einem
+    /// gemeinsamen (`WatchLCDFlaeche`)? Mathias, 25.11.2026: mehrere Rosen
+    /// gehoeren auf *ein* Display wie am Geraet, nicht in Einzelkaesten.
+    var eigenesFenster = true
     @ObservedObject private var stil = WatchStil.shared
 
     var body: some View {
@@ -117,10 +121,63 @@ struct WatchStilBlume: View {
                             color: isExpired ? .red : tint, size: size)
             }
         case .classic:
-            WatchLCDFenster(filledPetals: filledPetals, isExpired: isExpired,
-                            symbol: mitSymbol ? symbol : nil, size: size)
+            if eigenesFenster {
+                WatchLCDFenster(filledPetals: filledPetals, isExpired: isExpired,
+                                symbol: mitSymbol ? symbol : nil, size: size)
+            } else {
+                WatchLCDRoseMitSymbol(filledPetals: filledPetals, isExpired: isExpired,
+                                      symbol: mitSymbol ? symbol : nil, size: size)
+            }
         }
     }
+}
+
+/// Rose ohne eigenen Grund, fuer ein gemeinsames LCD. Symbol darunter,
+/// die Mitte bleibt leer.
+struct WatchLCDRoseMitSymbol: View {
+    let filledPetals: Int
+    let isExpired: Bool
+    let symbol: String?
+    let size: CGFloat
+
+    var body: some View {
+        let symbolHoehe = symbol == nil ? 0 : (size * 0.17).rounded()
+        VStack(spacing: 1) {
+            LCDRose(filledPetals: filledPetals, isExpired: isExpired, size: size)
+            if let symbol {
+                Image(symbol)
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(LCDPalette.on)
+                    .frame(height: symbolHoehe)
+            }
+        }
+    }
+}
+
+/// Der olivgraue Grund des Geraetedisplays, als Hintergrund fuer mehrere
+/// Rosen - ein Display, nicht drei.
+struct WatchLCDFlaeche: ViewModifier {
+    let aktiv: Bool
+    func body(content: Content) -> some View {
+        if aktiv {
+            content
+                .padding(.vertical, 5)
+                .padding(.horizontal, 4)
+                .background(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(LinearGradient(colors: [LCDPalette.base, LCDPalette.baseEdge],
+                                             startPoint: .topLeading, endPoint: .bottomTrailing))
+                )
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    /// Legt bei Classic ein gemeinsames LCD unter den Inhalt
+    func lcdFlaeche(_ aktiv: Bool) -> some View { modifier(WatchLCDFlaeche(aktiv: aktiv)) }
 }
 
 /// Ein Stueck Geraetedisplay: olivgrauer Grund, darauf die Rose.
