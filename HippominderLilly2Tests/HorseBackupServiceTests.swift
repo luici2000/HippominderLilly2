@@ -30,7 +30,10 @@ final class HorseBackupServiceTests: XCTestCase {
         let schema = Schema([Horse.self])
         let container = try ModelContainer(
             for: schema,
-            configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)]
+            // Without .none, SwiftData picks up the app's iCloud entitlement
+            // and starts mirroring even an in-memory store.
+            configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true,
+                                                cloudKitDatabase: .none)]
         )
         return ModelContext(container)
     }
