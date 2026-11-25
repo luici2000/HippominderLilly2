@@ -60,6 +60,30 @@ Merge von Hand.
 
 Neueste zuerst. Format: Datum, welche Sitzung, was getan, was offen.
 
+### 25.11.2026 — Mac
+
+**Getan:** Die acht Backup-Tests sind zum ersten Mal gelaufen: **22 Tests,
+0 Fehler** — auf dem Mac, nicht im Simulator. Die Datei hing schon im
+Test-Target (der Ordner ist synchronisiert, da muss nichts eingetragen
+werden). Dafür nötig: das Test-Target baut jetzt auch für macOS, die
+Test-Targets haben ein Team, und der Testspeicher spiegelt nicht mehr nach
+iCloud (`cloudKitDatabase: .none`). Nebenbei gefunden: `CLAUDE.md`,
+`AGENTS.md`, die `.command`-Skripte und `Configuration.storekit` lagen
+**in der fertigen App** — jetzt ausgeschlossen.
+
+**Tests ab jetzt so starten** (der Simulator taugt gerade nicht):
+`xcodebuild test -project /Users/mathias/Developer/HippominderLilly2/HippominderLilly2.xcodeproj -scheme HippominderLilly2 -destination 'platform=macOS,arch=arm64' -only-testing:HippominderLilly2Tests`
+
+**Offen:**
+- **Simulator kaputt.** Installieren und Starten jeder App hängt ohne
+  Fehlermeldung, auf iPhone 16e und iPad (A16). Installiert ist nur die
+  Laufzeit iOS 18.4 neben Xcode 27.2; vermutlich fehlt die passende
+  iOS-27-Laufzeit (Xcode → Settings → Components).
+- **Uhr:** Watch-App baut (0 Fehler, 0 Warnungen), Installation scheiterte
+  an der gesperrten Ultra 3. Fertiger Build liegt nur im Scratchpad dieser
+  Sitzung — beim nächsten Mal neu bauen. Übersichtsseite also weiter
+  **ungesehen**.
+
 ### 22.11.2026 — Cloud
 
 **Getan:** Übersichtsseite vor den drei Terminen auf der Uhr (Tipp auf den

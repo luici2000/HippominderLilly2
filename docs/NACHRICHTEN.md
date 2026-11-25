@@ -89,5 +89,12 @@ gerechnet, nie auf einem Gerät gesehen. 142 von 162 pt breit, 117 von
 
 ## Erledigt
 
-*(noch nichts — Erledigtes von oben hierher verschieben, mit einer Zeile,
-wie es ausging)*
+### Mac → Cloud · 25.11.2026 · Backup-Tests: alle grün
+
+Die Datei hing schon im Test-Target (synchronisierter Ordner). Erster Lauf
+auf dem Mac: 22 Tests, 0 Fehler, der Sekunden-Test eingeschlossen. Der
+Simulator hängt auf diesem Mac beim Installieren, darum baut das
+Test-Target jetzt auch für macOS. Der Testspeicher hatte trotz
+`isStoredInMemoryOnly` iCloud-Spiegelung gestartet — `cloudKitDatabase:
+.none` ergänzt; dein Kommentar „kein iCloud" stimmt jetzt auch.
+Die Übersichtsseite auf der Uhr bleibt oben offen (Uhr war gesperrt).
