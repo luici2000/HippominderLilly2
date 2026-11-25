@@ -142,30 +142,13 @@ class Horse {
         Calendar.current.date(byAdding: .day, value: wurmkurIntervall, to: letzterWurmkurTermin)!
     }
 
-    // Fortschritt (0.0 - 1.0)
-    func fortschritt(fuer typ: EventType) -> Double {
-        let tageVergangen: Int
-        let intervall: Int
-
-        switch typ {
-        case .hufschmied:
-            tageVergangen = Self.kalenderTage(von: letzterHufschmiedTermin, bis: currentDate)
-            intervall = hufschmiedIntervall
-        case .impfung:
-            tageVergangen = Self.kalenderTage(von: letzterImpfungTermin, bis: currentDate)
-            intervall = impfungIntervall
-        case .wurmkur:
-            tageVergangen = Self.kalenderTage(von: letzterWurmkurTermin, bis: currentDate)
-            intervall = wurmkurIntervall
-        }
-
-        return min(1.0, Double(tageVergangen) / Double(intervall))
-    }
-
-    // Gefuellte Bluetenblaetter (0-12)
-    func gefuellteBlätter(fuer typ: EventType) -> Int {
-        Int(fortschritt(fuer: typ) * 12)
-    }
+    // Wie voll die Blume ist, rechnet FlowerGeometry.filledPetals - und
+    // zwar als einzige Stelle. Hier stand frueher eine zweite Rechnung
+    // (fortschritt / gefuellteBlaetter), die das Gegenteil herum rundete:
+    // von 681 durchgerechneten Tagen zeigten 652 eine andere Blume, meist
+    // ein Blatt daneben, und bei Intervall 0 sagte die eine "leer", die
+    // andere "voll". Benutzt hat sie zuletzt niemand mehr. Entfernt, damit
+    // niemand nach ihr greift, weil sie am Pferd so bequem zur Hand liegt.
 
     // MARK: - Termin-Typen
 
