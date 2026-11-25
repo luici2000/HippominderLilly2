@@ -203,7 +203,11 @@ passen nicht und es ist ein großes Farbdurcheinander".
 
 ## Uhr: Stil wie beim Zifferblatt (Mathias, 25.11.2026 abends)
 
-- [ ] **Lang drücken → Stil und Farbe wählen**, wie man es von den
+- [x] **Lang drücken → Stil und Farbe wählen** — gebaut 25.11.2026,
+      Entscheidung Mathias: Stil für alle, Farbe auf Wunsch je Pferd, die Uhr
+      stellt selbst ein. Im Simulator (41 mm) angesehen, auf der Ultra 3
+      (Bauzeit 21:56). **[Gerät] offen:** langer Druck und Krone nur an der
+      echten Uhr prüfbar. Ursprüngliche Notiz:, wie man es von den
       Zifferblättern kennt: Darstellung (Glas, Classic …) und Farbe, Krone
       blättert durch die Farben. Beantwortet nebenbei die offene Frage aus
       `docs/NACHRICHTEN.md`: Mathias will auf der Uhr mehr als nur Glas.

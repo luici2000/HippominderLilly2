@@ -97,6 +97,14 @@ iCloud (`cloudKitDatabase: .none`). Nebenbei gefunden: `CLAUDE.md`,
   Ultra 3, Bauzeit 20:23. Preis: auf 41 mm wird die Terminblume ~56 statt
   104 pt. Wischen, Krone und Zurücktippen nur an der echten Uhr prüfbar —
   **Mathias' Urteil steht aus.**
+- **Stil wie beim Zifferblatt (21:56 auf der Ultra 3):** lange drücken auf
+  die Liste → Glas/Classic und Farbe für alle; lange drücken auf die
+  Übersicht → Farbe je Pferd (nur bei Glas). Acht Farben, kein Rot. Die Uhr
+  stellt selbst ein. Classic auf der Uhr = Rose im olivgrauen LCD-Fenster,
+  Symbol darunter, Mitte leer. `LCDRose` nach `Models` umgezogen; iPhone
+  baut, Mac-Tests 29/29 grün. Langer Druck und Krone nur an der Uhr prüfbar.
+  Kleinigkeit: mit der Farbe Grün sieht „War heute da“ fast aus wie
+  „Eingetragen“ (das ist auch grün) — unterscheidet sich nur am Text.
 - **Kalender:** nur der Knopf „Termine im Kalender speichern“ (iPhone,
   Mac); spätere Änderungen erreichen den Kalender nie, erneutes Drücken
   legt Dubletten an. Vorschlag (eigener Kalender, ein Eintrag je Termin,

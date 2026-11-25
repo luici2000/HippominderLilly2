@@ -44,8 +44,13 @@ Maße als Anteil der Blumenbreite:
 `GlobalSettings.designMode` schaltet um, Umschalter in `HorseDetailView`.
 Darstellung, Farbschema und Glasfarbe sind **je Gerät** gespeichert
 (Benutzervorgaben), absichtlich nicht über iCloud abgeglichen — Mathias
-will das pro Gerät einstellen (12.11.2026). Nur die Uhr übernimmt
-Glasfarbe und Darstellung vom iPhone.
+will das pro Gerät einstellen (12.11.2026). Die Uhr stellt seit
+25.11.2026 ebenfalls selbst ein (`WatchApp/WatchStil.swift`): lange drücken
+auf die Liste → Glas oder Classic und Farbe für alle, lange drücken auf die
+Übersicht → Farbe nur für dieses Pferd. Bis auf der Uhr eine Farbe gewählt
+ist, gilt die Glasfarbe vom iPhone. Kein Rot in der Farbauswahl — Rot heißt
+auf der Uhr „abgelaufen“. Die Classic-Rose (`LCDRose`, `LCDPalette`) liegt
+darum in `Models/LCDRose.swift`.
 
 - **Glas** — `FlowerTimerViewGlass.swift`. Blütenblätter aus
   `.ultraThinMaterial`, das Pferdefoto dahinter wird gebrochen sichtbar.

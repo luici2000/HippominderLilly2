@@ -17,6 +17,8 @@ struct WatchContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var horses: [Horse]
     @ObservedObject var syncReceiver = WatchSyncReceiver.shared
+    /// Langer Druck auf die Liste oeffnet den Stil fuer alle Pferde
+    @State private var zeigeStil = false
     /// Navigationspfad; Debug: Start mit "-demoDetail" springt direkt zur
     /// ersten Terminseite des ersten Pferdes
     @State private var pfad = NavigationPath()
@@ -75,6 +77,7 @@ struct WatchContentView: View {
                                 Text("Sync \(lastSync, style: .relative) her")
                             }
                             Text(Versionsinfo.zeileKurz)
+                            Text("Lange drücken: Stil")
                         }
                         .font(.system(size: 9))
                         .foregroundColor(.secondary)
@@ -83,6 +86,13 @@ struct WatchContentView: View {
                     .listRowBackground(Color.clear)
                 }
                 .navigationTitle("Hippominder")
+                // Wie beim Zifferblatt: lange druecken, dann Stil und Farbe
+                .simultaneousGesture(
+                    LongPressGesture(minimumDuration: 0.6).onEnded { _ in zeigeStil = true }
+                )
+                .sheet(isPresented: $zeigeStil) {
+                    NavigationStack { WatchStilView(pferd: nil) }
+                }
                 .navigationDestination(for: WatchEventTarget.self) { ziel in
                     if let horse = horses.first(where: { $0.id == ziel.horseID }) {
                         if let eventType = ziel.eventType {
@@ -106,6 +116,13 @@ struct WatchContentView: View {
                     let args = ProcessInfo.processInfo.arguments
                     let demoUebersicht = args.contains("-demoDetail")
                     let demoTermin = args.contains("-demoTermin")
+                    // "-demoClassic" schaltet auf Classic, "-demoStil" oeffnet
+                    // die Stil-Seite - lange druecken geht im Simulator nicht
+                    if args.contains("-demoClassic") { WatchStil.shared.darstellung = .classic }
+                    if args.contains("-demoGlas") { WatchStil.shared.darstellung = .glas }
+                    if args.contains("-demoStil") {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { zeigeStil = true }
+                    }
                     if demoUebersicht || demoTermin, let horse = horses.first, pfad.isEmpty {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                             if demoTermin {
@@ -169,6 +186,7 @@ struct WatchContentView: View {
 
 struct WatchHorseRow: View {
     let horse: Horse
+    @ObservedObject private var stil = WatchStil.shared
     /// Tapping a flower: open that date (with the overview beneath it)
     var oeffneTermin: (Horse.EventType) -> Void
 
@@ -227,14 +245,16 @@ struct WatchHorseRow: View {
                                 .scaledToFit()
                                 .frame(width: 9, height: 9)
                                 .foregroundStyle(.secondary)
-                            WatchFlower(
+                            WatchStilBlume(
                                 filledPetals: FlowerGeometry.filledPetals(
                                     remainingDays: days,
                                     interval: horse.holeIntervall(fuer: eventType)
                                 ),
                                 isExpired: days <= 0,
-                                color: WatchFarbe.blume(tage: days),
-                                size: WatchMass.listenBlume
+                                symbol: eventType.symbol,
+                                tint: stil.farbe(fuer: horse.id),
+                                size: WatchMass.listenBlume,
+                                mitSymbol: false
                             )
                         }
                         .frame(maxWidth: .infinity)
@@ -265,9 +285,6 @@ enum WatchFarbe {
         return .primary
     }
 
-    static func blume(tage: Int) -> Color {
-        tage <= 0 ? .red : WatchGlas.tint
-    }
 }
 
 /// Masse, die der Uhrengroesse folgen. Feste Punktwerte passten auf die
@@ -316,6 +333,9 @@ struct WatchEventTarget: Hashable {
 /// groesser. Ein Tipp auf eine Blume oeffnet ihre Seite.
 struct WatchUebersichtView: View {
     let horse: Horse
+    @ObservedObject private var stil = WatchStil.shared
+    /// Langer Druck: Farbe nur fuer dieses Pferd
+    @State private var zeigeFarbe = false
 
     private var dringendster: (type: Horse.EventType, days: Int) {
         let events = Horse.EventType.allCases.map { ($0, horse.tageBis(fuer: $0)) }
@@ -339,13 +359,14 @@ struct WatchUebersichtView: View {
                     let tage = horse.tageBis(fuer: eventType)
                     NavigationLink(value: WatchEventTarget(horseID: horse.id, eventType: eventType)) {
                         VStack(spacing: 4) {
-                            WatchGlassFlower(
+                            WatchStilBlume(
                                 filledPetals: FlowerGeometry.filledPetals(
                                     remainingDays: tage,
                                     interval: horse.holeIntervall(fuer: eventType)
                                 ),
                                 isExpired: tage <= 0,
                                 symbol: eventType.symbol,
+                                tint: stil.farbe(fuer: horse.id),
                                 size: WatchMass.uebersichtBlume
                             )
                             Text(WatchWortlaut.kurz(tage: tage))
@@ -363,11 +384,30 @@ struct WatchUebersichtView: View {
                 }
             }
 
-            Text("Blume antippen")
+            Text(stil.darstellung == .glas ? "Antippen · lange drücken: Farbe" : "Blume antippen")
                 .font(.system(size: WatchMass.schrift(10)))
                 .foregroundColor(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .contentShape(Rectangle())
+        // Classic ist einfarbig, da gibt es keine Farbe je Pferd
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.6).onEnded { _ in
+                if stil.darstellung == .glas { zeigeFarbe = true }
+            }
+        )
+        .sheet(isPresented: $zeigeFarbe) {
+            NavigationStack { WatchStilView(pferd: horse) }
+        }
+        .onAppear {
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("-demoPferdFarbe") {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { zeigeFarbe = true }
+            }
+            #endif
+        }
     }
 }
 
@@ -404,6 +444,7 @@ struct WatchTermineView: View {
 struct WatchEventView: View {
     let horse: Horse
     let eventType: Horse.EventType
+    @ObservedObject private var stil = WatchStil.shared
 
     @State private var gemeldet = false
 
@@ -429,10 +470,11 @@ struct WatchEventView: View {
                         .minimumScaleFactor(0.8)
                 }
 
-                WatchGlassFlower(
+                WatchStilBlume(
                     filledPetals: FlowerGeometry.filledPetals(remainingDays: days, interval: interval),
                     isExpired: days <= 0,
                     symbol: eventType.symbol,
+                    tint: stil.farbe(fuer: horse.id),
                     size: blume
                 )
 
@@ -473,7 +515,7 @@ struct WatchEventView: View {
                             .frame(maxWidth: .infinity, minHeight: 34)
                     }
                     .buttonStyle(.bordered)
-                    .tint(gemeldet ? .green : WatchGlas.tint)
+                    .tint(gemeldet ? .green : stil.farbe(fuer: horse.id))
                     .disabled(gemeldet)
                 }
             }

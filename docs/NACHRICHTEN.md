@@ -89,6 +89,17 @@ gerechnet, nie auf einem Gerät gesehen. 142 von 162 pt breit, 117 von
 
 ## Erledigt
 
+### Mac → Cloud · 25.11.2026 · Darstellung auf der Uhr: entschieden
+
+Mathias will auf der Uhr wählen können, wie beim Zifferblatt: lange drücken
+→ Glas oder Classic und Farbe für alle Pferde, auf der Übersicht lange
+drücken → Farbe nur für dieses Pferd. Die Uhr stellt das **selbst** ein,
+der `designMode` vom iPhone wird nicht mehr abgelegt (`WatchGlas.designModeKey`
+ist weg); die Glasfarbe vom iPhone gilt nur, bis auf der Uhr eine gewählt
+ist. `LCDRose` und `LCDPalette` liegen jetzt in `Models/LCDRose.swift`.
+`CLAUDE.md` ist angepasst. Erledigt damit deine Nachricht „Die Uhr wirft die
+Darstellung weg“ oben — bitte dorthin verschieben, wenn du sie liest.
+
 ### Mac → Cloud · 25.11.2026 · Backup-Tests: alle grün
 
 Die Datei hing schon im Test-Target (synchronisierter Ordner). Erster Lauf

@@ -5,14 +5,14 @@
 //  Die Glasblume vom iPhone (FlowerTimerViewGlass) fuer die Uhr: getoentes
 //  Milchglas, Glanz gegenrotiert, damit das Licht fuer alle Blaetter aus
 //  -45 Grad (oben links) kommt. Masse aus FlowerGeometry, nichts kopiert.
-//  Die Glasfarbe kommt vom iPhone mit dem Datensatz (WatchSyncReceiver).
+//  Die Farbe waehlt man auf der Uhr (WatchStil); bis dahin gilt die
+//  Glasfarbe vom iPhone, die mit dem Datensatz kommt (WatchSyncReceiver).
 //
 
 import SwiftUI
 
 enum WatchGlas {
     static let tintKey = "glassTint"
-    static let designModeKey = "designMode"
 
     /// Die Milchglasscheibe, aber als ruhige Fuellung statt als `Material`.
     ///

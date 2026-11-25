@@ -156,12 +156,11 @@ class WatchSyncReceiver: NSObject, ObservableObject {
     private func processPayload(_ payload: [String: Any]) {
         guard let container = modelContainer else { return }
         isSyncing = false
-        // Glasfarbe des iPhones uebernehmen, damit die Uhr dieselbe Blume zeigt
+        // Glasfarbe des iPhones merken: sie gilt, bis auf der Uhr selbst eine
+        // Farbe gewaehlt wird (WatchStil). Die Darstellung stellt die Uhr seit
+        // 25.11.2026 selbst ein, die vom iPhone wird nicht mehr abgelegt.
         if let tint = payload["glassTint"] as? [Double], tint.count == 3 {
             UserDefaults.standard.set(tint, forKey: WatchGlas.tintKey)
-        }
-        if let mode = payload["designMode"] as? String {
-            UserDefaults.standard.set(mode, forKey: WatchGlas.designModeKey)
         }
         guard let horseDataArray = payload["horses"] as? [[String: Any]] else { return }
         // Leere Liste nie uebernehmen: sie kommt vom iPhone, bevor iCloud
