@@ -89,8 +89,19 @@ iCloud (`cloudKitDatabase: .none`). Nebenbei gefunden: `CLAUDE.md`,
   eine eigene Seite, „zurück" eine Stufe hoch; kein Krone-Stapel mehr. Die
   Blumen in der Liste öffnen den Termin mit der Übersicht darunter.
   Im Uhr-Simulator (Series 9, watchOS 11.2 — der läuft) angesehen, auf der
-  Ultra 3 installiert, Bauzeit 20:16. Das Zurücktippen selbst ist nur auf
-  der echten Uhr ausprobierbar — Mathias' Urteil steht aus.
+  Ultra 3 installiert, Bauzeit 20:16.
+- **Gleich danach, Mathias' nächster Wunsch:** zwischen den Terminen
+  seitlich wischen statt scrollen; Terminseite ohne Scrollen; Intervall
+  auf eine eigene Seite. Gebaut (`WatchTermineView` mit `.page`,
+  `WatchIntervallView` mit Krone), im Simulator 41 mm angesehen, auf der
+  Ultra 3, Bauzeit 20:23. Preis: auf 41 mm wird die Terminblume ~56 statt
+  104 pt. Wischen, Krone und Zurücktippen nur an der echten Uhr prüfbar —
+  **Mathias' Urteil steht aus.**
+- **Kalender:** nur der Knopf „Termine im Kalender speichern“ (iPhone,
+  Mac); spätere Änderungen erreichen den Kalender nie, erneutes Drücken
+  legt Dubletten an. Vorschlag (eigener Kalender, ein Eintrag je Termin,
+  der verschoben wird) wartet auf drei Antworten von Mathias — stehen im
+  Artifact „Hippominder Uhr-Menü“.
 
 ### 22.11.2026 — Cloud
 

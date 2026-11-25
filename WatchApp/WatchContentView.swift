@@ -86,12 +86,16 @@ struct WatchContentView: View {
                 .navigationDestination(for: WatchEventTarget.self) { ziel in
                     if let horse = horses.first(where: { $0.id == ziel.horseID }) {
                         if let eventType = ziel.eventType {
-                            WatchEventView(horse: horse, eventType: eventType)
-                                .navigationTitle(horse.name)
+                            WatchTermineView(horse: horse, start: eventType)
                         } else {
                             WatchUebersichtView(horse: horse)
                                 .navigationTitle(horse.name)
                         }
+                    }
+                }
+                .navigationDestination(for: WatchIntervallZiel.self) { ziel in
+                    if let horse = horses.first(where: { $0.id == ziel.horseID }) {
+                        WatchIntervallView(horse: horse, eventType: ziel.eventType)
                     }
                 }
                 .onAppear {
@@ -106,6 +110,10 @@ struct WatchContentView: View {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                             if demoTermin {
                                 oeffneTermin(.hufschmied, von: horse)
+                                // "-demoIntervall": eine Stufe tiefer
+                                if args.contains("-demoIntervall") {
+                                    pfad.append(WatchIntervallZiel(horseID: horse.id, eventType: .hufschmied))
+                                }
                             } else {
                                 pfad.append(WatchEventTarget(horseID: horse.id, eventType: nil))
                             }
@@ -363,10 +371,36 @@ struct WatchUebersichtView: View {
     }
 }
 
-// MARK: - Terminseite (Watch)
+// MARK: - Terminseiten (Watch)
 
-/// Eine Seite fuer einen Termin: Glasblume, Resttage, "War heute da",
-/// Intervall mit Glastasten. Das ist die Seite, auf der man im Stall landet.
+/// Die drei Termine eines Pferdes nebeneinander: nach links und rechts
+/// wischen wechselt den Termin, "zurueck" fuehrt zur Uebersicht.
+/// Mathias, 25.11.2026: lieber wischen als scrollen.
+struct WatchTermineView: View {
+    let horse: Horse
+    @State private var seite: Horse.EventType
+
+    init(horse: Horse, start: Horse.EventType) {
+        self.horse = horse
+        _seite = State(initialValue: start)
+    }
+
+    var body: some View {
+        TabView(selection: $seite) {
+            ForEach(Horse.EventType.allCases, id: \.self) { eventType in
+                WatchEventView(horse: horse, eventType: eventType)
+                    .tag(eventType)
+            }
+        }
+        .tabViewStyle(.page)
+        .navigationTitle(horse.name)
+    }
+}
+
+/// Eine Seite fuer einen Termin, ohne Scrollen: Glasblume, Resttage,
+/// "War heute da" - und ein Knopf mit dem Intervall, der auf eine eigene
+/// Seite fuehrt. Vorher hingen die Plus/Minus-Tasten unten dran und die
+/// Seite war laenger als der Bildschirm.
 struct WatchEventView: View {
     let horse: Horse
     let eventType: Horse.EventType
@@ -376,17 +410,18 @@ struct WatchEventView: View {
     private var days: Int { horse.tageBis(fuer: eventType) }
     private var interval: Int { horse.holeIntervall(fuer: eventType) }
 
-    private var statusColor: Color { WatchFarbe.schrift(tage: days) }
-
     var body: some View {
-        ScrollViewReader { proxy in
-        ScrollView {
-            VStack(spacing: 6) {
+        GeometryReader { geo in
+            // Kopf, Resttage und Knopfzeile brauchen ihren Platz; die Blume
+            // bekommt den Rest, auf ganze Punkte (CLAUDE.md: krumme Masse
+            // lassen den Blattkranz driften)
+            let blume = max(56, min(geo.size.height - 82, WatchMass.terminBlume)).rounded(.down)
+            VStack(spacing: 3) {
                 HStack(spacing: 5) {
                     Image(eventType.symbol)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 14, height: 14)
+                        .frame(width: 13, height: 13)
                         .foregroundStyle(.secondary)
                     Text(eventType.localizedName)
                         .font(.caption.bold())
@@ -398,61 +433,54 @@ struct WatchEventView: View {
                     filledPetals: FlowerGeometry.filledPetals(remainingDays: days, interval: interval),
                     isExpired: days <= 0,
                     symbol: eventType.symbol,
-                    size: WatchMass.terminBlume
+                    size: blume
                 )
-                .padding(.vertical, 2)
 
                 Text(WatchWortlaut.rest(tage: days))
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(statusColor)
+                    .font(.system(size: WatchMass.schrift(15), weight: .semibold))
+                    .foregroundColor(WatchFarbe.schrift(tage: days))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
 
-                // Im Stall hat man die Uhr am Arm und das iPhone in der Tasche -
-                // darum laesst sich der Termin hier direkt abhaken.
-                Button {
-                    erledigt()
-                } label: {
-                    Label(gemeldet ? "Eingetragen" : "War heute da",
-                          systemImage: gemeldet ? "checkmark.circle.fill" : "checkmark")
-                        .font(.system(size: 12, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-                .tint(gemeldet ? .green : WatchGlas.tint)
-                .disabled(gemeldet)
-                .padding(.top, 4)
-
-                // Intervall mit Minus und Plus, wie die Tasten am iPhone
-                HStack(spacing: 8) {
-                    WatchGlassKey(symbol: "minus") { setzeIntervall(interval - 1) }
-                    VStack(spacing: 0) {
-                        Text("\(interval)")
-                            .font(.system(size: 17, weight: .semibold))
-                            .monospacedDigit()
-                        Text("Tage")
-                            .font(.system(size: 9))
-                            .foregroundColor(.secondary)
+                HStack(spacing: 6) {
+                    // Intervall als eigener Schritt: wer abhaken will, soll
+                    // nicht versehentlich die Wiederholung verstellen
+                    NavigationLink(value: WatchIntervallZiel(horseID: horse.id, eventType: eventType)) {
+                        VStack(spacing: 0) {
+                            Image(systemName: "repeat")
+                                .font(.system(size: 10, weight: .semibold))
+                            Text("\(interval) T.")
+                                .font(.system(size: 11, weight: .semibold))
+                                .monospacedDigit()
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                        .frame(width: 44, height: 34)
                     }
-                    .frame(minWidth: 44)
-                    WatchGlassKey(symbol: "plus") { setzeIntervall(interval + 1) }
+                    .buttonStyle(.bordered)
+                    .frame(width: 50)
+
+                    // Im Stall hat man die Uhr am Arm und das iPhone in der
+                    // Tasche - darum laesst sich der Termin hier abhaken.
+                    Button {
+                        erledigt()
+                    } label: {
+                        Label(gemeldet ? "Eingetragen" : "War heute da",
+                              systemImage: gemeldet ? "checkmark.circle.fill" : "checkmark")
+                            .font(.system(size: 12, weight: .semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                            .frame(maxWidth: .infinity, minHeight: 34)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(gemeldet ? .green : WatchGlas.tint)
+                    .disabled(gemeldet)
                 }
-                .padding(.top, 6)
-                .id("unten")
             }
-            .padding(.horizontal, 4)
-            .padding(.bottom, 8)
+            .frame(width: geo.size.width, height: geo.size.height)
         }
-        .onAppear {
-            #if DEBUG
-            // "-demoScroll": zum Pruefen des unteren Teils im Simulator
-            if ProcessInfo.processInfo.arguments.contains("-demoScroll") {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { proxy.scrollTo("unten", anchor: .bottom) }
-            }
-            #endif
-        }
-        // Ein Intervall, das noch in der Wartezeit steckt, geht beim
-        // Verlassen sofort raus - sonst ueberschriebe das iPhone es wieder
-        .onDisappear { WatchSyncReceiver.shared.meldeOffenesIntervall() }
-        }
+        .padding(.horizontal, 8) // die Ecken des Bildschirms sind rund
+        .padding(.bottom, 10) // Platz fuer die Seitenpunkte
     }
 
     /// Traegt den Termin sofort lokal ein, damit die Uhr nicht auf das
@@ -463,11 +491,61 @@ struct WatchEventView: View {
         WatchSyncReceiver.shared.meldeTerminErledigt(horseID: horse.id, eventType: eventType, datum: jetzt)
         withAnimation { gemeldet = true }
     }
+}
 
-    private func setzeIntervall(_ neu: Int) {
-        let wert = max(1, neu)
-        horse.setzeIntervall(wert, fuer: eventType)
-        WatchSyncReceiver.shared.meldeIntervall(horseID: horse.id, eventType: eventType, intervall: wert)
+// MARK: - Intervallseite (Watch)
+
+/// Ziel des Intervall-Knopfs auf einer Terminseite
+struct WatchIntervallZiel: Hashable {
+    let horseID: UUID
+    let eventType: Horse.EventType
+}
+
+/// Wie oft der Termin wiederkehrt. Eigene Seite, damit die Terminseite
+/// ohne Scrollen auskommt - und weil hier die Krone frei ist: Drehen
+/// stellt die Tage, Plus und Minus gehen auch.
+struct WatchIntervallView: View {
+    let horse: Horse
+    let eventType: Horse.EventType
+    @State private var wert: Double
+
+    init(horse: Horse, eventType: Horse.EventType) {
+        self.horse = horse
+        self.eventType = eventType
+        _wert = State(initialValue: Double(horse.holeIntervall(fuer: eventType)))
+    }
+
+    var body: some View {
+        VStack(spacing: WatchMass.schrift(4)) {
+            Text("Alle")
+                .font(.system(size: WatchMass.schrift(12)))
+                .foregroundColor(.secondary)
+            Text("\(Int(wert))")
+                .font(.system(size: WatchMass.schrift(44), weight: .semibold))
+                .monospacedDigit()
+                .contentTransition(.numericText())
+            Text("Tage")
+                .font(.system(size: WatchMass.schrift(12)))
+                .foregroundColor(.secondary)
+            HStack(spacing: 24) {
+                WatchGlassKey(symbol: "minus") { wert = max(1, wert - 1) }
+                WatchGlassKey(symbol: "plus") { wert = min(999, wert + 1) }
+            }
+            .padding(.top, 4)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .focusable()
+        .digitalCrownRotation($wert, from: 1, through: 999, by: 1,
+                              sensitivity: .medium, isContinuous: false,
+                              isHapticFeedbackEnabled: true)
+        .onChange(of: Int(wert)) { _, neu in
+            horse.setzeIntervall(neu, fuer: eventType)
+            WatchSyncReceiver.shared.meldeIntervall(horseID: horse.id, eventType: eventType, intervall: neu)
+        }
+        // Ein Wert, der noch in der Wartezeit steckt, geht beim Verlassen
+        // sofort raus - sonst ueberschriebe das iPhone ihn wieder
+        .onDisappear { WatchSyncReceiver.shared.meldeOffenesIntervall() }
+        .navigationTitle(eventType.localizedName)
     }
 }
 
