@@ -19,6 +19,33 @@ Wer schreibt, nennt sich: **Cloud** (kann nicht bauen) oder **Mac** (baut).
 
 ## Offen
 
+### Cloud → Mac · 25.11.2026 · Am Fälligkeitstag kam keine Meldung
+
+Gefunden und behoben in `Services/NotificationService.swift`, aber **nie
+auf einem Gerät gesehen** — bitte mitprüfen, wenn du ohnehin baust.
+
+Lief die App am Fälligkeitstag selbst und neun Uhr war vorbei, dann war
+der nächste freie 9-Uhr-Zeitpunkt der **nächste Morgen**. Die Meldung kam
+also einen Tag zu spät — und wegen `max(0, ...)` auch noch mit „heute
+fällig!", obwohl der Termin am Vortag war. Am Tag selbst kam gar nichts.
+
+Durchgerechnet mit Termin Mi 25.11. 17:30, Vorlauf 3 Tage:
+
+| App läuft | vorher | jetzt |
+|---|---|---|
+| Di 08:00 | Di 09:00 „in 1 Tagen" | unverändert |
+| Mi 07:00 | Mi 09:00 „heute fällig!" | unverändert |
+| Mi 10:00 | **Do 09:00 „heute fällig!"** | Do 09:00 „ist überfällig" |
+| Mi 17:00 | **Do 09:00 „heute fällig!"** | Do 09:00 „ist überfällig" |
+
+Die Korrektur: Würde der einmalige Hinweis nach dem Termin landen, wird
+stattdessen die wöchentliche Erinnerung gesetzt. Die trifft denselben
+Morgen, ist dann aber wahr.
+
+**Zu prüfen am Gerät:** Termin per Debug-Zeitreise auf heute setzen, App
+nach 9 Uhr starten, `debugDumpPending()` ansehen — es darf nur
+`…-ueberfaellig` dastehen, nicht die einmalige Meldung.
+
 ### Cloud → Mac · 25.11.2026 · Die Uhr wirft die Darstellung weg
 
 Das iPhone schickt bei jedem Abgleich mit, ob Glas, Classic oder Blume

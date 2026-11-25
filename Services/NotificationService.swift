@@ -63,6 +63,22 @@ class NotificationService {
                 fireDate = todayNine
             }
         }
+        // Der einmalige Hinweis darf nicht nach dem Termin landen.
+        //
+        // Das passierte, wenn die App am Faelligkeitstag selbst lief und
+        // neun Uhr schon vorbei war: der naechste freie 9-Uhr-Zeitpunkt ist
+        // dann der naechste Morgen. Gemeldet wurde also einen Tag zu spaet -
+        // und wegen max(0, ...) auch noch mit "heute faellig!", obwohl der
+        // Termin am Vortag war. Am Tag selbst kam gar nichts.
+        //
+        // In dem Fall ist die woechentliche Erinnerung die richtige: Sie
+        // faellt auf denselben naechsten Morgen, ist aber dann auch wahr -
+        // der Termin ist bis dahin wirklich verstrichen.
+        if Calendar.current.startOfDay(for: fireDate) > Calendar.current.startOfDay(for: nextDate) {
+            scheduleOverdueReminder(for: horse, eventType: eventType, identifier: identifier)
+            return
+        }
+
         let remainingDays = max(0, Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: fireDate), to: Calendar.current.startOfDay(for: nextDate)).day ?? daysBeforeEvent)
 
         // Create notification content (localized)
