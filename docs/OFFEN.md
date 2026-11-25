@@ -201,6 +201,17 @@ passen nicht und es ist ein großes Farbdurcheinander".
       15:44. Antippen einer Blume und Blättern mit der Krone sind im
       Simulator nicht ausprobiert.
 
+## Uhr: Stil wie beim Zifferblatt (Mathias, 25.11.2026 abends)
+
+- [ ] **Lang drücken → Stil und Farbe wählen**, wie man es von den
+      Zifferblättern kennt: Darstellung (Glas, Classic …) und Farbe, Krone
+      blättert durch die Farben. Beantwortet nebenbei die offene Frage aus
+      `docs/NACHRICHTEN.md`: Mathias will auf der Uhr mehr als nur Glas.
+      **Offen, wartet auf Mathias:** eine Einstellung für die ganze App oder
+      je Pferd? (Bisher galt: Farbschema global für alle Pferde,
+      `CLAUDE.local.md`.) Und: stellt die Uhr dann selbst ein, oder bleibt
+      sie beim iPhone?
+
 ## Akku der Uhr
 
 Mathias meldete am 11.11.2026 starken Akkuverbrauch. Zwei Ursachen
