@@ -79,10 +79,10 @@ iCloud (`cloudKitDatabase: .none`). Nebenbei gefunden: `CLAUDE.md`,
   Fehlermeldung, auf iPhone 16e und iPad (A16). Installiert ist nur die
   Laufzeit iOS 18.4 neben Xcode 27.2; vermutlich fehlt die passende
   iOS-27-Laufzeit (Xcode → Settings → Components).
-- **Uhr:** Watch-App baut (0 Fehler, 0 Warnungen), Installation scheiterte
-  an der gesperrten Ultra 3. Fertiger Build liegt nur im Scratchpad dieser
-  Sitzung — beim nächsten Mal neu bauen. Übersichtsseite also weiter
-  **ungesehen**.
+- **Uhr:** Watch-App baut (0 Fehler, 0 Warnungen). Um 20:11 auf die
+  Ultra 3 installiert und gestartet, nachdem Mathias sie entsperrt hatte
+  (gesperrt verweigert `devicectl` die Installation). Bauzeit-Zeile auf der
+  Uhr: 25.11., 17:39. **Mathias' Urteil zur Übersichtsseite steht noch aus.**
 
 ### 22.11.2026 — Cloud
 
