@@ -170,6 +170,15 @@ Mehrere Fehler fielen so auf, bevor er sie sehen musste: ein gelbes
 Emoji im monochromen Display, eine umgebrochene dritte Blume, nicht
 unterscheidbare Füllstände.
 
+**Selbst ansehen geht mit einem Befehl:**
+`/Users/mathias/Developer/HippominderLilly2/werkzeuge/sim-foto.sh <iphone|ipad|uhr> <name> [Startschalter]`
+baut bei Bedarf (`--bauen` erzwingt es), installiert im Simulator, startet
+mit den Demo-Schaltern (`-demoHorse -demoDaysAgo 30,120,10 -demoDetail` …)
+und legt ein PNG unter `/private/tmp/hippominder-fotos/` ab. Langes
+Drücken, Wischen und die Krone kann der Simulator nicht — dafür gibt es die
+Schalter, die eine Seite direkt öffnen. Tests laufen auch ohne Simulator
+auf dem Mac (`-destination 'platform=macOS,arch=arm64'`).
+
 **Behauptungen nachrechnen, nicht hinschreiben.** Die Testerwartungen in
 `FlowerGeometryTests` wurden ausgeführt, bevor sie festgeschrieben wurden —
 eine davon war falsch, und zwar meine Erwartung, nicht der Code.
